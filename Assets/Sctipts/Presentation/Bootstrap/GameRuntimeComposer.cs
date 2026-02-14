@@ -10,6 +10,10 @@ using VContainer;
 using VContainer.Unity;
 using UnityEngine;
 
+
+using Game.Presentation.Input;
+using Game.Presentation.View;
+
 namespace Game.Presentation.Bootstrap
 {
 
@@ -53,15 +57,26 @@ namespace Game.Presentation.Bootstrap
                 builder.RegisterInstance(new SimulationParameters(config.UnitsPerTick));
                 builder.Register<IRandomSource>(_ => new XorShiftRandomSource(config.Seed), Lifetime.Singleton);
 
-                // Register handlers
+                // handlers
                 builder.Register<MoveCommandHandler>(Lifetime.Singleton)
-                        .As<ICommandHandler<Game.Domain.Commands.MoveCommand>>();
+                    .As<ICommandHandler<Game.Domain.Commands.MoveCommand>>();
+
+                // registrations
+                builder.Register<CommandHandlerRegistration<Game.Domain.Commands.MoveCommand>>(Lifetime.Singleton)
+                    .As<Game.Infrastructure.Commands.ICommandHandlerRegistration>();
+
+                // dispatcher
+                builder.Register<Game.Infrastructure.Commands.CommandDispatcher>(Lifetime.Singleton)
+                    .As<Game.Domain.Abstractions.ICommandDispatcher>();
+
 
                 // Simulation
                 builder.Register<ISimulation, Simulation.Simulation>(Lifetime.Singleton);
 
                 // Game loop
                 builder.RegisterEntryPoint<GameLoop>();
+                builder.RegisterComponentInHierarchy<PlayerInputController>();
+                builder.RegisterComponentInHierarchy<PlayerView>();
             });
         }
     }

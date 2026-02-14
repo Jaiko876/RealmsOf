@@ -1,7 +1,7 @@
 ﻿<Solution>
   <Project Path="Game.Presentation.csproj" />
   <Project Path="Game.Domain.csproj" />
-  <Project Path="Game.Simulation.csproj" />
   <Project Path="Game.Infrastructure.csproj" />
+  <Project Path="Game.Simulation.csproj" />
   <Project Path="Game.Configs.csproj" />
 </Solution>

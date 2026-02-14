@@ -7,6 +7,7 @@ using Game.Infrastructure.Time;
 using VContainer;
 using VContainer.Unity;
 
+
 namespace Game.Presentation.Bootstrap
 {
 
@@ -26,9 +27,11 @@ namespace Game.Presentation.Bootstrap
 
             // Dispatcher + handlers (handlers можно регать до загрузки конфига,
             // но сами они зависят от SimulationParameters — это будет в runtime scope)
-            builder.Register<CachedCommandDispatcher>(Lifetime.Singleton).As<ICommandDispatcher>();
+            builder.Register<CommandDispatcher>(Lifetime.Singleton).As<ICommandDispatcher>();
 
             builder.RegisterEntryPoint<GameRuntimeComposer>();
+
+
         }
     }
 }
