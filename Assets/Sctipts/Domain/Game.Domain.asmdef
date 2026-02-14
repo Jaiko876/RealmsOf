@@ -1,0 +1,8 @@
+{
+  "name": "Game.Domain",
+  "overrideReferences": false,
+  "autoReferenced": true,
+  "noEngineReferences": false,
+  "allowUnsafeCode": false,
+  "overrideCompilerOptions": true
+}
