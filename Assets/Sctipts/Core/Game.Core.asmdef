@@ -1,0 +1,8 @@
+{
+  "name": "Game.Core",
+  "overrideReferences": false,
+  "autoReferenced": true,
+  "noEngineReferences": false,
+  "allowUnsafeCode": false,
+  "overrideCompilerOptions": true
+}

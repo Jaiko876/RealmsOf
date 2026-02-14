@@ -1,0 +1,17 @@
+{
+    "name": "Game.Net",
+    "rootNamespace": "",
+    "references": [
+        "GUID:dac5c0f972cb22444b16210f6c0530a3",
+        "GUID:cbefb09f751c8164d833315e2f9018b0"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
