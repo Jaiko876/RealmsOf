@@ -3,6 +3,8 @@ using Game.Core.Model;
 using Game.Core.Simulation;
 using Game.App.Commands;
 using Game.Unity.Config;
+using Game.Unity.Input;
+using Game.Unity.View;
 using Game.App.Time;
 using VContainer;
 using VContainer.Unity;
@@ -30,6 +32,9 @@ namespace Game.Unity.Bootstrap
 
             builder.RegisterEntryPoint<GameRuntimeComposer>();
 
+            builder.RegisterComponentInHierarchy<PlayerView>();
+            builder.RegisterComponentInHierarchy<PlayerInputController>();
+            builder.RegisterComponentInHierarchy<PlayerInputAdapter>();
 
         }
     }

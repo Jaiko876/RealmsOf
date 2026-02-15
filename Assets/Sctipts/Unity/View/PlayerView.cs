@@ -1,32 +1,29 @@
-using UnityEngine;
 using Game.Core.Model;
-using Game.Core.Simulation;
+using UnityEngine;
 using VContainer;
 
 namespace Game.Unity.View
 {
     public class PlayerView : MonoBehaviour
     {
-        [SerializeField]
-        private int playerId = 0;
+        [SerializeField] private int playerId = 0;
 
-        private ISimulation _simulation;
+        private GameState _gameState;
 
         [Inject]
-        public void Construct(ISimulation simulation)
+        public void Construct(GameState gameState)
         {
-            _simulation = simulation;
+            _gameState = gameState;
         }
 
         private void LateUpdate()
         {
-            if (_simulation == null)
-                return;
+            var id = new PlayerId(playerId);
 
-            PlayerId id = new PlayerId(playerId);
-            PlayerState player = _simulation.State.GetOrCreatePlayer(id);
+            var player = _gameState.GetOrCreatePlayer(id);
 
-            transform.position = new Vector3(player.X, player.Y, transform.position.z);
+            transform.position = new Vector3(player.X, player.Y, 0f);
         }
+
     }
 }

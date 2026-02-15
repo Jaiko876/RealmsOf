@@ -1,19 +1,14 @@
-using System;
-
 namespace Game.Core.Model
 {
-    public readonly struct PlayerId : IEquatable<PlayerId>
+    public readonly struct PlayerId
     {
         public int Value { get; }
 
-        public PlayerId(int value) => Value = value;
+        public PlayerId(int value)
+        {
+            Value = value;
+        }
 
-        public bool Equals(PlayerId other) => Value == other.Value;
-        public override bool Equals(object obj) => obj is PlayerId other && Equals(other);
-        public override int GetHashCode() => Value;
-        public static bool operator ==(PlayerId left, PlayerId right) => left.Equals(right);
-        public static bool operator !=(PlayerId left, PlayerId right) => !left.Equals(right);
-
-        public override string ToString() => Value.ToString();
+        public static PlayerId Local => new PlayerId(0);
     }
 }

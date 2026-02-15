@@ -76,8 +76,6 @@ namespace Game.Unity.Bootstrap
 
                 // Game loop
                 builder.RegisterEntryPoint<GameLoop>();
-                builder.RegisterComponentInHierarchy<PlayerInputController>();
-                builder.RegisterComponentInHierarchy<PlayerView>();
             });
         }
     }

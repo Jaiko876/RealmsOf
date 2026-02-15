@@ -1,50 +1,44 @@
-using UnityEngine;
-using Game.Core.Commands;
-using Game.Core.Model;
 using Game.App.Commands;
 using Game.App.Time;
+using Game.Core.Commands;
+using Game.Core.Model;
+using UnityEngine;
 using VContainer;
 
 namespace Game.Unity.Input
 {
     public class PlayerInputController : MonoBehaviour
     {
-        [SerializeField]
-        private int playerId = 0;
-
-        private ICommandQueue _queue;
+        private ICommandQueue _commandQueue;
         private ITickClock _clock;
 
-        private Vector2 _move;
+        private InputSnapshot _snapshot;
 
         [Inject]
-        public void Construct(ICommandQueue queue, ITickClock clock)
+        public void Construct(ICommandQueue commandQueue, ITickClock clock)
         {
-            _queue = queue;
+            _commandQueue = commandQueue;
             _clock = clock;
         }
 
-        public void SetMove(Vector2 move)
+        public void SetSnapshot(InputSnapshot snapshot)
         {
-            _move = move;
+            _snapshot = snapshot;
         }
 
-        private void Update()
+        public void FlushForTick(int tick)
         {
-            if (_queue == null || _clock == null)
-                return;
+            if (_snapshot.HasMovement)
+            {
+                var cmd = new MoveCommand(
+                    tick,
+                    PlayerId.Local,
+                    _snapshot.MoveX,
+                    _snapshot.MoveY
+                );
 
-            if (_move == Vector2.zero)
-                return;
-
-            MoveCommand command = new MoveCommand(
-                _clock.CurrentTick + 1,
-                new PlayerId(playerId),
-                _move.x,
-                _move.y
-            );
-
-            _queue.Enqueue(command);
+                _commandQueue.Enqueue(cmd);
+            }
         }
     }
 }
