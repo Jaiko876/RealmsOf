@@ -6,7 +6,7 @@ namespace Game.Configs {
     public sealed class GameConfigAsset : ScriptableObject
     {
         [Min(1)] public int TickRate = 50;
-        public uint Seed = 12345;
+        public int Seed = 12345;
         public float UnitsPerTick = 0.10f;
     }
 }

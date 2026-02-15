@@ -5,6 +5,7 @@ using Game.Core.Abstractions;
 using Game.Core.Random;
 using Game.Core.Simulation;
 using Game.Core.Systems;
+using Game.Core.Level;
 using Game.App.Commands;
 using Game.Unity.Config;
 using VContainer;
@@ -61,8 +62,6 @@ namespace Game.Unity.Bootstrap
                     physicsSubsteps: 1
                 ));
 
-                builder.Register<IRandomSource>(_ => new XorShiftRandomSource(config.Seed), Lifetime.Singleton);
-
                 // --- Physics (Unity2D backend) ---
                 builder.Register<Unity2DPhysicsWorld>(Lifetime.Singleton)
                     .As<Game.Core.Physics.Abstractions.IPhysicsWorld>();
@@ -78,7 +77,6 @@ namespace Game.Unity.Bootstrap
 
                 builder.Register<Game.Physics.Registry.BodyRegistry>(Lifetime.Singleton)
                     .As<Game.Core.Physics.Abstractions.IBodyProvider<Game.Core.Model.GameEntityId>>();
-
 
                 builder.RegisterComponentInHierarchy<Game.Physics.Unity2D.PhysicsBodyAuthoring>();
 
@@ -99,7 +97,28 @@ namespace Game.Unity.Bootstrap
 
                 // Game loop
                 builder.RegisterEntryPoint<GameLoop>();
+
+                // RAng
+                builder.Register<Game.Core.Random.XorShiftRandomFactory>(Lifetime.Singleton)
+                       .As<Game.Core.Abstractions.IRandomFactory>();
+
+                // Level
+                builder.Register<LevelGenerator>(Lifetime.Singleton);
+
+                builder.RegisterComponentInHierarchy<Game.Unity.Level.TilemapLevelView>()
+                       .As<Game.App.Level.ILevelView>();
+
+                builder.RegisterComponentInHierarchy<Game.Unity.Spawning.UnitySpawnSystem>()
+                       .As<Game.Core.Spawning.ISpawnSystem>();
+
+                builder.Register<Game.App.Level.LevelService>(Lifetime.Singleton);
+
+
             });
+
+
+            var level = _runtimeScope.Resolve<Game.App.Level.LevelService>();
+            level.StartLevel();
         }
     }
 }

@@ -35,7 +35,6 @@ namespace Game.Unity.Bootstrap
             builder.RegisterComponentInHierarchy<PlayerView>();
             builder.RegisterComponentInHierarchy<PlayerInputController>();
             builder.RegisterComponentInHierarchy<PlayerInputAdapter>();
-
         }
     }
 }

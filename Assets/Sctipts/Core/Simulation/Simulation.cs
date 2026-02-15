@@ -49,7 +49,6 @@ namespace Game.Core.Simulation
                 }
             }
 
-
             // 4) Sync tick
             _state.SetTick(tick + 1);
         }
