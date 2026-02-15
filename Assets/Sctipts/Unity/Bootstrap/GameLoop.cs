@@ -47,8 +47,6 @@ namespace Game.Unity.Bootstrap
 
                 var tick = _clock.CurrentTick;
 
-                _stats.SetTick(tick);
-
                 _input.FlushForTick(tick);
 
                 var batch = _queue.DequeueAllForTick(tick);

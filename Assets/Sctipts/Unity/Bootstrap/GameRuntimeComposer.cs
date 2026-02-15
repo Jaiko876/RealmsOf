@@ -6,6 +6,8 @@ using Game.Core.Level;
 using Game.Core.Random;
 using Game.Core.Simulation;
 using Game.Core.Systems;
+using Game.Core.Combat.Damage;
+using Game.Core.Combat.Health;
 using Game.Core.Stats;
 using Game.Physics.Unity2D;
 using UnityEngine;
@@ -68,6 +70,15 @@ namespace Game.Unity.Bootstrap
                 builder.Register<DefaultStatsSource>(Lifetime.Singleton);
                 builder.Register<EntityBaseStatsSource>(Lifetime.Singleton);
                 builder.Register<RuntimeModifiersSource>(Lifetime.Singleton);
+
+                // --- Damage/Health ---
+                builder.Register<DamageTuning>(Lifetime.Singleton);
+                builder.Register<IHealthStore, InMemoryHealthStore>(Lifetime.Singleton);
+                builder.Register<IDamageCalculator, DefaultDamageCalculator>(Lifetime.Singleton);
+                builder.Register<IHealthDamageService, HealthDamageService>(Lifetime.Singleton);
+
+                // (опционально) health tick system
+                builder.Register<IHealthTickSystem, HealthTickSystem>(Lifetime.Singleton);
 
                 // --- Physics (Unity2D backend) ---
                 builder.Register<Unity2DPhysicsWorld>(Lifetime.Singleton)
