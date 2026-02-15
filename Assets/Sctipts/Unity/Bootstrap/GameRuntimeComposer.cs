@@ -6,6 +6,7 @@ using Game.Core.Level;
 using Game.Core.Random;
 using Game.Core.Simulation;
 using Game.Core.Systems;
+using Game.Core.Stats;
 using Game.Physics.Unity2D;
 using UnityEngine;
 using VContainer;
@@ -62,6 +63,12 @@ namespace Game.Unity.Bootstrap
                 builder.RegisterInstance(_levelSeed);
                 builder.RegisterInstance(_levelGenConfig);
 
+                // --- Stats (core foundation) ---
+                builder.Register<StatResolver>(Lifetime.Singleton);
+                builder.Register<DefaultStatsSource>(Lifetime.Singleton);
+                builder.Register<EntityBaseStatsSource>(Lifetime.Singleton);
+                builder.Register<RuntimeModifiersSource>(Lifetime.Singleton);
+
                 // --- Physics (Unity2D backend) ---
                 builder.Register<Unity2DPhysicsWorld>(Lifetime.Singleton)
                     .As<Game.Core.Physics.Abstractions.IPhysicsWorld>();
@@ -109,6 +116,18 @@ namespace Game.Unity.Bootstrap
 
                 builder.Register<LevelService>(Lifetime.Singleton);
             });
+
+            // --- Init stat sources order ---
+            var statResolver = _runtimeScope.Resolve<StatResolver>();
+            var defaultStats = _runtimeScope.Resolve<DefaultStatsSource>();
+            var baseStats = _runtimeScope.Resolve<EntityBaseStatsSource>();
+            var runtimeMods = _runtimeScope.Resolve<RuntimeModifiersSource>();
+
+            statResolver.ClearSources();
+            statResolver.AddSource(defaultStats);
+            statResolver.AddSource(baseStats);
+            statResolver.AddSource(runtimeMods);
+
 
             // стартуем уровень
             var level = _runtimeScope.Resolve<LevelService>();

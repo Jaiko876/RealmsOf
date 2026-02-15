@@ -3,6 +3,7 @@ using Game.App.Commands;
 using Game.App.Time;
 using Game.Core.Simulation;
 using Game.Unity.Input;
+using Game.Core.Stats;
 using VContainer;
 using VContainer.Unity;
 
@@ -15,18 +16,23 @@ namespace Game.Unity.Bootstrap
         private readonly ISimulation _simulation;
         private readonly PlayerInputController _input;
 
+        private readonly StatResolver _stats;
+
         [Inject]
         public GameLoop(
             ITickClock clock,
             ICommandQueue queue,
             ISimulation simulation,
-            PlayerInputController input)
+            PlayerInputController input,
+            StatResolver stats)
         {
             _clock = clock;
             _queue = queue;
             _simulation = simulation;
             _input = input;
+            _stats = stats;
         }
+
 
         public void Start()
         {
@@ -40,6 +46,8 @@ namespace Game.Unity.Bootstrap
                 await UniTask.WaitForFixedUpdate();
 
                 var tick = _clock.CurrentTick;
+
+                _stats.SetTick(tick);
 
                 _input.FlushForTick(tick);
 

@@ -15,14 +15,14 @@ MonoBehaviour:
   Width: 220
   BaseGroundY: 6
   MinGroundY: 2
-  MaxGroundY: 20
-  MaxStepUp: 1
-  MaxStepDown: 2
+  MaxGroundY: 69
+  MaxStepUp: 5
+  MaxStepDown: 5
   MinSegmentLen: 10
   MaxSegmentLen: 40
   PlainsStep: 0
   HillsStep: 2
-  MountainsStep: 4
+  MountainsStep: 5
   PlainsChance: 55
   HillsChance: 30
   MountainsChance: 15
