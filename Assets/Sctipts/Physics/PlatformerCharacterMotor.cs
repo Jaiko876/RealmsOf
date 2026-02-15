@@ -15,7 +15,7 @@ namespace Game.Physics
             var dt = ctx.Dt;
             var p = ctx.Params;
             var body = ctx.Body;
-            int pid = input.PlayerId.Value;
+            int pid = input.EntityId.Value;
 
             // --- Horizontal ---
             float targetVx = Clamp(input.MoveX, -1f, 1f) * p.MaxSpeedX;

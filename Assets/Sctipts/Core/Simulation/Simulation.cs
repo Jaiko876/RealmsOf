@@ -13,14 +13,14 @@ namespace Game.Core.Simulation
 
         // Optional physics dependencies (Null Object by DI or just null for pure-logic runs)
         private readonly IPhysicsWorld _physicsWorld;
-        private readonly IPlayerBodyProvider _bodies;
+        private readonly IBodyProvider<GameEntityId> _bodies;
 
         public Simulation(
             GameState state,
             ICommandDispatcher dispatcher,
             SimulationParameters parameters,
             IPhysicsWorld physicsWorld,
-            IPlayerBodyProvider bodies)
+            IBodyProvider<GameEntityId> bodies)
         {
             _state = state;
             _dispatcher = dispatcher;
@@ -40,7 +40,7 @@ namespace Game.Core.Simulation
             _physicsWorld.Step(_parameters.TickDeltaTime, _parameters.PhysicsSubsteps);
 
             // 3) Mirror physical state back into GameState (view & logic)
-            foreach (var kv in _state.Players)
+            foreach (var kv in _state.Entities)
             {
                 if (_bodies.TryGet(kv.Key, out var body))
                 {

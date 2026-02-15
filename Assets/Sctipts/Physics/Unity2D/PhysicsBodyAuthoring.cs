@@ -5,36 +5,27 @@ using VContainer;
 
 namespace Game.Physics.Unity2D
 {
-
-    /// <summary>
-    /// Attach to any GameObject with Rigidbody2D to opt-in the player into physics.
-    /// (Later you can generalize to EntityId for any object.)
-    /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
-    public sealed class PlayerPhysicsAuthoring : MonoBehaviour
+    public sealed class PhysicsBodyAuthoring : MonoBehaviour
     {
-        [SerializeField] private int playerId = 0;
+        [SerializeField] private int entityId = 0;
 
-        private PlayerId _id;
+        private GameEntityId _id;
         private bool _registered;
 
-        private IPlayerBodyProvider _registry;
-        private Rigidbody2D _rb;
+        private IBodyProvider<GameEntityId> _registry;
         private Rigidbody2DPhysicsBody _body;
 
         private void Awake()
         {
-            _id = new PlayerId(playerId);
-            _rb = GetComponent<Rigidbody2D>();
-            _body = new Rigidbody2DPhysicsBody(_rb);
+            _id = new GameEntityId(entityId);
+            _body = new Rigidbody2DPhysicsBody(GetComponent<Rigidbody2D>());
         }
 
         [Inject]
-        public void Construct(IPlayerBodyProvider registry)
+        public void Construct(IBodyProvider<GameEntityId> registry)
         {
             _registry = registry;
-
-            // если объект уже enabled, а OnEnable успел сработать раньше инжекта
             TryRegister();
         }
 

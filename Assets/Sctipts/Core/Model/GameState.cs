@@ -6,30 +6,38 @@ namespace Game.Core.Model
     {
         public int Tick { get; private set; }
 
-        private readonly Dictionary<PlayerId, PlayerState> _players = new Dictionary<PlayerId, PlayerState>();
+        private readonly Dictionary<GameEntityId, EntityState> _entities =
+            new Dictionary<GameEntityId, EntityState>();
 
-        public IReadOnlyDictionary<PlayerId, PlayerState> Players => _players;
+        public IReadOnlyDictionary<GameEntityId, EntityState> Entities => _entities;
 
-        public PlayerState GetOrCreatePlayer(PlayerId id)
+        public PlayerAvatarMap PlayerAvatars { get; } = new PlayerAvatarMap();
+
+        public EntityState GetOrCreateEntity(GameEntityId id)
         {
-            PlayerState state;
-            if (!_players.TryGetValue(id, out state))
+            EntityState state;
+            if (!_entities.TryGetValue(id, out state))
             {
-                state = new PlayerState(id);
-                _players[id] = state;
+                state = new EntityState(id);
+                _entities[id] = state;
             }
 
             return state;
         }
 
-        public void SetTick(int tick)
+        // convenience: “дай entity, которым управляет игрок”
+        public bool TryGetAvatar(PlayerId playerId, out EntityState entity)
         {
-            Tick = tick;
+            entity = null;
+
+            GameEntityId eid;
+            if (!PlayerAvatars.TryGet(playerId, out eid))
+                return false;
+
+            return _entities.TryGetValue(eid, out entity);
         }
 
-        public void AdvanceTick()
-        {
-            Tick++;
-        }
+        public void SetTick(int tick) => Tick = tick;
+        public void AdvanceTick() => Tick++;
     }
 }

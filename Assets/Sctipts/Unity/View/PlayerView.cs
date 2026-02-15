@@ -7,12 +7,13 @@ namespace Game.Unity.View
     public sealed class PlayerView : MonoBehaviour
     {
         [SerializeField] private int playerId = 0;
+        [SerializeField] private int avatarEntityId = 0;
 
-        // Сюда укажи объект со SpriteRenderer/Animator (обычно child).
         [SerializeField] private Transform visualRoot;
 
         private GameState _gameState;
-        private PlayerId _id;
+        private PlayerId _playerId;
+        private GameEntityId _entityId;
 
         [Inject]
         public void Construct(GameState gameState)
@@ -22,19 +23,25 @@ namespace Game.Unity.View
 
         private void Awake()
         {
-            _id = new PlayerId(playerId);
+            _playerId = new PlayerId(playerId);
+            _entityId = new GameEntityId(avatarEntityId);
 
-            // Если не задано — будем двигать себя (но это лучше, чем падать в null)
             if (visualRoot == null)
                 visualRoot = transform;
+
+            // ВАЖНО: один раз связываем player -> avatar entity
+            _gameState.PlayerAvatars.Set(_playerId, _entityId);
+
+            // И гарантируем, что entity существует в стейте (чтобы не было null/KeyNotFound)
+            _gameState.GetOrCreateEntity(_entityId);
         }
 
         private void LateUpdate()
         {
-            var player = _gameState.GetOrCreatePlayer(_id);
+            // Можно брать напрямую entity (самый быстрый путь)
+            var entity = _gameState.GetOrCreateEntity(_entityId);
 
-            // Двигаем только визуал. Физическое тело пусть живет своей жизнью.
-            visualRoot.position = new Vector3(player.X, player.Y, 0f);
+            visualRoot.position = new Vector3(entity.X, entity.Y, 0f);
         }
     }
 }

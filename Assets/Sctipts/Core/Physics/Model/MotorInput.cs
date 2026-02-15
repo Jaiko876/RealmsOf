@@ -4,18 +4,14 @@ namespace Game.Core.Physics.Model
 {
     public readonly struct MotorInput
     {
-        public readonly PlayerId PlayerId;
-        public readonly float MoveX;      // [-1..1]
-        public readonly bool JumpPressed; // edge
+        public readonly GameEntityId EntityId;
+        public readonly float MoveX;
+        public readonly bool JumpPressed;
         public readonly bool JumpHeld;
 
-        public MotorInput(
-            PlayerId playerId,
-            float moveX,
-            bool jumpPressed,
-            bool jumpHeld)
+        public MotorInput(GameEntityId entityId, float moveX, bool jumpPressed, bool jumpHeld)
         {
-            PlayerId = playerId;
+            EntityId = entityId;
             MoveX = moveX;
             JumpPressed = jumpPressed;
             JumpHeld = jumpHeld;

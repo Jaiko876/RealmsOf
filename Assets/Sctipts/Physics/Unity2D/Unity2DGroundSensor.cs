@@ -6,7 +6,7 @@ namespace Game.Physics.Unity2D
 {
     public sealed class Unity2DGroundSensor : IGroundSensor
     {
-        private readonly IPlayerBodyProvider _bodies;
+        private readonly IBodyProvider<GameEntityId> _bodies;
         private readonly ContactFilter2D _filter;
         private readonly RaycastHit2D[] _hits = new RaycastHit2D[4];
 
@@ -14,7 +14,7 @@ namespace Game.Physics.Unity2D
         private const float Skin = 0.02f;        // чуть внутрь коллайдера
         private const float CheckDepth = 0.08f;  // насколько вниз проверяем
 
-        public Unity2DGroundSensor(IPlayerBodyProvider bodies)
+        public Unity2DGroundSensor(IBodyProvider<GameEntityId> bodies)
         {
             _bodies = bodies;
 
@@ -25,9 +25,9 @@ namespace Game.Physics.Unity2D
             _filter.useTriggers = false;
         }
 
-        public bool IsGrounded(PlayerId playerId)
+        public bool IsGrounded(GameEntityId entityId)
         {
-            if (!_bodies.TryGet(playerId, out var body))
+            if (!_bodies.TryGet(entityId, out var body))
                 return false;
 
             var u = body as Rigidbody2DPhysicsBody;

@@ -9,6 +9,9 @@ namespace Game.Unity.Input
 {
     public class PlayerInputController : MonoBehaviour
     {
+        [SerializeField] private int controlledEntityId = 0;
+        private GameEntityId Controlled => new GameEntityId(controlledEntityId);
+
         private ICommandQueue _commandQueue;
         private ITickClock _clock;
 
@@ -43,7 +46,7 @@ namespace Game.Unity.Input
             var s = _snapshot;
 
             _commandQueue.Enqueue(new MoveCommand(
-                tick, PlayerId.Local,
+                tick, Controlled,
                 s.MoveX, s.MoveY,
                 s.JumpPressed, s.JumpHeld
             ));

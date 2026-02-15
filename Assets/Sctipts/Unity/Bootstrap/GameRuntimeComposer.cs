@@ -48,7 +48,7 @@ namespace Game.Unity.Bootstrap
             var config = await _configProvider.LoadAsync();
 
             Time.fixedDeltaTime = 1f / config.TickRate;
-            
+
             Physics2DScriptBootstrap.EnsureScriptMode();
 
             _runtimeScope = _root.CreateScope(builder =>
@@ -67,9 +67,6 @@ namespace Game.Unity.Bootstrap
                 builder.Register<Unity2DPhysicsWorld>(Lifetime.Singleton)
                     .As<Game.Core.Physics.Abstractions.IPhysicsWorld>();
 
-                builder.Register<PlayerBodyRegistry>(Lifetime.Singleton)
-                    .As<Game.Core.Physics.Abstractions.IPlayerBodyProvider>();
-
                 builder.Register<Unity2DGroundSensor>(Lifetime.Singleton)
                     .As<Game.Core.Physics.Abstractions.IGroundSensor>();
 
@@ -79,9 +76,11 @@ namespace Game.Unity.Bootstrap
                 // TODO: подцепи из config реальные значения
                 builder.RegisterInstance(new Game.Core.Physics.Model.MotorParams());
 
-                // где-то рядом с остальными Register... внутри runtime scope
-                builder.RegisterComponentInHierarchy<Game.Physics.Unity2D.PlayerPhysicsAuthoring>();
+                builder.Register<Game.Physics.Registry.BodyRegistry>(Lifetime.Singleton)
+                    .As<Game.Core.Physics.Abstractions.IBodyProvider<Game.Core.Model.GameEntityId>>();
 
+
+                builder.RegisterComponentInHierarchy<Game.Physics.Unity2D.PhysicsBodyAuthoring>();
 
                 // handlers
                 builder.Register<MoveCommandHandler>(Lifetime.Singleton)
