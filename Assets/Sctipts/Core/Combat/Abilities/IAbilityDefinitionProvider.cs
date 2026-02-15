@@ -28,7 +28,10 @@ namespace Game.Core.Combat.Abilities
                         isDodge: false,
                         isBlock: false,
                         parryable: true,
-                        dodgeable: false)
+                        dodgeable: false,
+                        baseHpDamage: 2f,
+                        baseStaminaDamage: 1f,
+                        baseStaggerBuild: 2f)
                 },
                 {
                     AbilitySlot.HeavyAttack,
@@ -43,7 +46,10 @@ namespace Game.Core.Combat.Abilities
                         isDodge: false,
                         isBlock: false,
                         parryable: false,
-                        dodgeable: true)
+                        dodgeable: true,
+                        baseHpDamage: 4f,
+                        baseStaminaDamage: 0f,
+                        baseStaggerBuild: 4f)
                 },
                 {
                     AbilitySlot.Parry,
@@ -58,7 +64,10 @@ namespace Game.Core.Combat.Abilities
                         isDodge: false,
                         isBlock: false,
                         parryable: false,
-                        dodgeable: false)
+                        dodgeable: false,
+                        baseHpDamage: 0f,
+                        baseStaminaDamage: 0f,
+                        baseStaggerBuild: 0f)
                 },
                 {
                     AbilitySlot.Dodge,
@@ -73,7 +82,10 @@ namespace Game.Core.Combat.Abilities
                         isDodge: true,
                         isBlock: false,
                         parryable: false,
-                        dodgeable: false)
+                        dodgeable: false,
+                        baseHpDamage: 0f,
+                        baseStaminaDamage: 0f,
+                        baseStaggerBuild: 0f)
                 }
             };
         }

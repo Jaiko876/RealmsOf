@@ -11,8 +11,11 @@ using Game.Core.Combat.Damage;
 using Game.Core.Combat.Health;
 using Game.Core.Combat.Resources;
 using Game.Core.Combat.Abilities;
+using Game.Core.Combat.Rules;
+using Game.Core.Combat.Resolution;
 using Game.Core.Stats;
 using Game.Physics.Unity2D;
+using Game.Unity.Combat;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -92,6 +95,12 @@ namespace Game.Unity.Bootstrap
                 builder.Register<IAbilitySystem, AbilitySystem>(Lifetime.Singleton);
                 builder.Register<ICombatActionTickSystem, CombatActionTickSystem>(Lifetime.Singleton);
 
+                builder.Register<CombatRulesConfig>(Lifetime.Singleton);
+                builder.Register<ICombatRulesResolver, CombatRulesResolver>(Lifetime.Singleton);
+
+                // --- Combat Resolution ---
+                builder.Register<ICombatResolutionSystem, CombatResolutionSystem>(Lifetime.Singleton);
+                builder.Register<IHitQuery, UnityPhysicsHitQuery>(Lifetime.Singleton);
 
                 // --- Physics (Unity2D backend) ---
                 builder.Register<Unity2DPhysicsWorld>(Lifetime.Singleton)

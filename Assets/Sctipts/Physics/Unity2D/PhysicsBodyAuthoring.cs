@@ -16,6 +16,11 @@ namespace Game.Physics.Unity2D
         private IBodyProvider<GameEntityId> _registry;
         private Rigidbody2DPhysicsBody _body;
 
+        public GameEntityId EntityId
+        {
+            get { return _id; }
+        }
+
         private void Awake()
         {
             _id = new GameEntityId(entityId);
@@ -29,7 +34,10 @@ namespace Game.Physics.Unity2D
             TryRegister();
         }
 
-        private void OnEnable() => TryRegister();
+        private void OnEnable()
+        {
+            TryRegister();
+        }
 
         private void OnDisable()
         {
@@ -47,6 +55,21 @@ namespace Game.Physics.Unity2D
 
             _registry.Register(_id, _body);
             _registered = true;
+        }
+
+        /// <summary>
+        /// На будущее для спавна: назначить id до регистрации.
+        /// </summary>
+        public void SetEntityId(GameEntityId id)
+        {
+            if (_registered)
+            {
+                // На старте лучше явно падать, чем молча ломать регистрацию.
+                throw new System.InvalidOperationException("Cannot change EntityId after registration.");
+            }
+
+            _id = id;
+            entityId = id.Value;
         }
     }
 }

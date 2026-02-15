@@ -1,4 +1,5 @@
 using Game.Core.Combat.Damage;
+using Game.Core.Combat.Resolution;
 using Game.Core.Model;
 
 namespace Game.Core.Combat.Abilities
@@ -11,14 +12,15 @@ namespace Game.Core.Combat.Abilities
     public sealed class CombatActionTickSystem : ICombatActionTickSystem
     {
         private readonly ICombatActionStore _store;
-        private readonly IHealthDamageService _damageService;
+        private readonly ICombatResolutionSystem _resolutionSystem;
+
 
         public CombatActionTickSystem(
             ICombatActionStore store,
-            IHealthDamageService damageService)
+            ICombatResolutionSystem resolutionSystem)
         {
             _store = store;
-            _damageService = damageService;
+            _resolutionSystem = resolutionSystem;
         }
 
         public void Tick(int tick)
@@ -32,15 +34,7 @@ namespace Game.Core.Combat.Abilities
 
                 if (action is AttackAction attack && attack.IsActive)
                 {
-                    // Пока без hit detection — self-target для теста
-                    var request = new DamageRequest(
-                        attacker: attack.Owner,
-                        target: attack.Owner,
-                        baseHpDamage: 1f,
-                        baseStaminaDamage: 0f,
-                        baseStaggerBuild: 0f);
-
-                    _damageService.Apply(request, tick);
+                    _resolutionSystem.ResolveAttack(attack, tick);
                 }
 
                 if (action.IsFinished(tick))

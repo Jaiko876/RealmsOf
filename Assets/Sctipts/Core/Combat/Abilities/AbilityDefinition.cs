@@ -4,6 +4,11 @@ namespace Game.Core.Combat.Abilities
     {
         public AbilitySlot Slot { get; }
 
+        public float BaseHpDamage { get; }
+        public float BaseStaminaDamage { get; }
+        public float BaseStaggerBuild { get; }
+
+
         public int WindupTicks { get; }
         public int ActiveTicks { get; }
         public int RecoveryTicks { get; }
@@ -29,7 +34,10 @@ namespace Game.Core.Combat.Abilities
             bool isDodge,
             bool isBlock,
             bool parryable,
-            bool dodgeable)
+            bool dodgeable,
+            float baseHpDamage,
+            float baseStaminaDamage,
+            float baseStaggerBuild)
         {
             Slot = slot;
             WindupTicks = windupTicks;
@@ -42,6 +50,11 @@ namespace Game.Core.Combat.Abilities
             IsBlock = isBlock;
             Parryable = parryable;
             Dodgeable = dodgeable;
+
+            BaseHpDamage = baseHpDamage;
+            BaseStaminaDamage = baseStaminaDamage;
+            BaseStaggerBuild = baseStaggerBuild;
         }
+
     }
 }
