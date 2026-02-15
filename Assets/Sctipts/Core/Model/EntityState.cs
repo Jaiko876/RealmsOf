@@ -6,13 +6,25 @@ namespace Game.Core.Model
 
         public float X { get; private set; }
         public float Y { get; private set; }
-
         public float Vx { get; private set; }
         public float Vy { get; private set; }
+
+        public float PrevX { get; private set; }
+        public float PrevY { get; private set; }
+        public float PrevVx { get; private set; }
+        public float PrevVy { get; private set; }
 
         public EntityState(GameEntityId id)
         {
             Id = id;
+        }
+
+        public void BeginTick()
+        {
+            PrevX = X;
+            PrevY = Y;
+            PrevVx = Vx;
+            PrevVy = Vy;
         }
 
         public void Move(float dx, float dy)

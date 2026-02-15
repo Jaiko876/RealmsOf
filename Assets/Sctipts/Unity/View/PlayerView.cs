@@ -38,10 +38,22 @@ namespace Game.Unity.View
 
         private void LateUpdate()
         {
-            // Можно брать напрямую entity (самый быстрый путь)
-            var entity = _gameState.GetOrCreateEntity(_entityId);
+            var e = _gameState.GetOrCreateEntity(_entityId);
 
-            visualRoot.position = new Vector3(entity.X, entity.Y, 0f);
+            var alpha = 1f;
+            var fd = Time.fixedDeltaTime;
+            if (fd > 0f)
+            {
+                alpha = (Time.time - Time.fixedTime) / fd;
+                if (alpha < 0f) alpha = 0f;
+                if (alpha > 1f) alpha = 1f;
+            }
+
+            var x = Mathf.Lerp(e.PrevX, e.X, alpha);
+            var y = Mathf.Lerp(e.PrevY, e.Y, alpha);
+
+            visualRoot.position = new Vector3(x, y, 0f);
         }
+
     }
 }

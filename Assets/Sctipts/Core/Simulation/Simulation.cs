@@ -44,9 +44,11 @@ namespace Game.Core.Simulation
             {
                 if (_bodies.TryGet(kv.Key, out var body))
                 {
+                    kv.Value.BeginTick(); // <-- ВОТ ЭТО ДОБАВИТЬ
                     kv.Value.SetPose(body.X, body.Y, body.Vx, body.Vy);
                 }
             }
+
 
             // 4) Sync tick
             _state.SetTick(tick + 1);
