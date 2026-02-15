@@ -1,38 +1,42 @@
 using System;
-
-using Cysharp.Threading.Tasks;
+using Game.App.Commands;
+using Game.App.Level;
 using Game.Core.Abstractions;
+using Game.Core.Level;
 using Game.Core.Random;
 using Game.Core.Simulation;
 using Game.Core.Systems;
-using Game.Core.Level;
-using Game.App.Commands;
-using Game.Unity.Config;
+using Game.Physics.Unity2D;
+using UnityEngine;
 using VContainer;
 using VContainer.Unity;
-using UnityEngine;
-
-using Game.Physics.Unity2D;
-using Game.Physics;
 
 namespace Game.Unity.Bootstrap
 {
     public sealed class GameRuntimeComposer : IStartable, IDisposable
     {
         private readonly IObjectResolver _root;
-        private readonly IGameConfigProvider _configProvider;
+        private readonly SimulationParameters _simParams;
+        private readonly LevelSeed _levelSeed;
+        private readonly LevelGenConfig _levelGenConfig;
 
         private IScopedObjectResolver _runtimeScope;
 
-        public GameRuntimeComposer(IObjectResolver root, IGameConfigProvider configProvider)
+        public GameRuntimeComposer(
+            IObjectResolver root,
+            SimulationParameters simParams,
+            LevelSeed levelSeed,
+            LevelGenConfig levelGenConfig)
         {
             _root = root;
-            _configProvider = configProvider;
+            _simParams = simParams;
+            _levelSeed = levelSeed;
+            _levelGenConfig = levelGenConfig;
         }
 
         public void Start()
         {
-            InitializeAsync().Forget();
+            Initialize();
         }
 
         public void Dispose()
@@ -44,23 +48,19 @@ namespace Game.Unity.Bootstrap
             }
         }
 
-        private async UniTaskVoid InitializeAsync()
+        private void Initialize()
         {
-            var config = await _configProvider.LoadAsync();
-
-            Time.fixedDeltaTime = 1f / config.TickRate;
+            // фиксируем physics step под tick dt
+            Time.fixedDeltaTime = _simParams.TickDeltaTime;
 
             Physics2DScriptBootstrap.EnsureScriptMode();
 
             _runtimeScope = _root.CreateScope(builder =>
             {
-                var dt = 1f / config.TickRate;
-
-                builder.RegisterInstance(new SimulationParameters(
-                    unitsPerTick: config.UnitsPerTick,
-                    tickDeltaTime: dt,
-                    physicsSubsteps: 1
-                ));
+                // --- shared match/runtime params ---
+                builder.RegisterInstance(_simParams);
+                builder.RegisterInstance(_levelSeed);
+                builder.RegisterInstance(_levelGenConfig);
 
                 // --- Physics (Unity2D backend) ---
                 builder.Register<Unity2DPhysicsWorld>(Lifetime.Singleton)
@@ -72,7 +72,7 @@ namespace Game.Unity.Bootstrap
                 builder.Register<Game.Physics.PlatformerCharacterMotor>(Lifetime.Singleton)
                     .As<Game.Core.Physics.Abstractions.ICharacterMotor>();
 
-                // TODO: подцепи из config реальные значения
+                // TODO: позже вынесешь в эдитор-конфиг
                 builder.RegisterInstance(new Game.Core.Physics.Model.MotorParams());
 
                 builder.Register<Game.Physics.Registry.BodyRegistry>(Lifetime.Singleton)
@@ -80,44 +80,38 @@ namespace Game.Unity.Bootstrap
 
                 builder.RegisterComponentInHierarchy<Game.Physics.Unity2D.PhysicsBodyAuthoring>();
 
-                // handlers
+                // --- Commands: handlers + dispatcher ---
                 builder.Register<MoveCommandHandler>(Lifetime.Singleton)
                     .As<ICommandHandler<Game.Core.Commands.MoveCommand>>();
 
-                // registrations
                 builder.Register<CommandHandlerRegistration<Game.Core.Commands.MoveCommand>>(Lifetime.Singleton)
                     .As<Game.App.Commands.ICommandHandlerRegistration>();
 
-                // dispatcher
-                builder.Register<Game.App.Commands.CommandDispatcher>(Lifetime.Singleton)
-                    .As<Game.Core.Abstractions.ICommandDispatcher>();
+                builder.Register<CommandDispatcher>(Lifetime.Singleton)
+                    .As<ICommandDispatcher>();
 
-                // Simulation
+                // --- Simulation + loop ---
                 builder.Register<ISimulation, Simulation>(Lifetime.Singleton);
-
-                // Game loop
                 builder.RegisterEntryPoint<GameLoop>();
 
-                // RAng
-                builder.Register<Game.Core.Random.XorShiftRandomFactory>(Lifetime.Singleton)
-                       .As<Game.Core.Abstractions.IRandomFactory>();
+                // --- RNG ---
+                builder.Register<XorShiftRandomFactory>(Lifetime.Singleton)
+                    .As<IRandomFactory>();
 
-                // Level
+                // --- Level ---
                 builder.Register<LevelGenerator>(Lifetime.Singleton);
 
                 builder.RegisterComponentInHierarchy<Game.Unity.Level.TilemapLevelView>()
-                       .As<Game.App.Level.ILevelView>();
+                    .As<ILevelView>();
 
                 builder.RegisterComponentInHierarchy<Game.Unity.Spawning.UnitySpawnSystem>()
-                       .As<Game.Core.Spawning.ISpawnSystem>();
+                    .As<Game.Core.Spawning.ISpawnSystem>();
 
-                builder.Register<Game.App.Level.LevelService>(Lifetime.Singleton);
-
-
+                builder.Register<LevelService>(Lifetime.Singleton);
             });
 
-
-            var level = _runtimeScope.Resolve<Game.App.Level.LevelService>();
+            // стартуем уровень
+            var level = _runtimeScope.Resolve<LevelService>();
             level.StartLevel();
         }
     }

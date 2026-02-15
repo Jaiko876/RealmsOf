@@ -8,17 +8,21 @@ namespace Game.Unity.Level
     public sealed class TilemapLevelView : MonoBehaviour, ILevelView
     {
         [SerializeField] private Tilemap _tilemap;
-        [SerializeField] private TileBase _groundTile;
+        [SerializeField] private LevelTilesetAsset _tileset;
 
         public void Build(LevelDefinition definition)
         {
             _tilemap.ClearAllTiles();
 
-            foreach (var cell in definition.SolidCells)
+            // Теперь рисуем не “SolidCells”, а именно Tiles с Kind
+            var tiles = definition.Tiles;
+            for (int i = 0; i < tiles.Count; i++)
             {
-                _tilemap.SetTile(
-                    new Vector3Int(cell.X, cell.Y, 0),
-                    _groundTile);
+                var t = tiles[i];
+                var tileBase = _tileset != null ? _tileset.Get(t.Kind) : null;
+                if (tileBase == null) continue;
+
+                _tilemap.SetTile(new Vector3Int(t.X, t.Y, 0), tileBase);
             }
         }
     }

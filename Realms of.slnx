@@ -1,8 +1,8 @@
 ﻿<Solution>
   <Project Path="Game.Unity.csproj" />
+  <Project Path="Game.Core.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
-  <Project Path="Game.Core.csproj" />
   <Project Path="Game.Physics.csproj" />
   <Project Path="Game.App.csproj" />
   <Project Path="Game.Configs.csproj" />
