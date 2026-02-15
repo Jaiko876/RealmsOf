@@ -8,7 +8,6 @@ namespace Game.Unity.Input
     public class PlayerInputAdapter : MonoBehaviour
     {
         private PlayerInputController _controller;
-        private InputSnapshot _snapshot;
 
         [Inject]
         public void Construct(PlayerInputController controller)
@@ -19,17 +18,13 @@ namespace Game.Unity.Input
         public void OnMove(InputValue value)
         {
             var move = value.Get<Vector2>();
-
-            _snapshot.MoveX = move.x;
-            _snapshot.MoveY = move.y;
-
-            _controller.SetSnapshot(_snapshot);
+            _controller.SetMove(move.x, move.y);
         }
 
         public void OnJump(InputValue value)
         {
-            _snapshot.Jump = value.isPressed;
-            _controller.SetSnapshot(_snapshot);
+                Debug.Log("OnJump isPressed=" + value.isPressed);
+            _controller.SetJumpHeld(value.isPressed);
         }
     }
 }

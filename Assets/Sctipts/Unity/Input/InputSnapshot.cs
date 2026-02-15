@@ -4,9 +4,13 @@ namespace Game.Unity.Input
     {
         public float MoveX;
         public float MoveY;
-        public bool Jump;
 
-        public bool HasMovement =>
-            MoveX != 0f || MoveY != 0f;
+        // Platformer-friendly: held + edge
+        public bool JumpHeld;
+        public bool JumpPressed;
+
+
+        public bool HasSomething =>
+            MoveX != 0f || MoveY != 0f || JumpHeld || JumpPressed;
     }
 }

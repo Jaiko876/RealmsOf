@@ -17,6 +17,7 @@
 *.pidb
 *.booproj
 *.svd
+*.tar
 
 # OS
 .DS_Store

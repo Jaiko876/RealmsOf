@@ -13,6 +13,7 @@ namespace Game.Unity.Input
         private ITickClock _clock;
 
         private InputSnapshot _snapshot;
+        private bool _prevJumpHeld;
 
         [Inject]
         public void Construct(ICommandQueue commandQueue, ITickClock clock)
@@ -21,24 +22,33 @@ namespace Game.Unity.Input
             _clock = clock;
         }
 
-        public void SetSnapshot(InputSnapshot snapshot)
+        public void SetMove(float x, float y)
         {
-            _snapshot = snapshot;
+            _snapshot.MoveX = x;
+            _snapshot.MoveY = y;
+        }
+
+        public void SetJumpHeld(bool held)
+        {
+            _snapshot.JumpHeld = held;
+
+            if (held && !_prevJumpHeld)
+                _snapshot.JumpPressed = true;
+
+            _prevJumpHeld = held;
         }
 
         public void FlushForTick(int tick)
         {
-            if (_snapshot.HasMovement)
-            {
-                var cmd = new MoveCommand(
-                    tick,
-                    PlayerId.Local,
-                    _snapshot.MoveX,
-                    _snapshot.MoveY
-                );
+            var s = _snapshot;
 
-                _commandQueue.Enqueue(cmd);
-            }
+            _commandQueue.Enqueue(new MoveCommand(
+                tick, PlayerId.Local,
+                s.MoveX, s.MoveY,
+                s.JumpPressed, s.JumpHeld
+            ));
+
+            _snapshot.JumpPressed = false; // consume edge на тик
         }
     }
 }
