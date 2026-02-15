@@ -1,0 +1,86 @@
+using System.Collections.Generic;
+
+namespace Game.Core.Combat.Abilities
+{
+    public interface IAbilityDefinitionProvider
+    {
+        AbilityDefinition Get(AbilitySlot slot);
+    }
+
+    public sealed class DefaultAbilityDefinitionProvider : IAbilityDefinitionProvider
+    {
+        private readonly Dictionary<AbilitySlot, AbilityDefinition> _map;
+
+        public DefaultAbilityDefinitionProvider()
+        {
+            _map = new Dictionary<AbilitySlot, AbilityDefinition>
+            {
+                {
+                    AbilitySlot.LightAttack,
+                    new AbilityDefinition(
+                        AbilitySlot.LightAttack,
+                        windupTicks: 3,
+                        activeTicks: 2,
+                        recoveryTicks: 5,
+                        staminaCost: 1f,
+                        isAttack: true,
+                        isParry: false,
+                        isDodge: false,
+                        isBlock: false,
+                        parryable: true,
+                        dodgeable: false)
+                },
+                {
+                    AbilitySlot.HeavyAttack,
+                    new AbilityDefinition(
+                        AbilitySlot.HeavyAttack,
+                        windupTicks: 6,
+                        activeTicks: 2,
+                        recoveryTicks: 8,
+                        staminaCost: 3f,
+                        isAttack: true,
+                        isParry: false,
+                        isDodge: false,
+                        isBlock: false,
+                        parryable: false,
+                        dodgeable: true)
+                },
+                {
+                    AbilitySlot.Parry,
+                    new AbilityDefinition(
+                        AbilitySlot.Parry,
+                        windupTicks: 0,
+                        activeTicks: 2,
+                        recoveryTicks: 4,
+                        staminaCost: 1f,
+                        isAttack: false,
+                        isParry: true,
+                        isDodge: false,
+                        isBlock: false,
+                        parryable: false,
+                        dodgeable: false)
+                },
+                {
+                    AbilitySlot.Dodge,
+                    new AbilityDefinition(
+                        AbilitySlot.Dodge,
+                        windupTicks: 0,
+                        activeTicks: 3,
+                        recoveryTicks: 6,
+                        staminaCost: 2f,
+                        isAttack: false,
+                        isParry: false,
+                        isDodge: true,
+                        isBlock: false,
+                        parryable: false,
+                        dodgeable: false)
+                }
+            };
+        }
+
+        public AbilityDefinition Get(AbilitySlot slot)
+        {
+            return _map[slot];
+        }
+    }
+}

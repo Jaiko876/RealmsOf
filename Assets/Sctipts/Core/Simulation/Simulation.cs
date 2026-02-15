@@ -4,6 +4,7 @@ using Game.Core.Model;
 using Game.Core.Physics.Abstractions;
 using Game.Core.Combat.Health;
 using Game.Core.Combat.Resources;
+using Game.Core.Combat.Abilities;
 using Game.Core.Stats;
 
 namespace Game.Core.Simulation
@@ -24,6 +25,8 @@ namespace Game.Core.Simulation
 
         private readonly ICombatResourceTickSystem _combatResourceTickSystem;
 
+        private readonly ICombatActionTickSystem _combatActionTickSystem;
+
 
         public Simulation(
             GameState state,
@@ -33,7 +36,8 @@ namespace Game.Core.Simulation
             IBodyProvider<GameEntityId> bodies,
             IHealthTickSystem healthTickSystem,
             StatResolver stats,
-            ICombatResourceTickSystem combatResourceTickSystem)
+            ICombatResourceTickSystem combatResourceTickSystem,
+            ICombatActionTickSystem combatActionTickSystem)
         {
             _state = state;
             _dispatcher = dispatcher;
@@ -43,6 +47,7 @@ namespace Game.Core.Simulation
             _healthTickSystem = healthTickSystem;
             _stats = stats;
             _combatResourceTickSystem = combatResourceTickSystem;
+            _combatActionTickSystem = combatActionTickSystem;
         }
         public GameState State => _state;
 
@@ -68,6 +73,7 @@ namespace Game.Core.Simulation
 
             _healthTickSystem.Tick(tick, _parameters.TickDeltaTime);
             _combatResourceTickSystem.Tick(tick, _parameters.TickDeltaTime);
+            _combatActionTickSystem.Tick(tick);
 
             // 4) Sync tick
             _state.SetTick(tick + 1);

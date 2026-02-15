@@ -2,6 +2,7 @@ using Game.App.Commands;
 using Game.App.Time;
 using Game.Core.Commands;
 using Game.Core.Model;
+using Game.Core.Combat.Abilities;
 using UnityEngine;
 using VContainer;
 
@@ -10,6 +11,7 @@ namespace Game.Unity.Input
     public class PlayerInputController : MonoBehaviour
     {
         [SerializeField] private int controlledEntityId = 0;
+
         private GameEntityId Controlled => new GameEntityId(controlledEntityId);
 
         private ICommandQueue _commandQueue;
@@ -41,17 +43,33 @@ namespace Game.Unity.Input
             _prevJumpHeld = held;
         }
 
+        public void UseAbility(AbilitySlot slot)
+        {
+            var tick = _clock.CurrentTick;
+
+            _commandQueue.Enqueue(
+                new UseAbilityCommand(
+                    tick,
+                    Controlled,
+                    slot
+                )
+            );
+        }
+
         public void FlushForTick(int tick)
         {
             var s = _snapshot;
 
             _commandQueue.Enqueue(new MoveCommand(
-                tick, Controlled,
-                s.MoveX, s.MoveY,
-                s.JumpPressed, s.JumpHeld
+                tick,
+                Controlled,
+                s.MoveX,
+                s.MoveY,
+                s.JumpPressed,
+                s.JumpHeld
             ));
 
-            _snapshot.JumpPressed = false; // consume edge на тик
+            _snapshot.JumpPressed = false;
         }
     }
 }

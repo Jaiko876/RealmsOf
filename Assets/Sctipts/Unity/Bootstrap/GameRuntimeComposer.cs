@@ -1,5 +1,6 @@
 using System;
 using Game.App.Commands;
+using Game.App.Combat;
 using Game.App.Level;
 using Game.Core.Abstractions;
 using Game.Core.Level;
@@ -9,6 +10,7 @@ using Game.Core.Systems;
 using Game.Core.Combat.Damage;
 using Game.Core.Combat.Health;
 using Game.Core.Combat.Resources;
+using Game.Core.Combat.Abilities;
 using Game.Core.Stats;
 using Game.Physics.Unity2D;
 using UnityEngine;
@@ -77,14 +79,19 @@ namespace Game.Unity.Bootstrap
                 builder.Register<IHealthStore, InMemoryHealthStore>(Lifetime.Singleton);
                 builder.Register<IDamageCalculator, DefaultDamageCalculator>(Lifetime.Singleton);
                 builder.Register<IHealthDamageService, HealthDamageService>(Lifetime.Singleton);
+                // (опционально) health tick system
+                builder.Register<IHealthTickSystem, HealthTickSystem>(Lifetime.Singleton);
 
                 // --- Combat Resources ---
                 builder.Register<ICombatResourceStore, InMemoryCombatResourceStore>(Lifetime.Singleton);
                 builder.Register<ICombatResourceTickSystem, CombatResourceTickSystem>(Lifetime.Singleton);
 
+                // --- Abilities ---
+                builder.Register<IAbilityDefinitionProvider, DefaultAbilityDefinitionProvider>(Lifetime.Singleton);
+                builder.Register<ICombatActionStore, InMemoryCombatActionStore>(Lifetime.Singleton);
+                builder.Register<IAbilitySystem, AbilitySystem>(Lifetime.Singleton);
+                builder.Register<ICombatActionTickSystem, CombatActionTickSystem>(Lifetime.Singleton);
 
-                // (опционально) health tick system
-                builder.Register<IHealthTickSystem, HealthTickSystem>(Lifetime.Singleton);
 
                 // --- Physics (Unity2D backend) ---
                 builder.Register<Unity2DPhysicsWorld>(Lifetime.Singleton)
@@ -107,6 +114,12 @@ namespace Game.Unity.Bootstrap
                 // --- Commands: handlers + dispatcher ---
                 builder.Register<MoveCommandHandler>(Lifetime.Singleton)
                     .As<ICommandHandler<Game.Core.Commands.MoveCommand>>();
+                builder.Register<UseAbilityCommandHandler>(Lifetime.Singleton)
+                    .As<ICommandHandler<Game.Core.Combat.Abilities.UseAbilityCommand>>();
+
+                builder.Register<CommandHandlerRegistration<Game.Core.Combat.Abilities.UseAbilityCommand>>(Lifetime.Singleton)
+                    .As<Game.App.Commands.ICommandHandlerRegistration>();
+
 
                 builder.Register<CommandHandlerRegistration<Game.Core.Commands.MoveCommand>>(Lifetime.Singleton)
                     .As<Game.App.Commands.ICommandHandlerRegistration>();
