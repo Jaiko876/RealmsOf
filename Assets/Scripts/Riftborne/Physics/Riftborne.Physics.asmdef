@@ -1,0 +1,17 @@
+{
+    "name": "Riftborne.Physics",
+    "rootNamespace": "",
+    "references": [
+        "GUID:cbefb09f751c8164d833315e2f9018b0",
+        "GUID:b0214a6008ed146ff8f122a6a9c2f6cc"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

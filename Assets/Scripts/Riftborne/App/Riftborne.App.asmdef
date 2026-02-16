@@ -1,0 +1,17 @@
+{
+    "name": "Riftborne.App",
+    "rootNamespace": "",
+    "references": [
+        "GUID:cbefb09f751c8164d833315e2f9018b0",
+        "GUID:d57ce6445b98eb349a7da2426f9005b9"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Riftborne.Core",
+  "overrideReferences": false,
+  "autoReferenced": true,
+  "noEngineReferences": true,
+  "allowUnsafeCode": false,
+  "overrideCompilerOptions": true,
+  "references": []
+}
