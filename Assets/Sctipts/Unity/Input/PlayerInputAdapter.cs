@@ -23,8 +23,26 @@ namespace Game.Unity.Input
 
         public void OnJump(InputValue value)
         {
-                Debug.Log("OnJump isPressed=" + value.isPressed);
             _controller.SetJumpHeld(value.isPressed);
+        }
+
+        // West button: Attack
+        public void OnAttack(InputValue value)
+        {
+            _controller.SetAttackHeld(value.isPressed);
+        }
+
+        // North button: Defense
+        public void OnDefense(InputValue value)
+        {
+            _controller.SetDefenseHeld(value.isPressed);
+        }
+
+        // East button: Evade
+        public void OnEvade(InputValue value)
+        {
+            if (value.isPressed)
+                _controller.OnEvadePressed();
         }
     }
 }

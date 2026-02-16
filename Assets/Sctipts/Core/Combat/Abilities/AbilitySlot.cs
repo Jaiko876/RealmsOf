@@ -6,6 +6,7 @@ namespace Game.Core.Combat.Abilities
         HeavyAttack,
         Parry,
         Dodge,
+        Dash,
         Block
     }
 }

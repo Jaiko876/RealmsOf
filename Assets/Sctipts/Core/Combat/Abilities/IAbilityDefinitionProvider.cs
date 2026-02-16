@@ -86,6 +86,42 @@ namespace Game.Core.Combat.Abilities
                         baseHpDamage: 0f,
                         baseStaminaDamage: 0f,
                         baseStaggerBuild: 0f)
+                },
+                {
+                    AbilitySlot.Dash,
+                    new AbilityDefinition(
+                        AbilitySlot.Dash,
+                        windupTicks: 0,
+                        activeTicks: 0, // i-frames берём из rules
+                        recoveryTicks: 0,
+                        staminaCost: 1.5f,
+                        isAttack: false,
+                        isParry: false,
+                        isDodge: true,
+                        isBlock: false,
+                        parryable: false,
+                        dodgeable: false,
+                        baseHpDamage: 0f,
+                        baseStaminaDamage: 0f,
+                        baseStaggerBuild: 0f)
+                },
+                {
+                    AbilitySlot.Block,
+                    new AbilityDefinition(
+                        AbilitySlot.Block,
+                        windupTicks: 0,
+                        activeTicks: 0,
+                        recoveryTicks: 0,
+                        staminaCost: 0f,
+                        isAttack: false,
+                        isParry: false,
+                        isDodge: false,
+                        isBlock: true,
+                        parryable: false,
+                        dodgeable: false,
+                        baseHpDamage: 0f,
+                        baseStaminaDamage: 0f,
+                        baseStaggerBuild: 0f)
                 }
             };
         }

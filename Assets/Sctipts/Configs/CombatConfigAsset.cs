@@ -11,6 +11,9 @@ namespace Game.Configs
     [CreateAssetMenu(menuName = "Game/Config/Combat Config")]
     public sealed class CombatConfigAsset : ScriptableObject
     {
+        [Header("Input")]
+        [SerializeField] private CombatInputData input = new CombatInputData();
+
         [Header("Damage")]
         [SerializeField] private DamageTuningData damage = new DamageTuningData();
 
@@ -23,15 +26,39 @@ namespace Game.Configs
         [Header("Hit Query")]
         [SerializeField] private HitQueryData hitQuery = new HitQueryData();
 
+        public CombatInputTuning ToInputTuning() => input.ToCore();
         public DamageTuning ToDamageTuning() => damage.ToCore();
-
         public CombatRulesConfig ToRulesConfig() => rules.ToCore();
-
         public HitQueryTuning ToHitQueryTuning() => hitQuery.ToCore();
 
         public IReadOnlyList<AbilityEntry> Abilities => abilities;
 
         // ---------- nested ----------
+
+        [Serializable]
+        private sealed class CombatInputData
+        {
+            [Header("Hold thresholds (ticks)")]
+            [Min(0)] public int AttackHoldTicksForHeavy = 10;
+            [Min(0)] public int DefenseHoldTicksForBlock = 10;
+
+            [Header("Buffering (ticks)")]
+            [Min(0)] public int InputBufferTicks = 6;
+
+            [Header("Evade direction")]
+            [Range(0f, 1f)] public float EvadeDeadzone = 0.35f;
+
+            public CombatInputTuning ToCore()
+            {
+                return new CombatInputTuning(
+                    attackHoldTicksForHeavy: Mathf.Max(0, AttackHoldTicksForHeavy),
+                    defenseHoldTicksForBlock: Mathf.Max(0, DefenseHoldTicksForBlock),
+                    inputBufferTicks: Mathf.Max(0, InputBufferTicks),
+                    evadeDeadzone: Mathf.Clamp01(EvadeDeadzone)
+                );
+            }
+        }
+
         [Serializable]
         private sealed class DamageTuningData
         {
@@ -54,7 +81,7 @@ namespace Game.Configs
         {
             [Min(0)] public int DefaultParryWindowTicks = 2;
             [Min(0)] public int DefaultDodgeIFramesTicks = 3;
-            [Min(0)] public int DefaultDashIFramesTicks = 0;
+            [Min(0)] public int DefaultDashIFramesTicks = 2;
 
             [Min(0)] public int HeavyWindupMinTicks = 6;
             [Min(0)] public int HeavyWindupMaxTicks = 10;

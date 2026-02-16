@@ -28,6 +28,10 @@ namespace Game.Unity.Bootstrap
             builder.Register<GameState>(Lifetime.Singleton);
 
             // --- Configs (из инспектора) ---
+            if (_gameConfig == null) throw new System.InvalidOperationException("GameConfigAsset is not assigned in GameLifetimeScope.");
+            if (_levelConfig == null) throw new System.InvalidOperationException("LevelGenConfigAsset is not assigned in GameLifetimeScope.");
+            if (_combatConfig == null) throw new System.InvalidOperationException("CombatConfigAsset is not assigned in GameLifetimeScope.");
+
             builder.RegisterInstance(_gameConfig);
 
             // Simulation parameters (из game config)
