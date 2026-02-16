@@ -14,6 +14,7 @@ namespace Riftborne.Core.Simulation
         // Optional physics dependencies (Null Object by DI or just null for pure-logic runs)
         private readonly IPhysicsWorld _physicsWorld;
         private readonly IBodyProvider<GameEntityId> _bodies;
+        private readonly IGroundSensor _groundSensor;
 
 
         public Simulation(
@@ -21,13 +22,15 @@ namespace Riftborne.Core.Simulation
             ICommandDispatcher dispatcher,
             SimulationParameters parameters,
             IPhysicsWorld physicsWorld,
-            IBodyProvider<GameEntityId> bodies)
+            IBodyProvider<GameEntityId> bodies,
+            IGroundSensor groundSensor)
         {
             _state = state;
             _dispatcher = dispatcher;
             _parameters = parameters;
             _physicsWorld = physicsWorld;
             _bodies = bodies;
+            _groundSensor = groundSensor;
         }
         public GameState State => _state;
 
@@ -46,7 +49,7 @@ namespace Riftborne.Core.Simulation
 
                 if (_bodies.TryGet(kv.Key, out var body))
                 {
-                    kv.Value.SetPose(body.X, body.Y, body.Vx, body.Vy);
+                    kv.Value.SetPose(body.X, body.Y, body.Vx, body.Vy, _groundSensor.IsGrounded(kv.Key));
                 }
             }
 

@@ -1,3 +1,5 @@
+using System;
+
 namespace Riftborne.Core.Model
 {
     public sealed class EntityState
@@ -14,6 +16,12 @@ namespace Riftborne.Core.Model
         public float PrevVx { get; private set; }
         public float PrevVy { get; private set; }
 
+        public int Facing { get; private set; } = 1;
+        public int PrevFacing { get; private set; } = 1;
+        
+        public bool Grounded { get; private set; }
+        public bool Moving { get; private set; }
+
         public EntityState(GameEntityId id)
         {
             Id = id;
@@ -25,20 +33,21 @@ namespace Riftborne.Core.Model
             PrevY = Y;
             PrevVx = Vx;
             PrevVy = Vy;
+            PrevFacing = Facing;
         }
 
-        public void Move(float dx, float dy)
-        {
-            X += dx;
-            Y += dy;
-        }
-
-        public void SetPose(float x, float y, float vx, float vy)
+        public void SetPose(float x, float y, float vx, float vy, bool grounded)
         {
             X = x;
             Y = y;
             Vx = vx;
             Vy = vy;
+            Grounded = grounded;
+            Moving = Math.Abs(vx) > 0.01f;
+
+            if (vx > 0.0001f) Facing = 1;
+            else if (vx < -0.0001f) Facing = -1;
         }
+        
     }
 }

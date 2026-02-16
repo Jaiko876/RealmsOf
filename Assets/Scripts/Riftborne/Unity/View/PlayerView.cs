@@ -10,6 +10,7 @@ namespace Riftborne.Unity.View
         [SerializeField] private int avatarEntityId = 0;
 
         [SerializeField] private Transform visualRoot;
+        [SerializeField] private Animator animator;
 
         private GameState _gameState;
         private PlayerId _playerId;
@@ -26,13 +27,9 @@ namespace Riftborne.Unity.View
             _playerId = new PlayerId(playerId);
             _entityId = new GameEntityId(avatarEntityId);
 
-            if (visualRoot == null)
-                visualRoot = transform;
+            if (visualRoot == null) visualRoot = transform;
 
-            // ВАЖНО: один раз связываем player -> avatar entity
             _gameState.PlayerAvatars.Set(_playerId, _entityId);
-
-            // И гарантируем, что entity существует в стейте (чтобы не было null/KeyNotFound)
             _gameState.GetOrCreateEntity(_entityId);
         }
 
@@ -40,6 +37,7 @@ namespace Riftborne.Unity.View
         {
             var e = _gameState.GetOrCreateEntity(_entityId);
 
+            // интерполяция позиции (как у тебя)
             var alpha = 1f;
             var fd = Time.fixedDeltaTime;
             if (fd > 0f)
@@ -53,7 +51,20 @@ namespace Riftborne.Unity.View
             var y = Mathf.Lerp(e.PrevY, e.Y, alpha);
 
             visualRoot.position = new Vector3(x, y, 0f);
-        }
 
+            var facing = e.Facing; // -1 или +1
+            var s = visualRoot.localScale;
+            s.x = facing < 0 ? -Mathf.Abs(s.x) : Mathf.Abs(s.x);
+            visualRoot.localScale = s;
+
+            var vx = e.Vx;
+            var vy = e.Vy;
+
+            var speed01 = Mathf.Clamp01(Mathf.Abs(e.Vx) / 8f);
+            var moveBlend = speed01 * 3f;
+
+            animator.SetFloat("MoveBlendX", moveBlend);
+            animator.SetBool("IsGrounded", e.Grounded); // если у тебя это уже есть
+        }
     }
 }
