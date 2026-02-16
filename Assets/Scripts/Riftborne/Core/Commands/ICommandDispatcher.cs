@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Riftborne.Core.Abstractions
+namespace Riftborne.Core.Commands
 {
 
     public interface ICommandDispatcher

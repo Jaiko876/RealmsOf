@@ -1,4 +1,4 @@
-namespace Riftborne.Core.Abstractions
+namespace Riftborne.Core.Commands
 {
 
     public interface ICommandHandler<in TCommand> where TCommand : ICommand

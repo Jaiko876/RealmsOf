@@ -1,5 +1,5 @@
-using Riftborne.Core.Abstractions;
 using Riftborne.Core.Combat.Abilities;
+using Riftborne.Core.Commands;
 
 namespace Riftborne.App.Combat
 {

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Riftborne.Core.Abstractions;
+using Riftborne.Core.Random;
 
 namespace Riftborne.Core.Level
 {

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Riftborne.Core.Abstractions;
+using Riftborne.Core.Commands;
 
 namespace Riftborne.App.Commands
 {
@@ -22,9 +22,8 @@ namespace Riftborne.App.Commands
 
         public IReadOnlyList<ICommand> DequeueAllForTick(int tick)
         {
-            if (_byTick.TryGetValue(tick, out var list))
+            if (_byTick.Remove(tick, out var list))
             {
-                _byTick.Remove(tick);
                 return list;
             }
 

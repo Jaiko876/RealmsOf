@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Riftborne.Core.Abstractions;
+using Riftborne.Core.Commands;
 using Riftborne.Core.Model;
 
 namespace Riftborne.Core.Simulation

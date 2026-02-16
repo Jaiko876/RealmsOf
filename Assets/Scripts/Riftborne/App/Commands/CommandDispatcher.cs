@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Riftborne.Core.Abstractions;
+using Riftborne.Core.Commands;
 
 namespace Riftborne.App.Commands
 {

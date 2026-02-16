@@ -1,4 +1,4 @@
-using Riftborne.Core.Abstractions;
+using Riftborne.Core.Commands;
 using Riftborne.Core.Model;
 
 namespace Riftborne.Core.Combat.Abilities

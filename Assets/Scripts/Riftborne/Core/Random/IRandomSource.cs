@@ -1,4 +1,4 @@
-namespace Riftborne.Core.Abstractions
+namespace Riftborne.Core.Random
 {
 
     public interface IRandomSource
