@@ -61,6 +61,8 @@ namespace Game.Core.Combat.Resolution
 
             bool hasParry = false;
             bool hasDodge = false;
+            bool hasBlock = false;
+
 
             foreach (var action in _actions.All)
             {
@@ -78,6 +80,11 @@ namespace Game.Core.Combat.Resolution
                 {
                     hasDodge = true;
                 }
+                if (action is BlockAction block && block.IsActive(tick))
+                {
+                    hasBlock = true;
+                }
+
             }
 
             // -----------------------------
@@ -133,6 +140,53 @@ namespace Game.Core.Combat.Resolution
                     AddStamina(target, -staminaPenalty);
                 }
             }
+            // -----------------------------
+            // BLOCK (v1)
+            // -----------------------------
+            // Если парри активен и удар парируемый — парри уже обработал и вернул.
+            // Если додж успешен для heavy — мы уже вернули.
+            // Здесь блок работает как "смягчение" оставшихся случаев.
+            if (hasBlock)
+            {
+                // Срежем HP-урон. Коэффициент возьмём из статов, дефолт уже есть.
+                // Если у тебя позже будет броня/перки — они просто поменяют этот стат.
+                float blockMul = 0.6f; // fallback
+                                       // StatResolver тут нет — поэтому используем правила через ресурсы/конфиг в v1.
+                                       // (Если хочешь — я в следующем шаге протяну StatResolver в CombatResolutionSystem.)
+                                       // Пока сделаем проще: blockMul = 0.6.
+
+                // За блок платим стаминой: чем сильнее удар, тем больнее.
+                // В v1: базируемся на BaseHpDamage (потом переведём на staminaDamage/impact).
+                float staminaPenalty = def.BaseHpDamage * 0.75f;
+                if (staminaPenalty < 0.25f) staminaPenalty = 0.25f;
+
+                AddStamina(target, -staminaPenalty);
+
+                // Heavy сильнее пробивает блок: добавим ещё штрафа.
+                if (def.Dodgeable) // heavy (у тебя heavy = dodgeable)
+                {
+                    AddStamina(target, -staminaPenalty);
+                }
+
+                // И режем урон (сейчас просто уменьшим base перед Apply)
+                // Если стамина упала в 0 — блок считается "продавленным", урон режем слабее.
+                bool staminaEmpty = false;
+                if (_resources.TryGetStamina(target, out var st))
+                    staminaEmpty = st.Current <= 0.001f;
+
+                float mul = staminaEmpty ? 0.85f : blockMul;
+
+                var requestBlocked = new DamageRequest(
+                    attack.Owner,
+                    target,
+                    baseHpDamage: def.BaseHpDamage * mul,
+                    baseStaminaDamage: def.BaseStaminaDamage,
+                    baseStaggerBuild: def.BaseStaggerBuild);
+
+                _damage.Apply(requestBlocked, tick);
+                return;
+            }
+
 
             // -----------------------------
             // APPLY DAMAGE

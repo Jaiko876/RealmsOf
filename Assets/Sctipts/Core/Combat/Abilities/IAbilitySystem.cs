@@ -87,10 +87,16 @@ namespace Game.Core.Combat.Abilities
 
             if (def.IsBlock)
             {
-                // Блок “потом” по механике — но слот/действие должны существовать, чтобы input работал.
-                _actionStore.Add(new ParryAction(entityId, tick, activeTicks: 0));
+                // v1: block как короткое активное окно.
+                // Потом заменим на удержание + drain per tick.
+                // Берём длительность из ability def (ActiveTicks), а если там 0 — дадим минимум.
+                int active = def.ActiveTicks;
+                if (active <= 0) active = 6;
+
+                _actionStore.Add(new BlockAction(entityId, tick, active));
                 return true;
             }
+
 
             return false;
         }
