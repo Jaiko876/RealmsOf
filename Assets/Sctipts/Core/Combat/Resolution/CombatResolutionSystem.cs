@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using Game.Core.Combat.Abilities;
+using Game.Core.Combat.Config;
 using Game.Core.Combat.Damage;
 using Game.Core.Combat.Resources;
 using Game.Core.Combat.Rules;
 using Game.Core.Model;
+using Game.Core.Stats;
 
 namespace Game.Core.Combat.Resolution
 {
@@ -14,6 +16,8 @@ namespace Game.Core.Combat.Resolution
         private readonly IHealthDamageService _damage;
         private readonly ICombatResourceStore _resources;
         private readonly ICombatRulesResolver _rules;
+        private readonly CombatResourceTuning _resourceTuning;
+        private readonly StatResolver _stats;
 
         private readonly List<GameEntityId> _hits = new List<GameEntityId>(8);
         private readonly HashSet<(AttackAction, GameEntityId)> _alreadyHit
@@ -24,13 +28,17 @@ namespace Game.Core.Combat.Resolution
             ICombatActionStore actions,
             IHealthDamageService damage,
             ICombatRulesResolver rulesResolver,
-            ICombatResourceStore resources)
+            ICombatResourceStore resources,
+            CombatResourceTuning resourceTuning,
+            StatResolver stats)
         {
             _hitQuery = hitQuery;
             _actions = actions;
             _damage = damage;
             _resources = resources;
             _rules = rulesResolver;
+            _resourceTuning = resourceTuning;
+            _stats = stats;
         }
 
         public void ResolveAttack(AttackAction attack, int tick)
@@ -38,8 +46,10 @@ namespace Game.Core.Combat.Resolution
             _hits.Clear();
             _hitQuery.QueryHits(attack.Owner, _hits);
 
-            foreach (var target in _hits)
+            for (int i = 0; i < _hits.Count; i++)
             {
+                var target = _hits[i];
+
                 if (_rules.AttackHitsOncePerAction())
                 {
                     if (_alreadyHit.Contains((attack, target)))
@@ -52,10 +62,7 @@ namespace Game.Core.Combat.Resolution
             }
         }
 
-        private void ResolveVsTarget(
-            AttackAction attack,
-            GameEntityId target,
-            int tick)
+        private void ResolveVsTarget(AttackAction attack, GameEntityId target, int tick)
         {
             var def = attack.Definition;
 
@@ -63,28 +70,21 @@ namespace Game.Core.Combat.Resolution
             bool hasDodge = false;
             bool hasBlock = false;
 
-
-            foreach (var action in _actions.All)
+            var all = _actions.All;
+            for (int i = 0; i < all.Count; i++)
             {
+                var action = all[i];
                 if (!action.Owner.Equals(target))
                     continue;
 
-                if (action is ParryAction parry &&
-                    parry.IsActive(tick))
-                {
+                if (action is ParryAction parry && parry.IsActive(tick))
                     hasParry = true;
-                }
 
-                if (action is DodgeAction dodge &&
-                    dodge.IsInvulnerable(tick))
-                {
+                if (action is DodgeAction dodge && dodge.IsInvulnerable(tick))
                     hasDodge = true;
-                }
-                if (action is BlockAction block && block.IsActive(tick))
-                {
-                    hasBlock = true;
-                }
 
+                if (action is BlockAction block && block.IsActive(tick))
+                    hasBlock = true;
             }
 
             // -----------------------------
@@ -94,20 +94,15 @@ namespace Game.Core.Combat.Resolution
             {
                 if (hasParry)
                 {
-                    float staggerGain =
-                        _rules.GetParrySuccessStaggerToAttacker(attack.Owner);
-
-                    AddStagger(attack.Owner, staggerGain);
+                    float staggerGain = _rules.GetParrySuccessStaggerToAttacker(attack.Owner);
+                    BuildStaggerWithBreak(attack.Owner, staggerGain, tick);
                     return;
                 }
 
-                if (hasDodge &&
-                    !_rules.AllowDodgeVsLight(target))
+                if (hasDodge && !_rules.AllowDodgeVsLight(target))
                 {
-                    float extraStagger =
-                        _rules.GetDodgeFailVsLightExtraStaggerPenalty(target);
-
-                    AddStagger(target, extraStagger);
+                    float extraStagger = _rules.GetDodgeFailVsLightExtraStaggerPenalty(target);
+                    BuildStaggerWithBreak(target, extraStagger, tick);
                 }
             }
 
@@ -118,87 +113,80 @@ namespace Game.Core.Combat.Resolution
             {
                 if (hasDodge)
                 {
-                    float staminaPenalty =
-                        _rules.GetDodgeSuccessStaminaDamageToAttacker(attack.Owner);
-
+                    float staminaPenalty = _rules.GetDodgeSuccessStaminaDamageToAttacker(attack.Owner);
                     AddStamina(attack.Owner, -staminaPenalty);
 
-                    int microTicks =
-                        _rules.GetDodgeSuccessMicroStaggerTicksToAttacker(attack.Owner);
-
-                    AddMicroStagger(attack.Owner, microTicks);
-
+                    int microTicks = _rules.GetDodgeSuccessMicroStaggerTicksToAttacker(attack.Owner);
+                    AddMicroStagger(attack.Owner, microTicks, tick);
                     return;
                 }
 
-                if (hasParry &&
-                    !_rules.AllowParryVsHeavy(target))
+                if (hasParry && !_rules.AllowParryVsHeavy(target))
                 {
-                    float staminaPenalty =
-                        _rules.GetParryFailVsHeavyExtraStaminaPenalty(target);
-
+                    float staminaPenalty = _rules.GetParryFailVsHeavyExtraStaminaPenalty(target);
                     AddStamina(target, -staminaPenalty);
                 }
             }
+
+            // -----------------------------
+            // Vulnerable multiplier (broken window)
+            // -----------------------------
+            float vulnerableMul = 1f;
+            if (_resources.TryGetStagger(target, out var st))
+            {
+                if (st.IsBroken && tick < st.VulnerableUntilTick)
+                    vulnerableMul = _resourceTuning.VulnerableHpDamageMultiplier;
+            }
+
             // -----------------------------
             // BLOCK (v1)
             // -----------------------------
-            // Если парри активен и удар парируемый — парри уже обработал и вернул.
-            // Если додж успешен для heavy — мы уже вернули.
-            // Здесь блок работает как "смягчение" оставшихся случаев.
             if (hasBlock)
             {
-                // Срежем HP-урон. Коэффициент возьмём из статов, дефолт уже есть.
-                // Если у тебя позже будет броня/перки — они просто поменяют этот стат.
-                float blockMul = 0.6f; // fallback
-                                       // StatResolver тут нет — поэтому используем правила через ресурсы/конфиг в v1.
-                                       // (Если хочешь — я в следующем шаге протяну StatResolver в CombatResolutionSystem.)
-                                       // Пока сделаем проще: blockMul = 0.6.
+                float blockMul = 0.6f;
 
-                // За блок платим стаминой: чем сильнее удар, тем больнее.
-                // В v1: базируемся на BaseHpDamage (потом переведём на staminaDamage/impact).
                 float staminaPenalty = def.BaseHpDamage * 0.75f;
                 if (staminaPenalty < 0.25f) staminaPenalty = 0.25f;
 
                 AddStamina(target, -staminaPenalty);
 
-                // Heavy сильнее пробивает блок: добавим ещё штрафа.
-                if (def.Dodgeable) // heavy (у тебя heavy = dodgeable)
-                {
+                if (def.Dodgeable) // heavy
                     AddStamina(target, -staminaPenalty);
-                }
 
-                // И режем урон (сейчас просто уменьшим base перед Apply)
-                // Если стамина упала в 0 — блок считается "продавленным", урон режем слабее.
                 bool staminaEmpty = false;
-                if (_resources.TryGetStamina(target, out var st))
-                    staminaEmpty = st.Current <= 0.001f;
+                if (_resources.TryGetStamina(target, out var stm))
+                    staminaEmpty = stm.Current <= 0.001f;
 
                 float mul = staminaEmpty ? 0.85f : blockMul;
 
                 var requestBlocked = new DamageRequest(
-                    attack.Owner,
-                    target,
-                    baseHpDamage: def.BaseHpDamage * mul,
+                    attacker: attack.Owner,
+                    target: target,
+                    baseHpDamage: def.BaseHpDamage * mul * vulnerableMul,
                     baseStaminaDamage: def.BaseStaminaDamage,
-                    baseStaggerBuild: def.BaseStaggerBuild);
+                    baseStaggerBuild: 0f // stagger ведём здесь
+                );
 
                 _damage.Apply(requestBlocked, tick);
+
+                BuildStaggerWithBreak(target, def.BaseStaggerBuild, tick);
                 return;
             }
-
 
             // -----------------------------
             // APPLY DAMAGE
             // -----------------------------
             var request = new DamageRequest(
-                attack.Owner,
-                target,
-                baseHpDamage: def.BaseHpDamage,
+                attacker: attack.Owner,
+                target: target,
+                baseHpDamage: def.BaseHpDamage * vulnerableMul,
                 baseStaminaDamage: def.BaseStaminaDamage,
-                baseStaggerBuild: def.BaseStaggerBuild);
+                baseStaggerBuild: 0f // stagger ведём здесь
+            );
 
             _damage.Apply(request, tick);
+
+            BuildStaggerWithBreak(target, def.BaseStaggerBuild, tick);
         }
 
         private void AddStamina(GameEntityId entity, float delta)
@@ -213,20 +201,43 @@ namespace Game.Core.Combat.Resolution
             }
         }
 
-        private void AddStagger(GameEntityId entity, float delta)
+        private void BuildStaggerWithBreak(GameEntityId entity, float delta, int tick)
         {
-            if (_resources.TryGetStagger(entity, out var s))
+            if (delta <= 0f)
+                return;
+
+            if (!_resources.TryGetStagger(entity, out var s))
+                return;
+
+            if (s.IsBroken)
+                return;
+
+            s.Current += delta;
+
+            float maxStagger = _stats.Get(entity, StatId.MaxStagger);
+            if (maxStagger <= 0f) maxStagger = 1f;
+
+            if (s.Current >= maxStagger)
             {
-                s.Current += delta;
-                _resources.SetStagger(entity, s);
+                s.Current = 0f;
+                s.IsBroken = true;
+                s.VulnerableUntilTick = tick + _resourceTuning.StaggerBrokenWindowTicks;
             }
+
+            _resources.SetStagger(entity, s);
         }
 
-        private void AddMicroStagger(GameEntityId entity, int ticks)
+        private void AddMicroStagger(GameEntityId entity, int microTicks, int tick)
         {
+            if (microTicks <= 0)
+                return;
+
             if (_resources.TryGetStagger(entity, out var s))
             {
-                s.VulnerableUntilTick += ticks;
+                int until = tick + microTicks;
+                if (until > s.VulnerableUntilTick)
+                    s.VulnerableUntilTick = until;
+
                 _resources.SetStagger(entity, s);
             }
         }

@@ -89,6 +89,7 @@ namespace Game.Unity.Bootstrap
                 builder.RegisterInstance(_combatConfig.ToDamageTuning());
                 builder.RegisterInstance(_combatConfig.ToRulesConfig());
                 builder.RegisterInstance(_combatConfig.ToHitQueryTuning());
+                builder.RegisterInstance(_combatConfig.ToResourceTuning());
 
                 // abilities from config
                 builder.Register<IAbilityDefinitionProvider, ConfigAbilityDefinitionProvider>(Lifetime.Singleton);

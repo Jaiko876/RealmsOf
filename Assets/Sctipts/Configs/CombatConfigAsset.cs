@@ -26,6 +26,11 @@ namespace Game.Configs
         [Header("Hit Query")]
         [SerializeField] private HitQueryData hitQuery = new HitQueryData();
 
+        [Header("Resources")]
+        [SerializeField] private ResourceData resources = new ResourceData();
+
+        public Game.Core.Combat.Config.CombatResourceTuning ToResourceTuning() => resources.ToCore();
+
         public CombatInputTuning ToInputTuning() => input.ToCore();
         public DamageTuning ToDamageTuning() => damage.ToCore();
         public CombatRulesConfig ToRulesConfig() => rules.ToCore();
@@ -34,6 +39,33 @@ namespace Game.Configs
         public IReadOnlyList<AbilityEntry> Abilities => abilities;
 
         // ---------- nested ----------
+
+        [System.Serializable]
+        private sealed class ResourceData
+        {
+            [Header("Stamina")]
+            [Min(0f)] public float StaminaRegenPerSec = 8f;
+            [Min(0)] public int StaminaRegenDelayTicks = 10;
+
+            [Header("Stagger")]
+            [Min(0f)] public float StaggerDecayPerSec = 6f;
+            [Min(0)] public int StaggerBrokenWindowTicks = 18;
+
+            [Header("Vulnerable")]
+            [Min(1f)] public float VulnerableHpDamageMultiplier = 1.5f;
+
+            public Game.Core.Combat.Config.CombatResourceTuning ToCore()
+            {
+                return new Game.Core.Combat.Config.CombatResourceTuning(
+                    staminaRegenPerSec: Mathf.Max(0f, StaminaRegenPerSec),
+                    staminaRegenDelayTicks: Mathf.Max(0, StaminaRegenDelayTicks),
+                    staggerDecayPerSec: Mathf.Max(0f, StaggerDecayPerSec),
+                    staggerBrokenWindowTicks: Mathf.Max(0, StaggerBrokenWindowTicks),
+                    vulnerableHpDamageMultiplier: Mathf.Max(1f, VulnerableHpDamageMultiplier)
+                );
+            }
+        }
+
 
         [Serializable]
         private sealed class CombatInputData
