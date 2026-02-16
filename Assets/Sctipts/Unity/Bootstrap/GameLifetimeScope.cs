@@ -16,6 +16,7 @@ namespace Game.Unity.Bootstrap
     {
         [SerializeField] private Game.Configs.GameConfigAsset _gameConfig;
         [SerializeField] private Game.Configs.LevelGenConfigAsset _levelConfig;
+        [SerializeField] private Game.Configs.CombatConfigAsset _combatConfig;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -36,6 +37,8 @@ namespace Game.Unity.Bootstrap
                 tickDeltaTime: dt,
                 physicsSubsteps: 1
             ));
+
+            builder.RegisterInstance(_combatConfig);
 
             // Level seed/config (из инспектора)
             builder.RegisterInstance(new LevelSeed(_gameConfig.Seed));

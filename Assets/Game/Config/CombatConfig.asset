@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce264067074ff7b4ea9f36b43138ea24, type: 3}
+  m_Name: CombatConfig
+  m_EditorClassIdentifier: Game.Configs::Game.Configs.CombatConfigAsset
+  damage:
+    DefenseK: 25
+    MinDamageFraction: 0.05
+    MinFlatDamage: 0
+  rules:
+    DefaultParryWindowTicks: 2
+    DefaultDodgeIFramesTicks: 3
+    DefaultDashIFramesTicks: 0
+    HeavyWindupMinTicks: 6
+    HeavyWindupMaxTicks: 10
+    ParryStaminaCost: 1
+    DodgeStaminaCost: 2
+    DashStaminaCost: 1.5
+    BlockStaminaCostPerSec: 2
+    ParryFailVsHeavy_ExtraStaminaPenalty: 2
+    DodgeFailVsLight_ExtraStaggerPenalty: 2.5
+    ParrySuccess_StaggerToAttacker: 2
+    DodgeSuccess_StaminaDamageToAttacker: 4
+    DodgeSuccess_MicroStaggerToAttackerTicks: 8
+    AllowParryVsHeavy: 0
+    AllowDodgeVsLight: 0
+    AttackHitsOncePerAction: 1
+  abilities: []
+  hitQuery:
+    HitWidth: 1
+    HitHeight: 0.8
+    ForwardOffset: 0.6
+    HitMask:
+      serializedVersion: 2
+      m_Bits: 0

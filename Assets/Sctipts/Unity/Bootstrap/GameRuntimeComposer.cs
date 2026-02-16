@@ -14,6 +14,7 @@ using Game.Core.Combat.Abilities;
 using Game.Core.Combat.Rules;
 using Game.Core.Combat.Resolution;
 using Game.Core.Stats;
+using Game.Configs;
 using Game.Physics.Unity2D;
 using Game.Unity.Combat;
 using UnityEngine;
@@ -28,6 +29,7 @@ namespace Game.Unity.Bootstrap
         private readonly SimulationParameters _simParams;
         private readonly LevelSeed _levelSeed;
         private readonly LevelGenConfig _levelGenConfig;
+        private readonly CombatConfigAsset _combatConfig;
 
         private IScopedObjectResolver _runtimeScope;
 
@@ -35,12 +37,15 @@ namespace Game.Unity.Bootstrap
             IObjectResolver root,
             SimulationParameters simParams,
             LevelSeed levelSeed,
-            LevelGenConfig levelGenConfig)
+            LevelGenConfig levelGenConfig,
+            CombatConfigAsset combatConfigAsset
+            )
         {
             _root = root;
             _simParams = simParams;
             _levelSeed = levelSeed;
             _levelGenConfig = levelGenConfig;
+            _combatConfig = combatConfigAsset;
         }
 
         public void Start()
@@ -77,8 +82,19 @@ namespace Game.Unity.Bootstrap
                 builder.Register<EntityBaseStatsSource>(Lifetime.Singleton);
                 builder.Register<RuntimeModifiersSource>(Lifetime.Singleton);
 
+                // combat config
+                builder.RegisterInstance(_combatConfig);
+
+                // core combat tunings
+                builder.RegisterInstance(_combatConfig.ToDamageTuning());
+                builder.RegisterInstance(_combatConfig.ToRulesConfig());
+                builder.RegisterInstance(_combatConfig.ToHitQueryTuning());
+
+                // abilities from config
+                builder.Register<IAbilityDefinitionProvider, ConfigAbilityDefinitionProvider>(Lifetime.Singleton);
+
+
                 // --- Damage/Health ---
-                builder.Register<DamageTuning>(Lifetime.Singleton);
                 builder.Register<IHealthStore, InMemoryHealthStore>(Lifetime.Singleton);
                 builder.Register<IDamageCalculator, DefaultDamageCalculator>(Lifetime.Singleton);
                 builder.Register<IHealthDamageService, HealthDamageService>(Lifetime.Singleton);
@@ -90,12 +106,10 @@ namespace Game.Unity.Bootstrap
                 builder.Register<ICombatResourceTickSystem, CombatResourceTickSystem>(Lifetime.Singleton);
 
                 // --- Abilities ---
-                builder.Register<IAbilityDefinitionProvider, DefaultAbilityDefinitionProvider>(Lifetime.Singleton);
                 builder.Register<ICombatActionStore, InMemoryCombatActionStore>(Lifetime.Singleton);
                 builder.Register<IAbilitySystem, AbilitySystem>(Lifetime.Singleton);
                 builder.Register<ICombatActionTickSystem, CombatActionTickSystem>(Lifetime.Singleton);
 
-                builder.Register<CombatRulesConfig>(Lifetime.Singleton);
                 builder.Register<ICombatRulesResolver, CombatRulesResolver>(Lifetime.Singleton);
 
                 // --- Combat Resolution ---

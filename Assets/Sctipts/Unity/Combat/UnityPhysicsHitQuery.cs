@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Game.Core.Combat.Config;
 using Game.Core.Combat.Resolution;
 using Game.Core.Model;
 using Game.Core.Physics.Abstractions;
@@ -10,17 +11,15 @@ namespace Game.Unity.Combat
     public sealed class UnityPhysicsHitQuery : IHitQuery
     {
         private readonly IBodyProvider<GameEntityId> _bodies;
+        private readonly HitQueryTuning _tuning;
 
-        private const float HitWidth = 1.0f;
-        private const float HitHeight = 0.8f;
-        private const float ForwardOffset = 0.6f;
+        private readonly int _hitMask;
 
-        private readonly LayerMask _hitMask;
-
-        public UnityPhysicsHitQuery(IBodyProvider<GameEntityId> bodies)
+        public UnityPhysicsHitQuery(IBodyProvider<GameEntityId> bodies, HitQueryTuning tuning)
         {
             _bodies = bodies;
-            _hitMask = LayerMask.GetMask("Player", "Enemy");
+            _tuning = tuning;
+            _hitMask = tuning.HitMask;
         }
 
         public void QueryHits(GameEntityId attacker, List<GameEntityId> results)
@@ -30,13 +29,12 @@ namespace Game.Unity.Combat
 
             var center = new Vector2(body.X, body.Y);
 
-            // пока берём направление из скорости
             float dir = body.Vx >= 0f ? 1f : -1f;
-            center.x += dir * ForwardOffset;
+            center.x += dir * _tuning.ForwardOffset;
 
             var colliders = Physics2D.OverlapBoxAll(
                 center,
-                new Vector2(HitWidth, HitHeight),
+                new Vector2(_tuning.HitWidth, _tuning.HitHeight),
                 0f,
                 _hitMask);
 
@@ -54,7 +52,6 @@ namespace Game.Unity.Combat
                     continue;
 
                 var targetId = authoring.EntityId;
-
                 if (targetId.Equals(attacker))
                     continue;
 
