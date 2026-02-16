@@ -8,7 +8,5 @@ namespace Riftborne.Core.Model
         {
             Value = value;
         }
-
-        public static PlayerId Local => new PlayerId(0);
     }
 }

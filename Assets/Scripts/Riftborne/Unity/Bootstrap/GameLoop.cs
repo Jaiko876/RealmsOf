@@ -2,7 +2,6 @@ using Cysharp.Threading.Tasks;
 using Riftborne.App.Commands;
 using Riftborne.App.Time.Time;
 using Riftborne.Core.Simulation;
-using Riftborne.Core.Stats;
 using Riftborne.Unity.Input;
 using VContainer;
 using VContainer.Unity;
@@ -15,22 +14,18 @@ namespace Riftborne.Unity.Bootstrap
         private readonly ICommandQueue _queue;
         private readonly ISimulation _simulation;
         private readonly PlayerInputController _input;
-
-        private readonly StatResolver _stats;
-
+        
         [Inject]
         public GameLoop(
             ITickClock clock,
             ICommandQueue queue,
             ISimulation simulation,
-            PlayerInputController input,
-            StatResolver stats)
+            PlayerInputController input)
         {
             _clock = clock;
             _queue = queue;
             _simulation = simulation;
             _input = input;
-            _stats = stats;
         }
 
 

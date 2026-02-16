@@ -1,9 +1,9 @@
 using Riftborne.App.Commands;
 using Riftborne.App.Time.Time;
 using Riftborne.Configs;
-using Riftborne.Core.Level;
 using Riftborne.Core.Model;
 using Riftborne.Core.Simulation;
+using Riftborne.Unity.Bootstrap.Runtime;
 using Riftborne.Unity.Input;
 using Riftborne.Unity.View;
 using UnityEngine;
@@ -15,8 +15,7 @@ namespace Riftborne.Unity.Bootstrap
     public sealed class GameLifetimeScope : LifetimeScope
     {
         [SerializeField] private GameConfigAsset _gameConfig;
-        [SerializeField] private LevelGenConfigAsset _levelConfig;
-        [SerializeField] private CombatConfigAsset _combatConfig;
+        [SerializeField] private MotorConfigAsset _motorConfig;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -29,9 +28,9 @@ namespace Riftborne.Unity.Bootstrap
 
             // --- Configs (из инспектора) ---
             if (_gameConfig == null) throw new System.InvalidOperationException("GameConfigAsset is not assigned in GameLifetimeScope.");
-            if (_levelConfig == null) throw new System.InvalidOperationException("LevelGenConfigAsset is not assigned in GameLifetimeScope.");
-            if (_combatConfig == null) throw new System.InvalidOperationException("CombatConfigAsset is not assigned in GameLifetimeScope.");
-
+            if (_motorConfig == null) throw new System.InvalidOperationException("MotorConfigAsset is not assigned in GameLifetimeScope.");
+            
+            builder.RegisterInstance(_motorConfig);
             builder.RegisterInstance(_gameConfig);
 
             // Simulation parameters (из game config)
@@ -42,36 +41,15 @@ namespace Riftborne.Unity.Bootstrap
                 physicsSubsteps: 1
             ));
 
-            builder.RegisterInstance(_combatConfig);
-
-            // Level seed/config (из инспектора)
-            builder.RegisterInstance(new LevelSeed(_gameConfig.Seed));
-
-            builder.RegisterInstance(new LevelGenConfig
-            {
-                Width = _levelConfig.Width,
-                BaseGroundY = _levelConfig.BaseGroundY,
-                MinGroundY = _levelConfig.MinGroundY,
-                MaxGroundY = _levelConfig.MaxGroundY,
-                MaxStepUp = _levelConfig.MaxStepUp,
-                MaxStepDown = _levelConfig.MaxStepDown,
-                MinSegmentLen = _levelConfig.MinSegmentLen,
-                MaxSegmentLen = _levelConfig.MaxSegmentLen,
-                PlainsStep = _levelConfig.PlainsStep,
-                HillsStep = _levelConfig.HillsStep,
-                MountainsStep = _levelConfig.MountainsStep,
-                PlainsChance = _levelConfig.PlainsChance,
-                HillsChance = _levelConfig.HillsChance,
-                MountainsChance = _levelConfig.MountainsChance,
-                FillDepth = _levelConfig.FillDepth,
-                StoneStartDepth = _levelConfig.StoneStartDepth,
-                SpawnerCount = _levelConfig.SpawnerCount,
-                SpawnerMinDistanceFromPlayer = _levelConfig.SpawnerMinDistanceFromPlayer
-            });
-
             // --- Entry point: соберёт runtime scope и запустит матч ---
+            builder.Register<PhysicRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
+            builder.Register<MotorRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
+            builder.Register<CommandsRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
+            builder.Register<SimulationRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
+            builder.Register<RandomRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
+            
             builder.RegisterEntryPoint<GameRuntimeComposer>();
-
+            
             // --- Scene components (в root, чтобы composer мог их найти) ---
             builder.RegisterComponentInHierarchy<PlayerView>();
             builder.RegisterComponentInHierarchy<PlayerInputController>();

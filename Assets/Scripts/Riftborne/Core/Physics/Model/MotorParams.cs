@@ -1,19 +1,28 @@
 namespace Riftborne.Core.Physics.Model
 {
-
-    /// <summary>
-    /// Platformer feel parameters (pure data, configurable from GameConfig later).
-    /// </summary>
     public sealed class MotorParams
     {
-        public float MaxSpeedX = 8f;
-        public float AccelX = 60f;
-        public float DecelX = 70f;
+        public float MaxSpeedX { get; }
+        public float AccelX { get; }
+        public float DecelX { get; }
+        public float JumpVelocity { get; }
+        public float CoyoteTimeSeconds { get; }
+        public float JumpBufferSeconds { get; }
 
-        public float JumpVelocity = 12f;
-
-        // Feel helpers
-        public float CoyoteTimeSeconds = 0.08f;
-        public float JumpBufferSeconds = 0.10f;
+        public MotorParams(
+            float maxSpeedX,
+            float accelX,
+            float decelX,
+            float jumpVelocity,
+            float coyoteTimeSeconds,
+            float jumpBufferSeconds)
+        {
+            MaxSpeedX = maxSpeedX;
+            AccelX = accelX;
+            DecelX = decelX;
+            JumpVelocity = jumpVelocity;
+            CoyoteTimeSeconds = coyoteTimeSeconds;
+            JumpBufferSeconds = jumpBufferSeconds;
+        }
     }
 }
