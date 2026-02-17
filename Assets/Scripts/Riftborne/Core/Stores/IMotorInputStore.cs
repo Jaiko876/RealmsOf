@@ -1,7 +1,7 @@
 ﻿using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Model;
 
-namespace Riftborne.Core.Input
+namespace Riftborne.Core.Stores
 {
     public interface IMotorInputStore
     {

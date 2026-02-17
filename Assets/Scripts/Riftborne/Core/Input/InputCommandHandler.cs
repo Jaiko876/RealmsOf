@@ -1,5 +1,6 @@
 using Riftborne.Core.Commands;
 using Riftborne.Core.Physics.Model;
+using Riftborne.Core.Stores;
 
 namespace Riftborne.Core.Input
 {

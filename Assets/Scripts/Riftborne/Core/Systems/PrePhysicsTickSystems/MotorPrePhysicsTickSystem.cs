@@ -3,6 +3,7 @@ using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
 using Riftborne.Core.Physics.Model;
 using Riftborne.Core.Simulation;
+using Riftborne.Core.Stores;
 
 namespace Riftborne.Core.Systems.PrePhysicsTickSystems
 {

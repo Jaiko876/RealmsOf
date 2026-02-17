@@ -1,4 +1,5 @@
 using Riftborne.Core.Physics.Model;
+using Riftborne.Core.Simulation;
 using UnityEngine;
 
 namespace Riftborne.Configs
@@ -16,15 +17,22 @@ namespace Riftborne.Configs
         [Min(0f)] public float CoyoteTimeSeconds = 0.08f;
         [Min(0f)] public float JumpBufferSeconds = 0.10f;
 
-        public MotorParams ToMotorParams()
+        public MotorParams ToMotorParams(SimulationParameters sim)
         {
+            int SecToTicks(float seconds)
+            {
+                if (seconds <= 0f) return 0;
+                return Mathf.CeilToInt(seconds / sim.TickDeltaTime);
+            }
+
             return new MotorParams(
                 MaxSpeedX,
                 AccelX,
                 DecelX,
                 JumpVelocity,
-                CoyoteTimeSeconds,
-                JumpBufferSeconds);
+                SecToTicks(CoyoteTimeSeconds),
+                SecToTicks(JumpBufferSeconds)
+            );
         }
     }
 }

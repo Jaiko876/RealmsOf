@@ -1,4 +1,5 @@
 ﻿using Riftborne.Core.Input;
+using Riftborne.Core.Stores;
 using VContainer;
 
 namespace Riftborne.Unity.Bootstrap.Runtime
@@ -10,6 +11,7 @@ namespace Riftborne.Unity.Bootstrap.Runtime
         public void Initialize(IContainerBuilder builder)
         {
             builder.Register<IMotorInputStore, MotorInputStore>(Lifetime.Singleton);
+            builder.Register<IMotorStateStore, MotorStateStore>(Lifetime.Singleton);
         }
     }
 }

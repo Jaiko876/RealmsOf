@@ -1,8 +1,8 @@
 ﻿using Riftborne.Configs;
 using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
-using Riftborne.Core.Physics.Model;
 using Riftborne.Core.Physics.Registry;
+using Riftborne.Core.Simulation;
 using Riftborne.Physics;
 using Riftborne.Physics.Unity2D;
 using VContainer;
@@ -25,9 +25,13 @@ namespace Riftborne.Unity.Bootstrap.Runtime
         public void Initialize(IContainerBuilder builder)
         {
             Physics2DScriptBootstrap.EnsureScriptMode();
-            
-            MotorParams motorParams = _motorConfig.ToMotorParams();
-            builder.RegisterInstance(motorParams);
+
+            builder.Register(c =>
+            {
+                var config = c.Resolve<MotorConfigAsset>();
+                var sim = c.Resolve<SimulationParameters>();
+                return config.ToMotorParams(sim);
+            }, Lifetime.Singleton);
 
             builder.Register<IBodyProvider<GameEntityId>, BodyRegistry>(Lifetime.Singleton);
 
