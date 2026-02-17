@@ -5,11 +5,9 @@ namespace Riftborne.Unity.Input
         public float MoveX;
         public float MoveY;
 
-        // Platformer-friendly
         public bool JumpHeld;
         public bool JumpPressed;
 
-        // Combat buttons (edge + held)
         public bool AttackHeld;
         public bool AttackPressed;
 

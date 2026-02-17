@@ -5,11 +5,11 @@ namespace Riftborne.Unity.Bootstrap.Runtime
 {
     public sealed class RandomRuntimeInitializer : IRuntimeInitializer
     {
-        public int Order => 500;
+        public int Order => 100;
 
         public void Initialize(IContainerBuilder builder)
         {
-            builder.Register<XorShiftRandomFactory>(Lifetime.Singleton).As<IRandomFactory>();
+            builder.Register<IRandomFactory, XorShiftRandomFactory>(Lifetime.Singleton);
         }
     }
 }

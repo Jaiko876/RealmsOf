@@ -6,7 +6,7 @@ namespace Riftborne.Unity.Bootstrap.Runtime
 {
     public sealed class SimulationRuntimeInitializer : IRuntimeInitializer
     {
-        public int Order => 400;
+        public int Order => 600;
 
         public void Initialize(IContainerBuilder builder)
         {

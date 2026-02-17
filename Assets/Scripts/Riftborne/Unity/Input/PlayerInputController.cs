@@ -1,6 +1,7 @@
 using Riftborne.App.Commands;
 using Riftborne.App.Time.Time;
 using Riftborne.Core.Commands;
+using Riftborne.Core.Input;
 using Riftborne.Core.Model;
 using UnityEngine;
 using VContainer;
@@ -11,7 +12,7 @@ namespace Riftborne.Unity.Input
     {
         [SerializeField] private int controlledEntityId = 0;
 
-        private GameEntityId Controlled => new GameEntityId(controlledEntityId);
+        private GameEntityId Controlled => new(controlledEntityId);
 
         private ICommandQueue _commandQueue;
         private ITickClock _clock;
@@ -53,25 +54,34 @@ namespace Riftborne.Unity.Input
 
             _prevJumpHeld = held;
         }
-
-        // --- Combat input setters ---
         
 
         public void FlushForTick(int tick)
         {
-            // 1) Movement каждую физику
             var s = _snapshot;
 
-            _commandQueue.Enqueue(new MoveCommand(
+            var buttons = InputButtons.None;
+
+            if (s.JumpPressed) buttons |= InputButtons.JumpPressed;
+            if (s.JumpHeld)    buttons |= InputButtons.JumpHeld;
+
+            if (s.AttackPressed) buttons |= InputButtons.AttackPressed;
+            if (s.AttackHeld)    buttons |= InputButtons.AttackHeld;
+
+            if (s.DefensePressed) buttons |= InputButtons.DefensePressed;
+            if (s.DefenseHeld)    buttons |= InputButtons.DefenseHeld;
+
+            if (s.EvadePressed) buttons |= InputButtons.EvadePressed;
+
+            _commandQueue.Enqueue(new InputCommand(
                 tick,
                 Controlled,
                 s.MoveX,
                 s.MoveY,
-                s.JumpPressed,
-                s.JumpHeld
+                buttons
             ));
 
-            // 4) Consume one-frame edges
+            // edges — в ноль
             _snapshot.JumpPressed = false;
             _snapshot.AttackPressed = false;
             _snapshot.DefensePressed = false;

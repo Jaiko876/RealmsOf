@@ -16,5 +16,7 @@ namespace Riftborne.Core.Physics.Model
             JumpPressed = jumpPressed;
             JumpHeld = jumpHeld;
         }
+        
+        public static MotorInput None(GameEntityId id) => new(id, 0f, false, false);
     }
 }

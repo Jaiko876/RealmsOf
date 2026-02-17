@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Riftborne.Core.Physics.Abstractions
 {
     public interface IBodyProvider<TId>
@@ -5,5 +7,6 @@ namespace Riftborne.Core.Physics.Abstractions
         bool TryGet(TId id, out IPhysicsBody body);
         void Register(TId id, IPhysicsBody body);
         void Unregister(TId id);
+        IEnumerable<TId> EnumerateIds();
     }
 }

@@ -20,7 +20,6 @@ namespace Riftborne.App.Commands
 
         public void Invoke(object command)
         {
-            // Hotpath: только cast + вызов
             _handler.Handle((TCommand)command);
         }
     }
