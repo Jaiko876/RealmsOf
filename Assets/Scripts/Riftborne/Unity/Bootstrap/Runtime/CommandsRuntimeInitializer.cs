@@ -11,9 +11,14 @@ namespace Riftborne.Unity.Bootstrap.Runtime
 
         public void Initialize(IContainerBuilder builder)
         {
-            builder.Register<ICommandHandler<InputCommand>, InputCommandHandler>(Lifetime.Singleton);
-            builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<InputCommand>>(Lifetime.Singleton);
-            builder.Register<ICommandHandler<InputCommand>, ActionInputCommandHandler>(Lifetime.Singleton);
+            // Конкретные обработчики (без регистрации одного и того же ICommandHandler<> два раза)
+            builder.Register<InputCommandHandler>(Lifetime.Singleton);
+            builder.Register<ActionInputCommandHandler>(Lifetime.Singleton);
+
+            // ДВЕ разные реализации ICommandHandlerRegistration (уникальный implementation type)
+            builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<InputCommand, InputCommandHandler>>(Lifetime.Singleton);
+            builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<InputCommand, ActionInputCommandHandler>>(Lifetime.Singleton);
+
             builder.Register<ICommandDispatcher, CommandDispatcher>(Lifetime.Singleton);
         }
     }

@@ -3,12 +3,13 @@ using Riftborne.Core.Commands;
 
 namespace Riftborne.App.Commands
 {
-    public sealed class CommandHandlerRegistration<TCommand> : ICommandHandlerRegistration
+    public sealed class CommandHandlerRegistration<TCommand, THandler> : ICommandHandlerRegistration
         where TCommand : ICommand
+        where THandler : ICommandHandler<TCommand>
     {
-        private readonly ICommandHandler<TCommand> _handler;
+        private readonly THandler _handler;
 
-        public CommandHandlerRegistration(ICommandHandler<TCommand> handler)
+        public CommandHandlerRegistration(THandler handler)
         {
             _handler = handler;
         }
