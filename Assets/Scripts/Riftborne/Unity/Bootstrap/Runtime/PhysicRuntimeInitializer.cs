@@ -37,6 +37,7 @@ namespace Riftborne.Unity.Bootstrap.Runtime
 
             builder.Register<IPhysicsWorld, Unity2DPhysicsWorld>(Lifetime.Singleton);
             builder.Register<IGroundSensor, Unity2DGroundSensor>(Lifetime.Singleton);
+            builder.Register<Unity2DWallSensor>(Lifetime.Singleton).As<IWallSensor>();
             builder.Register<ICharacterMotor, PlatformerCharacterMotor>(Lifetime.Singleton);
             builder.RegisterComponentInHierarchy<PhysicsBodyAuthoring>();
         }

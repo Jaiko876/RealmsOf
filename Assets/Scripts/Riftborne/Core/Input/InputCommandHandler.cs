@@ -17,12 +17,18 @@ namespace Riftborne.Core.Input
         {
             var jumpPressed = (command.Buttons & InputButtons.JumpPressed) != 0;
             var jumpHeld    = (command.Buttons & InputButtons.JumpHeld) != 0;
+            
+            sbyte facing = 0;
+            const float dead = 0.1f;
+            if (command.Dx > dead) facing = 1;
+            else if (command.Dx < -dead) facing = -1;
 
             var input = new MotorInput(
                 command.EntityId,
                 command.Dx,
                 jumpPressed,
-                jumpHeld
+                jumpHeld,
+                facing
             );
 
             _motorInputs.Set(command.EntityId, input);

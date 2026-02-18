@@ -19,27 +19,28 @@ namespace Riftborne.Physics
             var p = ctx.Params;
             var body = ctx.Body;
             var id = input.EntityId;
-            
-            float targetVx = Clamp(input.MoveX, -1f, 1f) * p.MaxSpeedX;
+
+            // --- Horizontal (anti-wall-push) ---
+            float moveX = Clamp(input.MoveX, -1f, 1f);
+
+            // если жмём в стену — гасим намерение (иначе мотор вдавливает)
+            if (moveX < 0f && ctx.BlockedLeft) moveX = 0f;
+            if (moveX > 0f && ctx.BlockedRight) moveX = 0f;
+
+            float targetVx = moveX * p.MaxSpeedX;
             float accel = Math.Abs(targetVx) > Math.Abs(body.Vx) ? p.AccelX : p.DecelX;
-
-
             body.Vx = MoveTowards(body.Vx, targetVx, accel * ctx.Dt);
 
-
+            // --- Timers (coyote/buffer) ---
             var s = _stateStore.GetOrCreate(id);
 
-            if (ctx.IsGrounded)
-                s.CoyoteTicks = p.CoyoteTicks;
-            else if (s.CoyoteTicks > 0)
-                s.CoyoteTicks--;
+            if (ctx.IsGrounded) s.CoyoteTicks = p.CoyoteTicks;
+            else if (s.CoyoteTicks > 0) s.CoyoteTicks--;
 
-            if (input.JumpPressed)
-                s.JumpBufferTicks = p.JumpBufferTicks;
-            else if (s.JumpBufferTicks > 0)
-                s.JumpBufferTicks--;
+            if (input.JumpPressed) s.JumpBufferTicks = p.JumpBufferTicks;
+            else if (s.JumpBufferTicks > 0) s.JumpBufferTicks--;
 
-
+            // --- Jump decision ---
             bool jumpNow =
                 (ctx.IsGrounded && input.JumpPressed) ||
                 (s.JumpBufferTicks > 0 && s.CoyoteTicks > 0);
@@ -52,7 +53,8 @@ namespace Riftborne.Physics
             }
 
             _stateStore.Set(s);
-            
+
+            // --- Modifiers ---
             if (ctx.Modifiers.ImpulseX != 0f || ctx.Modifiers.ImpulseY != 0f)
                 body.AddImpulse(ctx.Modifiers.ImpulseX, ctx.Modifiers.ImpulseY);
         }

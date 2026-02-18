@@ -1,6 +1,8 @@
 using Riftborne.Core.Model;
+using Riftborne.Core.Model.Animation;
 using UnityEngine;
 using VContainer;
+using AnimationState = Riftborne.Core.Model.Animation.AnimationState;
 
 namespace Riftborne.Unity.View
 {
@@ -11,6 +13,13 @@ namespace Riftborne.Unity.View
 
         [SerializeField] private Transform visualRoot;
         [SerializeField] private Animator animator;
+
+        private static readonly int GroundedHash = Animator.StringToHash("Grounded");
+        private static readonly int JustLandedHash = Animator.StringToHash("JustLanded");
+        private static readonly int Moving = Animator.StringToHash("Moving");
+        private static readonly int Speed01Hash = Animator.StringToHash("Speed01");
+        private static readonly int AirSpeed01Hash = Animator.StringToHash("AirSpeed01");
+        private static readonly int AirTHash = Animator.StringToHash("AirT");
 
         private GameState _gameState;
         private PlayerId _playerId;
@@ -27,7 +36,8 @@ namespace Riftborne.Unity.View
             _playerId = new PlayerId(playerId);
             _entityId = new GameEntityId(avatarEntityId);
 
-            if (visualRoot == null) visualRoot = transform;
+            if (visualRoot == null)
+                visualRoot = transform;
 
             _gameState.PlayerAvatars.Set(_playerId, _entityId);
             _gameState.GetOrCreateEntity(_entityId);
@@ -37,14 +47,16 @@ namespace Riftborne.Unity.View
         {
             var e = _gameState.GetOrCreateEntity(_entityId);
 
-            // интерполяция позиции (как у тебя)
+            // ---------------------------
+            // 1. Интерполяция позиции
+            // ---------------------------
             var alpha = 1f;
             var fd = Time.fixedDeltaTime;
+
             if (fd > 0f)
             {
                 alpha = (Time.time - Time.fixedTime) / fd;
-                if (alpha < 0f) alpha = 0f;
-                if (alpha > 1f) alpha = 1f;
+                alpha = Mathf.Clamp01(alpha);
             }
 
             var x = Mathf.Lerp(e.PrevX, e.X, alpha);
@@ -52,19 +64,30 @@ namespace Riftborne.Unity.View
 
             visualRoot.position = new Vector3(x, y, 0f);
 
-            var facing = e.Facing; // -1 или +1
+            // ---------------------------
+            // 2. Facing
+            // ---------------------------
             var s = visualRoot.localScale;
-            s.x = facing < 0 ? -Mathf.Abs(s.x) : Mathf.Abs(s.x);
+            s.x = e.Facing < 0
+                ? -Mathf.Abs(s.x)
+                : Mathf.Abs(s.x);
             visualRoot.localScale = s;
 
-            var vx = e.Vx;
-            var vy = e.Vy;
+            // ---------------------------
+            // 3. Анимация
+            // ---------------------------
+            ApplyAnimation(e.AnimationState);
+        }
 
-            var speed01 = Mathf.Clamp01(Mathf.Abs(e.Vx) / 8f);
-            var moveBlend = speed01 * 3f;
+        private void ApplyAnimation(AnimationState a)
+        {
+            animator.SetBool(GroundedHash, a.Grounded);
+            animator.SetBool(JustLandedHash, a.JustLanded);
+            animator.SetBool(Moving, a.Moving);
 
-            animator.SetFloat("MoveBlendX", moveBlend);
-            animator.SetBool("IsGrounded", e.Grounded); // если у тебя это уже есть
+            animator.SetFloat(Speed01Hash, a.Speed01);
+            animator.SetFloat(AirSpeed01Hash, a.AirSpeed01);
+            animator.SetFloat(AirTHash, a.AirT);
         }
     }
 }

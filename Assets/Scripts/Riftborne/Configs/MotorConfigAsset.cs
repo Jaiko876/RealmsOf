@@ -16,6 +16,8 @@ namespace Riftborne.Configs
         public float JumpVelocity = 12f;
         [Min(0f)] public float CoyoteTimeSeconds = 0.08f;
         [Min(0f)] public float JumpBufferSeconds = 0.10f;
+        [Header("Air")]
+        [Min(0f)] public float MaxFallSpeed = 20f;
 
         public MotorParams ToMotorParams(SimulationParameters sim)
         {
@@ -31,7 +33,8 @@ namespace Riftborne.Configs
                 DecelX,
                 JumpVelocity,
                 SecToTicks(CoyoteTimeSeconds),
-                SecToTicks(JumpBufferSeconds)
+                SecToTicks(JumpBufferSeconds),
+                maxFallSpeed: MaxFallSpeed
             );
         }
     }

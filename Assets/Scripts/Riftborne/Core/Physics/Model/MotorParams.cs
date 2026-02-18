@@ -8,6 +8,7 @@ namespace Riftborne.Core.Physics.Model
         public float JumpVelocity { get; }
         public int CoyoteTicks { get; }
         public int JumpBufferTicks { get; }
+        public float MaxFallSpeed { get; }
 
         public MotorParams(
             float maxSpeedX,
@@ -15,7 +16,8 @@ namespace Riftborne.Core.Physics.Model
             float decelX,
             float jumpVelocity,
             int coyoteTicks,
-            int jumpBufferTicks)
+            int jumpBufferTicks,
+            float maxFallSpeed)
         {
             MaxSpeedX = maxSpeedX;
             AccelX = accelX;
@@ -23,6 +25,7 @@ namespace Riftborne.Core.Physics.Model
             JumpVelocity = jumpVelocity;
             CoyoteTicks = coyoteTicks;
             JumpBufferTicks = jumpBufferTicks;
+            MaxFallSpeed = maxFallSpeed;
         }
     }
 }

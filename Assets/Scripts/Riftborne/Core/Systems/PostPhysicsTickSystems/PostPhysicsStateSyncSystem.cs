@@ -1,4 +1,5 @@
-﻿using Riftborne.Core.Model;
+﻿using System;
+using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
 
 namespace Riftborne.Core.Systems.PostPhysicsTickSystems
@@ -26,10 +27,12 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
                 var id = kv.Key;
                 var e = kv.Value;
 
-                if (_bodies.TryGet(id, out var body))
-                {
-                    e.SetPose(body.X, body.Y, body.Vx, body.Vy, _groundSensor.IsGrounded(id));
-                }
+                if (!_bodies.TryGet(id, out var body))
+                    continue;
+
+                var grounded = _groundSensor.IsGrounded(id);
+
+                e.SetPose(body.X, body.Y, body.Vx, body.Vy, grounded);
             }
         }
     }

@@ -11,6 +11,7 @@ namespace Riftborne.Core.Systems
 
         public TickPipeline(
             MotorPrePhysicsTickSystem motor,
+            AnimationStatePostPhysicsSystem animationStatePostPhysicsSystem,
             PostPhysicsStateSyncSystem sync)
         {
             PrePhysics = new IPrePhysicsTickSystem[]
@@ -20,7 +21,8 @@ namespace Riftborne.Core.Systems
 
             PostPhysics = new IPostPhysicsTickSystem[]
             {
-                sync
+                sync,
+                animationStatePostPhysicsSystem
             };
         }
     }

@@ -1,10 +1,12 @@
 using System;
+using Riftborne.Core.Model.Animation;
 
 namespace Riftborne.Core.Model
 {
     public sealed class EntityState
     {
         public GameEntityId Id { get; }
+        public AnimationState AnimationState { get; private set; }
 
         public float X { get; private set; }
         public float Y { get; private set; }
@@ -20,7 +22,7 @@ namespace Riftborne.Core.Model
         public int PrevFacing { get; private set; } = 1;
         
         public bool Grounded { get; private set; }
-        public bool Moving { get; private set; }
+        public bool PrevGrounded { get; private set; }
 
         public EntityState(GameEntityId id)
         {
@@ -34,6 +36,7 @@ namespace Riftborne.Core.Model
             PrevVx = Vx;
             PrevVy = Vy;
             PrevFacing = Facing;
+            PrevGrounded = Grounded;
         }
 
         public void SetPose(float x, float y, float vx, float vy, bool grounded)
@@ -43,11 +46,15 @@ namespace Riftborne.Core.Model
             Vx = vx;
             Vy = vy;
             Grounded = grounded;
-            Moving = Math.Abs(vx) > 0.01f;
-
-            if (vx > 0.0001f) Facing = 1;
-            else if (vx < -0.0001f) Facing = -1;
         }
+
+        public void SetAnimationState(AnimationState state) => AnimationState = state;
         
+        public void ApplyFacingIntent(sbyte intent)
+        {
+            if (intent == 0) return;
+            Facing = intent < 0 ? -1 : 1;
+        }
+
     }
 }
