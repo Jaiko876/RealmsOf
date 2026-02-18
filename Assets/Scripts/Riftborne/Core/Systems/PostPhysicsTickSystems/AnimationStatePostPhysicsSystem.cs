@@ -1,6 +1,8 @@
 ﻿using System;
 using Riftborne.Core.Model;
+using Riftborne.Core.Model.Animation;
 using Riftborne.Core.Physics.Model;
+using Riftborne.Core.Stores;
 
 namespace Riftborne.Core.Systems.PostPhysicsTickSystems
 {
@@ -8,14 +10,15 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
     {
         private readonly GameState _state;
         private readonly MotorParams _motor;
+        private readonly IActionIntentStore _actions;
 
-        // Подстрой по ощущениям (0.01..0.03 обычно норм)
         private const float SpeedDeadZone01 = 0.01f;
 
-        public AnimationStatePostPhysicsSystem(GameState state, MotorParams motor)
+        public AnimationStatePostPhysicsSystem(GameState state, MotorParams motor, IActionIntentStore actions)
         {
             _state = state;
             _motor = motor;
+            _actions = actions;
         }
 
         public void Tick(int tick)
@@ -50,6 +53,12 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
                     // Apex (Vy=0) -> 0.5, вверх -> (0..0.5), вниз -> (0.5..1)
                     a.AirT = ComputeAirT(e.Vy, _motor.JumpVelocity, _motor.MaxFallSpeed);
                 }
+                
+                // Action (одноразовый “event” на тик)
+                if (_actions.TryConsume(e.Id, out var act))
+                    a.Action = act;
+                else
+                    a.Action = ActionState.None;
 
                 e.SetAnimationState(a);
             }

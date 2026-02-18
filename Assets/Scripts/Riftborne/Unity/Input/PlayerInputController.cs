@@ -23,13 +23,6 @@ namespace Riftborne.Unity.Input
         private bool _prevAttackHeld;
         private bool _prevDefenseHeld;
 
-        // hold tracking (ticks)
-        private int _attackHoldStartTick = -1;
-        private bool _attackConsumedAsHeavy;
-
-        private int _defenseHoldStartTick = -1;
-        private bool _defenseConsumedAsBlock;
-
         [Inject]
         public void Construct(
             ICommandQueue commandQueue,
@@ -54,6 +47,28 @@ namespace Riftborne.Unity.Input
 
             _prevJumpHeld = held;
         }
+        
+        public void SetAttackHeld(bool held)
+        {
+            _snapshot.AttackHeld = held;
+            if (held && !_prevAttackHeld)
+                _snapshot.AttackPressed = true;
+            _prevAttackHeld = held;
+        }
+
+        public void SetDefenseHeld(bool held)
+        {
+            _snapshot.DefenseHeld = held;
+            if (held && !_prevDefenseHeld)
+                _snapshot.DefensePressed = true;
+            _prevDefenseHeld = held;
+        }
+
+        public void SetEvadePressed()
+        {
+            _snapshot.EvadePressed = true;
+        }
+
         
 
         public void FlushForTick(int tick)

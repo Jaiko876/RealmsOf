@@ -6,20 +6,21 @@ namespace Riftborne.App.Commands
 {
     public sealed class CommandDispatcher : ICommandDispatcher
     {
-        private readonly Dictionary<Type, ICommandHandlerRegistration> _map;
+        private readonly Dictionary<Type, List<ICommandHandlerRegistration>> _map;
 
         public CommandDispatcher(IEnumerable<ICommandHandlerRegistration> registrations)
         {
-            _map = new Dictionary<Type, ICommandHandlerRegistration>();
+            _map = new Dictionary<Type, List<ICommandHandlerRegistration>>();
 
             foreach (ICommandHandlerRegistration reg in registrations)
             {
-                if (_map.ContainsKey(reg.CommandType))
+                if (!_map.TryGetValue(reg.CommandType, out var list))
                 {
-                    throw new InvalidOperationException("Duplicate handler registration for command: " + reg.CommandType.FullName);
+                    list = new List<ICommandHandlerRegistration>(4);
+                    _map.Add(reg.CommandType, list);
                 }
 
-                _map.Add(reg.CommandType, reg);
+                list.Add(reg);
             }
         }
 
@@ -27,17 +28,14 @@ namespace Riftborne.App.Commands
         {
             for (int i = 0; i < commands.Count; i++)
             {
-                ICommand cmd = commands[i];
-                Type type = cmd.GetType();
+                var cmd = commands[i];
+                var type = cmd.GetType();
 
-                ICommandHandlerRegistration reg;
-                if (!_map.TryGetValue(type, out reg))
-                {
-                    // В dev лучше падать сразу — иначе ты “теряешь” команды молча
+                if (!_map.TryGetValue(type, out var handlers) || handlers.Count == 0)
                     throw new InvalidOperationException("No handler registered for command: " + type.FullName);
-                }
 
-                reg.Invoke(cmd);
+                for (int h = 0; h < handlers.Count; h++)
+                    handlers[h].Invoke(cmd);
             }
         }
     }

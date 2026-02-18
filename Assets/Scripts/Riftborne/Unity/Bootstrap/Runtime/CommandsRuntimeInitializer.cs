@@ -13,6 +13,7 @@ namespace Riftborne.Unity.Bootstrap.Runtime
         {
             builder.Register<ICommandHandler<InputCommand>, InputCommandHandler>(Lifetime.Singleton);
             builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<InputCommand>>(Lifetime.Singleton);
+            builder.Register<ICommandHandler<InputCommand>, ActionInputCommandHandler>(Lifetime.Singleton);
             builder.Register<ICommandDispatcher, CommandDispatcher>(Lifetime.Singleton);
         }
     }

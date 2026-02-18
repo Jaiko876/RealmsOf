@@ -25,5 +25,22 @@ namespace Riftborne.Unity.Input
         {
             _controller.SetJumpHeld(value.isPressed);
         }
+        
+        public void OnAttack(InputValue value)
+        {
+            _controller.SetAttackHeld(value.isPressed);
+        }
+
+        public void OnDefense(InputValue value)
+        {
+            _controller.SetDefenseHeld(value.isPressed);
+        }
+
+        public void OnEvade(InputValue value)
+        {
+            if (value.isPressed)
+                _controller.SetEvadePressed();
+        }
+
     }
 }

@@ -11,6 +11,8 @@ namespace Riftborne.Unity.Bootstrap.Runtime
         {
             builder.Register<IMotorInputStore, MotorInputStore>(Lifetime.Singleton);
             builder.Register<IMotorStateStore, MotorStateStore>(Lifetime.Singleton);
+            builder.Register<IActionIntentStore, ActionIntentStore>(Lifetime.Singleton);
+
         }
     }
 }

@@ -13,6 +13,8 @@ namespace Riftborne.Unity.View
 
         [SerializeField] private Transform visualRoot;
         [SerializeField] private Animator animator;
+        
+        private ActionState _prevAction;
 
         private static readonly int GroundedHash = Animator.StringToHash("Grounded");
         private static readonly int JustLandedHash = Animator.StringToHash("JustLanded");
@@ -20,6 +22,9 @@ namespace Riftborne.Unity.View
         private static readonly int Speed01Hash = Animator.StringToHash("Speed01");
         private static readonly int AirSpeed01Hash = Animator.StringToHash("AirSpeed01");
         private static readonly int AirTHash = Animator.StringToHash("AirT");
+        private static readonly int AtkLightHash = Animator.StringToHash("AtkLight");
+        private static readonly int AtkHeavyHash = Animator.StringToHash("AtkHeavy");
+
 
         private GameState _gameState;
         private PlayerId _playerId;
@@ -88,6 +93,15 @@ namespace Riftborne.Unity.View
             animator.SetFloat(Speed01Hash, a.Speed01);
             animator.SetFloat(AirSpeed01Hash, a.AirSpeed01);
             animator.SetFloat(AirTHash, a.AirT);
+
+            if (a.Action != ActionState.None && a.Action != _prevAction)
+            {
+                if (a.Action == ActionState.LightAttack) animator.SetTrigger(AtkLightHash);
+                else if (a.Action == ActionState.HeavyAttack) animator.SetTrigger(AtkHeavyHash);
+            }
+
+            _prevAction = a.Action;
         }
+
     }
 }
