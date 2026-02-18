@@ -15,16 +15,14 @@ namespace Riftborne.Core.Input
 
         public void Handle(InputCommand command)
         {
-            // V1: пока без “hold-to-heavy” тайминга — просто:
-            // - AttackPressed => Light
-            // - AttackHeld    => Heavy (если хочешь, потом заменим на threshold)
-            var pressed = (command.Buttons & InputButtons.AttackPressed) != 0;
-            var held    = (command.Buttons & InputButtons.AttackHeld) != 0;
+            var light = (command.Buttons & InputButtons.AttackPressed) != 0;
+            var heavy = (command.Buttons & InputButtons.AttackHeavyPressed) != 0;
 
-            if (pressed)
+            if (light)
                 _actions.Set(command.EntityId, ActionState.LightAttack);
-            else if (held)
+            else if (heavy)
                 _actions.Set(command.EntityId, ActionState.HeavyAttack);
         }
+
     }
 }

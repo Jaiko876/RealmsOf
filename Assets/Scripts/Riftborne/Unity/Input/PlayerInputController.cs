@@ -1,6 +1,5 @@
 using Riftborne.App.Commands;
 using Riftborne.App.Time.Time;
-using Riftborne.Core.Commands;
 using Riftborne.Core.Input;
 using Riftborne.Core.Model;
 using UnityEngine;
@@ -11,7 +10,9 @@ namespace Riftborne.Unity.Input
     public class PlayerInputController : MonoBehaviour
     {
         [SerializeField] private int controlledEntityId = 0;
-
+        
+        [SerializeField] private int heavyHoldTicks = 12; // при TickRate=50 это ~0.2с
+        
         private GameEntityId Controlled => new(controlledEntityId);
 
         private ICommandQueue _commandQueue;
@@ -19,6 +20,10 @@ namespace Riftborne.Unity.Input
 
         private InputSnapshot _snapshot;
 
+        private bool _attackHeldPrevTick;
+        private int _attackHoldStartTick = -1;
+        private bool _attackHeavyFired;
+        
         private bool _prevJumpHeld;
         private bool _prevAttackHeld;
         private bool _prevDefenseHeld;
@@ -51,10 +56,8 @@ namespace Riftborne.Unity.Input
         public void SetAttackHeld(bool held)
         {
             _snapshot.AttackHeld = held;
-            if (held && !_prevAttackHeld)
-                _snapshot.AttackPressed = true;
-            _prevAttackHeld = held;
         }
+
 
         public void SetDefenseHeld(bool held)
         {
@@ -73,15 +76,18 @@ namespace Riftborne.Unity.Input
 
         public void FlushForTick(int tick)
         {
-            var s = _snapshot;
+            // --- tick-based attack resolve ---
+            ResolveAttackForTick(tick);
 
+            var s = _snapshot;
             var buttons = InputButtons.None;
 
             if (s.JumpPressed) buttons |= InputButtons.JumpPressed;
             if (s.JumpHeld)    buttons |= InputButtons.JumpHeld;
 
-            if (s.AttackPressed) buttons |= InputButtons.AttackPressed;
-            if (s.AttackHeld)    buttons |= InputButtons.AttackHeld;
+            if (s.AttackPressed)      buttons |= InputButtons.AttackPressed;      // light
+            if (s.AttackHeavyPressed) buttons |= InputButtons.AttackHeavyPressed; // heavy
+            if (s.AttackHeld)         buttons |= InputButtons.AttackHeld;         // raw (может пригодиться позже)
 
             if (s.DefensePressed) buttons |= InputButtons.DefensePressed;
             if (s.DefenseHeld)    buttons |= InputButtons.DefenseHeld;
@@ -99,8 +105,45 @@ namespace Riftborne.Unity.Input
             // edges — в ноль
             _snapshot.JumpPressed = false;
             _snapshot.AttackPressed = false;
+            _snapshot.AttackHeavyPressed = false;
             _snapshot.DefensePressed = false;
             _snapshot.EvadePressed = false;
         }
+
+        private void ResolveAttackForTick(int tick)
+        {
+            bool held = _snapshot.AttackHeld;
+
+            // down edge (в тиковой системе)
+            if (!_attackHeldPrevTick && held)
+            {
+                _attackHoldStartTick = tick;
+                _attackHeavyFired = false;
+            }
+
+            // heavy fires once when threshold reached
+            if (held && _attackHoldStartTick >= 0 && !_attackHeavyFired)
+            {
+                int dt = tick - _attackHoldStartTick;
+                if (dt >= heavyHoldTicks)
+                {
+                    _snapshot.AttackHeavyPressed = true;
+                    _attackHeavyFired = true;
+                }
+            }
+
+            // up edge => light if heavy not fired
+            if (_attackHeldPrevTick && !held)
+            {
+                if (!_attackHeavyFired)
+                    _snapshot.AttackPressed = true; // light on release
+
+                _attackHoldStartTick = -1;
+                _attackHeavyFired = false;
+            }
+
+            _attackHeldPrevTick = held;
+        }
+
     }
 }
