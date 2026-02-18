@@ -15,6 +15,7 @@ namespace Riftborne.Core.Systems.PrePhysicsTickSystems
         private readonly MotorParams _motorParams;
         private readonly SimulationParameters _parameters;
         private readonly IMotorInputStore _motorInputs;
+        private readonly IWallSensor _walls;
 
         public MotorPrePhysicsTickSystem(
             GameState state,
@@ -23,7 +24,8 @@ namespace Riftborne.Core.Systems.PrePhysicsTickSystems
             ICharacterMotor motor,
             MotorParams motorParams,
             SimulationParameters parameters,
-            IMotorInputStore motorInputs)
+            IMotorInputStore motorInputs,
+            IWallSensor walls)
         {
             _state = state;
             _bodies = bodies;
@@ -32,6 +34,7 @@ namespace Riftborne.Core.Systems.PrePhysicsTickSystems
             _motorParams = motorParams;
             _parameters = parameters;
             _motorInputs = motorInputs;
+            _walls = walls;
         }
 
         public void Tick(int tick)
@@ -49,13 +52,18 @@ namespace Riftborne.Core.Systems.PrePhysicsTickSystems
                 // ВАЖНО: Facing от намерения, а не от физики
                 var e = _state.GetOrCreateEntity(entityId);
                 e.ApplyFacingIntent(input.FacingIntent);
+                
+                var blockedLeft = _walls.IsBlockedLeft(entityId);
+                var blockedRight = _walls.IsBlockedRight(entityId);
 
                 var ctx = new MotorContext(
                     _parameters.TickDeltaTime,
                     body,
                     _motorParams,
                     PhysicsModifiers.None,
-                    grounded
+                    grounded,
+                    blockedLeft,
+                    blockedRight
                 );
 
                 _motor.Apply(input, ctx);

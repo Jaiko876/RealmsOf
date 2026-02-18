@@ -10,18 +10,25 @@ namespace Riftborne.Core.Physics.Model
         public readonly PhysicsModifiers Modifiers;
         public readonly bool IsGrounded;
 
+        public readonly bool BlockedLeft;
+        public readonly bool BlockedRight;
+
         public MotorContext(
             float dt,
             IPhysicsBody body,
             MotorParams @params,
             PhysicsModifiers modifiers,
-            bool isGrounded)
+            bool isGrounded,
+            bool blockedLeft,
+            bool blockedRight)
         {
             Dt = dt;
             Body = body;
             Params = @params;
             Modifiers = modifiers;
             IsGrounded = isGrounded;
+            BlockedLeft = blockedLeft;
+            BlockedRight = blockedRight;
         }
     }
 }

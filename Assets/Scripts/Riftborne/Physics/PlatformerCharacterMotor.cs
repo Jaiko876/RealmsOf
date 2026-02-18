@@ -23,6 +23,10 @@ namespace Riftborne.Physics
             // --- Horizontal (anti-wall-push) ---
             float moveX = Clamp(input.MoveX, -1f, 1f);
 
+            // если жмём в стену — гасим намерение (иначе мотор вдавливает)
+            if (moveX < 0f && ctx.BlockedLeft) moveX = 0f;
+            if (moveX > 0f && ctx.BlockedRight) moveX = 0f;
+
             float targetVx = moveX * p.MaxSpeedX;
             float accel = Math.Abs(targetVx) > Math.Abs(body.Vx) ? p.AccelX : p.DecelX;
             body.Vx = MoveTowards(body.Vx, targetVx, accel * ctx.Dt);
