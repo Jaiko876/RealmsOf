@@ -11,14 +11,16 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
         private readonly GameState _state;
         private readonly MotorParams _motor;
         private readonly IActionIntentStore _actions;
+        private readonly IAttackChargeStore _charge;
 
         private const float SpeedDeadZone01 = 0.01f;
 
-        public AnimationStatePostPhysicsSystem(GameState state, MotorParams motor, IActionIntentStore actions)
+        public AnimationStatePostPhysicsSystem(GameState state, MotorParams motor, IActionIntentStore actions, IAttackChargeStore charge)
         {
             _state = state;
             _motor = motor;
             _actions = actions;
+            _charge = charge;
         }
 
         public void Tick(int tick)
@@ -53,6 +55,18 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
                     // Apex (Vy=0) -> 0.5, вверх -> (0..0.5), вниз -> (0.5..1)
                     a.AirT = ComputeAirT(e.Vy, _motor.JumpVelocity, _motor.MaxFallSpeed);
                 }
+                
+                if (_charge.TryGet(e.Id, out var charging, out var charge01))
+                {
+                    a.HeavyCharging = charging;
+                    a.Charge01 = charge01;
+                }
+                else
+                {
+                    a.HeavyCharging = false;
+                    a.Charge01 = 0f;
+                }
+
                 
                 // Action (одноразовый “event” на тик)
                 if (_actions.TryConsume(e.Id, out var act))

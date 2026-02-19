@@ -24,6 +24,9 @@ namespace Riftborne.Unity.View
         private static readonly int AirTHash = Animator.StringToHash("AirT");
         private static readonly int AtkLightHash = Animator.StringToHash("AtkLight");
         private static readonly int AtkHeavyHash = Animator.StringToHash("AtkHeavy");
+        private static readonly int HeavyChargeHash = Animator.StringToHash("HeavyCharge");
+        private static readonly int Charge01Hash = Animator.StringToHash("Charge01");
+
 
 
         private GameState _gameState;
@@ -93,12 +96,21 @@ namespace Riftborne.Unity.View
             animator.SetFloat(Speed01Hash, a.Speed01);
             animator.SetFloat(AirSpeed01Hash, a.AirSpeed01);
             animator.SetFloat(AirTHash, a.AirT);
+            
+            animator.SetBool(HeavyChargeHash, a.HeavyCharging);
+            animator.SetFloat(Charge01Hash, a.Charge01);
 
             if (a.Action != ActionState.None && a.Action != _prevAction)
             {
+                animator.ResetTrigger(AtkLightHash);
+                animator.ResetTrigger(AtkHeavyHash);
+
                 if (a.Action == ActionState.LightAttack) animator.SetTrigger(AtkLightHash);
                 else if (a.Action == ActionState.HeavyAttack) animator.SetTrigger(AtkHeavyHash);
             }
+
+            _prevAction = a.Action;
+
 
             _prevAction = a.Action;
         }

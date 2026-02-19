@@ -14,5 +14,8 @@
         public float AirSpeed01;     // 0..1 (воздух)
         public float AirT;           // 0..1 (вверх->вниз)
         
+        public bool HeavyCharging;   // true когда держим и порог пройден
+        public float Charge01;       // 0..1 прогресс (опционально)
+        
     }
 }
