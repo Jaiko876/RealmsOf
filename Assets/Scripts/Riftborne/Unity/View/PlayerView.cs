@@ -1,5 +1,6 @@
 using Riftborne.Core.Model;
 using Riftborne.Core.Model.Animation;
+using Riftborne.Unity.VFX;
 using UnityEngine;
 using VContainer;
 using AnimationState = Riftborne.Core.Model.Animation.AnimationState;
@@ -13,6 +14,7 @@ namespace Riftborne.Unity.View
 
         [SerializeField] private Transform visualRoot;
         [SerializeField] private Animator animator;
+        [SerializeField] private ChargeFullFlashView _flash;
         
         private ActionState _prevAction;
 
@@ -32,6 +34,8 @@ namespace Riftborne.Unity.View
         private GameState _gameState;
         private PlayerId _playerId;
         private GameEntityId _entityId;
+        
+        private bool _prevFull;
 
         [Inject]
         public void Construct(GameState gameState)
@@ -50,6 +54,7 @@ namespace Riftborne.Unity.View
             _gameState.PlayerAvatars.Set(_playerId, _entityId);
             _gameState.GetOrCreateEntity(_entityId);
         }
+
 
         private void LateUpdate()
         {
@@ -80,11 +85,23 @@ namespace Riftborne.Unity.View
                 ? -Mathf.Abs(s.x)
                 : Mathf.Abs(s.x);
             visualRoot.localScale = s;
-
+            
             // ---------------------------
             // 3. Анимация
             // ---------------------------
             ApplyAnimation(e.AnimationState);
+        }
+
+        private void SyncCharge(float charge01, int facing)
+        {
+            bool full = charge01 >= 0.999f;
+
+            _flash.SetFacing(facing);
+
+            if (full && !_prevFull)
+                _flash.PlayOnce();
+
+            _prevFull = full;
         }
 
         private void ApplyAnimation(AnimationState a)
@@ -100,6 +117,8 @@ namespace Riftborne.Unity.View
             animator.SetBool(HeavyChargeHash, a.HeavyCharging);
             animator.SetFloat(Charge01Hash, a.Charge01);
 
+            SyncCharge(a.Charge01, 1);
+
             if (a.Action != ActionState.None && a.Action != _prevAction)
             {
                 animator.ResetTrigger(AtkLightHash);
@@ -110,10 +129,9 @@ namespace Riftborne.Unity.View
             }
 
             _prevAction = a.Action;
-
-
-            _prevAction = a.Action;
         }
+        
+        
 
     }
 }

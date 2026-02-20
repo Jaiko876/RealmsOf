@@ -85,8 +85,6 @@ namespace Riftborne.Unity.Input
             if (s.JumpPressed) buttons |= InputButtons.JumpPressed;
             if (s.JumpHeld)    buttons |= InputButtons.JumpHeld;
 
-            if (s.AttackPressed)      buttons |= InputButtons.AttackPressed;      // light
-            if (s.AttackHeavyPressed) buttons |= InputButtons.AttackHeavyPressed; // heavy
             if (s.AttackHeld)         buttons |= InputButtons.AttackHeld;         // raw (может пригодиться позже)
 
             if (s.DefensePressed) buttons |= InputButtons.DefensePressed;
@@ -105,7 +103,6 @@ namespace Riftborne.Unity.Input
             // edges — в ноль
             _snapshot.JumpPressed = false;
             _snapshot.AttackPressed = false;
-            _snapshot.AttackHeavyPressed = false;
             _snapshot.DefensePressed = false;
             _snapshot.EvadePressed = false;
         }
@@ -127,7 +124,6 @@ namespace Riftborne.Unity.Input
                 int dt = tick - _attackHoldStartTick;
                 if (dt >= heavyHoldTicks)
                 {
-                    _snapshot.AttackHeavyPressed = true;
                     _attackHeavyFired = true;
                 }
             }

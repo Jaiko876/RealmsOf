@@ -13,7 +13,7 @@ namespace Riftborne.Core.Input
 
         // Сколько тиков надо держать, чтобы включить charge.
         // При TickRate=50: 12 тиков ≈ 0.24s
-        private const int HeavyThresholdTicks = 21;
+        private const int HeavyThresholdTicks = 18;
 
         // За сколько тиков после порога набираем Charge01 до 1 (визуально)
         private const int FullChargeExtraTicks = 42;
@@ -24,7 +24,7 @@ namespace Riftborne.Core.Input
             public int HeldTicks;
         }
 
-        private readonly Dictionary<GameEntityId, Hold> _hold = new Dictionary<GameEntityId, Hold>();
+        private readonly Dictionary<GameEntityId, Hold> _hold = new();
 
         public ActionInputCommandHandler(IActionIntentStore actions, IAttackChargeStore charge)
         {
@@ -36,16 +36,16 @@ namespace Riftborne.Core.Input
         {
             var id = command.EntityId;
 
-            var pressed = (command.Buttons & InputButtons.AttackPressed) != 0;
             var held    = (command.Buttons & InputButtons.AttackHeld) != 0;
 
             _hold.TryGetValue(id, out var h);
 
-            // начало удержания
-            if (pressed)
+            bool heldStarted = held && !h.PrevHeld;
+            if (heldStarted)
             {
                 h.HeldTicks = 0;
             }
+
 
             // тик удержания
             if (held)

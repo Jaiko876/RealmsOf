@@ -258,9 +258,10 @@ Shader "Cainos/Customizable Pixel Character/Body - 2D Lit"
 				InputData2D inputData;
 				InitializeInputData(IN.texCoord0.xy, half2(IN.screenPosition.xy / IN.screenPosition.w), inputData);
 				SETUP_DEBUG_DATA_2D(inputData, positionWS, positionCS);
+				Color *= IN.color;
 				return CombinedShapeLightShared(surfaceData, inputData);
 
-				Color *= IN.color;
+
 			}
 
 			ENDHLSL

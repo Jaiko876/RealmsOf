@@ -10,9 +10,7 @@ namespace Riftborne.Core.Input
         JumpPressed = 1 << 0,
         JumpHeld = 1 << 1,
 
-        AttackPressed = 1 << 2,
         AttackHeld = 1 << 3,
-        AttackHeavyPressed = 1 << 7,
 
         DefensePressed = 1 << 4,
         DefenseHeld = 1 << 5,

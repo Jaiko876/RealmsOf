@@ -10,7 +10,6 @@ namespace Riftborne.Unity.Input
 
         public bool AttackHeld;
         public bool AttackPressed;
-        public bool AttackHeavyPressed;
 
         public bool DefenseHeld;
         public bool DefensePressed;
@@ -22,6 +21,6 @@ namespace Riftborne.Unity.Input
             JumpHeld || JumpPressed ||
             AttackHeld || AttackPressed ||
             DefenseHeld || DefensePressed ||
-            EvadePressed || AttackHeavyPressed;
+            EvadePressed;
     }
 }
