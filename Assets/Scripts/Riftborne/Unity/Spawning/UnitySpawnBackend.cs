@@ -4,6 +4,8 @@ using Riftborne.Core.Model;
 using Riftborne.Core.Spawning;
 using Riftborne.Physics.Unity2D;
 using UnityEngine;
+using VContainer;
+using VContainer.Unity;
 
 namespace Riftborne.Unity.Spawning
 {
@@ -17,9 +19,15 @@ namespace Riftborne.Unity.Spawning
         }
 
         [SerializeField] private Entry[] prefabs;
+        private readonly IObjectResolver _resolver;
 
         private readonly Dictionary<string, GameObject> _catalog = new Dictionary<string, GameObject>(StringComparer.Ordinal);
         private readonly Dictionary<int, GameObject> _alive = new Dictionary<int, GameObject>();
+
+        public UnitySpawnBackend(IObjectResolver resolver)
+        {
+            _resolver = resolver;
+        }
 
         private void Awake()
         {
@@ -43,6 +51,8 @@ namespace Riftborne.Unity.Spawning
                 throw new InvalidOperationException("Unknown prefabKey: " + prefabKey);
 
             var go = Instantiate(prefab, new Vector3(x, y, 0f), Quaternion.identity);
+            
+            _resolver.InjectGameObject(go);
 
             // важно: проставить id до регистрации body
             var body = go.GetComponentInChildren<PhysicsBodyAuthoring>(true);

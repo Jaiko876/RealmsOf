@@ -72,13 +72,8 @@ namespace Riftborne.Unity.Input
             _snapshot.EvadePressed = true;
         }
 
-        
-
         public void FlushForTick(int tick)
         {
-            // --- tick-based attack resolve ---
-            ResolveAttackForTick(tick);
-
             var s = _snapshot;
             var buttons = InputButtons.None;
 
@@ -102,44 +97,8 @@ namespace Riftborne.Unity.Input
 
             // edges — в ноль
             _snapshot.JumpPressed = false;
-            _snapshot.AttackPressed = false;
             _snapshot.DefensePressed = false;
             _snapshot.EvadePressed = false;
         }
-
-        private void ResolveAttackForTick(int tick)
-        {
-            bool held = _snapshot.AttackHeld;
-
-            // down edge (в тиковой системе)
-            if (!_attackHeldPrevTick && held)
-            {
-                _attackHoldStartTick = tick;
-                _attackHeavyFired = false;
-            }
-
-            // heavy fires once when threshold reached
-            if (held && _attackHoldStartTick >= 0 && !_attackHeavyFired)
-            {
-                int dt = tick - _attackHoldStartTick;
-                if (dt >= heavyHoldTicks)
-                {
-                    _attackHeavyFired = true;
-                }
-            }
-
-            // up edge => light if heavy not fired
-            if (_attackHeldPrevTick && !held)
-            {
-                if (!_attackHeavyFired)
-                    _snapshot.AttackPressed = true; // light on release
-
-                _attackHoldStartTick = -1;
-                _attackHeavyFired = false;
-            }
-
-            _attackHeldPrevTick = held;
-        }
-
     }
 }

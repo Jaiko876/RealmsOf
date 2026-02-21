@@ -43,21 +43,26 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
             // For now assume you add it (see below).
             s.ClearAllMods();
         }
+        
 
         private static void ApplyEffects(StatsState s, IReadOnlyList<StatsEffect> list)
         {
             int count = list.Count;
             if (count == 0) return;
 
-            // Stable deterministic ordering by Sequence without allocations.
-            // Small N, so O(N^2) is fine.
-            for (int i = 0; i < count; i++)
-            {
-                int best = i;
-                int bestSeq = list[i].Sequence;
+            // Маленькие N → можно без драмы держать небольшой буфер.
+            // Если хочешь вообще без аллокаций — можно сделать static буфер на 64 и ограничить.
+            var used = new bool[count];
 
-                for (int j = i + 1; j < count; j++)
+            for (int k = 0; k < count; k++)
+            {
+                int best = -1;
+                int bestSeq = int.MaxValue;
+
+                for (int j = 0; j < count; j++)
                 {
+                    if (used[j]) continue;
+
                     int seq = list[j].Sequence;
                     if (seq < bestSeq)
                     {
@@ -66,9 +71,10 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
                     }
                 }
 
-                StatsEffect e = list[best];
-                // we cannot swap in IReadOnlyList; just apply in selected order by scanning
-                ApplyOne(s, e);
+                if (best < 0) break;
+
+                used[best] = true;
+                ApplyOne(s, list[best]);
             }
         }
 
