@@ -1,6 +1,5 @@
+using System.Collections.Generic;
 using Riftborne.Core.Model;
-using Riftborne.Core.Physics.Abstractions;
-using Riftborne.Core.Stores;
 
 namespace Riftborne.Core.Spawning
 {
@@ -9,72 +8,55 @@ namespace Riftborne.Core.Spawning
         private readonly GameState _state;
         private readonly IEntityIdAllocator _ids;
         private readonly ISpawnBackend _backend;
-
-        private readonly IBodyProvider<GameEntityId> _bodies;
-
-        private readonly IMotorStateStore _motorState;
-        private readonly IActionIntentStore _actions;
-        private readonly IAttackChargeStore _charge;
-
-        private readonly IStatsStore _stats;
-        private readonly IStatsEffectStore _effects;
+        private readonly IReadOnlyList<IEntityLifecycleHook> _hooks;
 
         public EntityLifecycle(
             GameState state,
             IEntityIdAllocator ids,
             ISpawnBackend backend,
-            IBodyProvider<GameEntityId> bodies,
-            IMotorStateStore motorState,
-            IActionIntentStore actions,
-            IAttackChargeStore charge,
-            IStatsStore stats,
-            IStatsEffectStore effects)
+            IReadOnlyList<IEntityLifecycleHook> hooks)
         {
             _state = state;
             _ids = ids;
             _backend = backend;
-            _bodies = bodies;
-
-            _motorState = motorState;
-            _actions = actions;
-            _charge = charge;
-
-            _stats = stats;
-            _effects = effects;
+            _hooks = hooks;
         }
 
         public GameEntityId Spawn(string prefabKey, float x, float y, GameEntityId? fixedId)
         {
             var id = fixedId ?? _ids.Next();
 
-            // 1) Core entity
+            // 1) Core entity exists
             _state.GetOrCreateEntity(id);
 
-            // 2) Unity GO + PhysicsBodyAuthoring.SetEntityId до регистрации
+            // 2) hooks (before)
+            for (int i = 0; i < _hooks.Count; i++)
+                _hooks[i].OnBeforeSpawn(id, prefabKey, x, y);
+
+            // 3) Unity GO
             _backend.Spawn(id, prefabKey, x, y);
+
+            // 4) hooks (after)
+            for (int i = 0; i < _hooks.Count; i++)
+                _hooks[i].OnAfterSpawn(id, prefabKey, x, y);
 
             return id;
         }
 
         public void Despawn(GameEntityId id)
         {
-            // 0) Уничтожить GO (PhysicsBodyAuthoring.OnDisable отцепит из registry)
+            // 0) hooks (before)
+            for (int i = 0; i < _hooks.Count; i++)
+                _hooks[i].OnBeforeDespawn(id);
+
+            // 1) kill GO
             _backend.Despawn(id);
 
-            // 1) На всякий случай — если GO уже умер/неактивен, это безопасный no-op
-            _bodies.Unregister(id);
+            // 2) hooks (after)
+            for (int i = 0; i < _hooks.Count; i++)
+                _hooks[i].OnAfterDespawn(id);
 
-            // 2) Стереть player->avatar связь если это был аватар
-            _state.PlayerAvatars.RemoveByEntity(id);
-
-            // 3) Уборка сторов
-            _motorState.Remove(id);
-            _actions.Remove(id);
-            _charge.Remove(id);
-            _effects.ClearEntity(id);
-            _stats.Remove(id);
-
-            // 4) Удалить entity из GameState
+            // 3) remove entity last
             _state.RemoveEntity(id);
         }
     }

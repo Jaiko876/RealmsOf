@@ -1,6 +1,7 @@
 ﻿using Riftborne.App.Commands;
 using Riftborne.Core.Commands;
 using Riftborne.Core.Spawning;
+using Riftborne.Core.Spawning.Hook;
 using Riftborne.Unity.Spawning;
 using VContainer;
 using VContainer.Unity;
@@ -24,6 +25,11 @@ namespace Riftborne.Unity.Bootstrap.Runtime
             // command handlers + registrations
             builder.Register<SpawnEntityCommandHandler>(Lifetime.Singleton);
             builder.Register<DespawnEntityCommandHandler>(Lifetime.Singleton);
+            
+            //hooks
+            builder.Register<IEntityLifecycleHook, PlayerAvatarCleanupHook>(Lifetime.Singleton);
+            builder.Register<IEntityLifecycleHook, StoresCleanupHook>(Lifetime.Singleton);
+            builder.Register<IEntityLifecycleHook, BodyRegistryCleanupHook>(Lifetime.Singleton);
 
             builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<SpawnEntityCommand, SpawnEntityCommandHandler>>(Lifetime.Singleton);
             builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<DespawnEntityCommand, DespawnEntityCommandHandler>>(Lifetime.Singleton);
