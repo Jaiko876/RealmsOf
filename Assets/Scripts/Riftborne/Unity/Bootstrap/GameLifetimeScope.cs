@@ -16,6 +16,8 @@ namespace Riftborne.Unity.Bootstrap
     {
         [SerializeField] private GameConfigAsset _gameConfig;
         [SerializeField] private MotorConfigAsset _motorConfig;
+        [SerializeField] private StatsConfigAsset _statsConfig;
+        
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -29,7 +31,9 @@ namespace Riftborne.Unity.Bootstrap
             // --- Configs (из инспектора) ---
             if (_gameConfig == null) throw new System.InvalidOperationException("GameConfigAsset is not assigned in GameLifetimeScope.");
             if (_motorConfig == null) throw new System.InvalidOperationException("MotorConfigAsset is not assigned in GameLifetimeScope.");
-            
+            if (_statsConfig == null) throw new System.InvalidOperationException("StatsConfigAsset is not assigned in GameLifetimeScope.");
+           
+            builder.RegisterInstance(_statsConfig);
             builder.RegisterInstance(_motorConfig);
             builder.RegisterInstance(_gameConfig);
 
@@ -42,6 +46,7 @@ namespace Riftborne.Unity.Bootstrap
             ));
 
             // --- Entry point: соберёт runtime scope и запустит матч ---
+            builder.Register<StatsRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<PhysicRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<SystemsRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<CommandsRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();

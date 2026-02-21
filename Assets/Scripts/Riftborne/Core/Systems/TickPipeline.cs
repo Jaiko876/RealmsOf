@@ -11,18 +11,25 @@ namespace Riftborne.Core.Systems
 
         public TickPipeline(
             MotorPrePhysicsTickSystem motor,
-            AnimationStatePostPhysicsSystem animationStatePostPhysicsSystem,
-            PostPhysicsStateSyncSystem sync)
+            PostPhysicsStateSyncSystem sync,
+            StatsInitPostPhysicsSystem statsInit,
+            StatsRegenPostPhysicsSystem statsRegen,
+            StatsApplyDeltasPostPhysicsSystem statsDeltas,
+            StatsEffectsTickPostPhysicsSystem statsEffects,
+            StatsRebuildModifiersPostPhysicsSystem statsRebuildModifiers,
+            AnimationStatePostPhysicsSystem animation)
         {
-            PrePhysics = new IPrePhysicsTickSystem[]
-            {
-                motor
-            };
+            PrePhysics = new IPrePhysicsTickSystem[] { motor };
 
             PostPhysics = new IPostPhysicsTickSystem[]
             {
                 sync,
-                animationStatePostPhysicsSystem
+                statsInit,
+                statsEffects,
+                statsRebuildModifiers,
+                statsRegen,
+                statsDeltas,
+                animation
             };
         }
     }

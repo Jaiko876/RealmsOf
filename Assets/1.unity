@@ -314,55 +314,6 @@ MonoBehaviour:
   m_CropFrameX: 0
   m_CropFrameY: 0
   m_StretchFill: 0
---- !u!1 &263956613
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 263956615}
-  - component: {fileID: 263956614}
-  m_Layer: 0
-  m_Name: Global Volume
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &263956614
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 263956613}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
-  m_IsGlobal: 1
-  priority: 0
-  blendDistance: 0
-  weight: 1
-  sharedProfile: {fileID: 11400000, guid: e048520d5437329498bd9a3e453a2fb0, type: 2}
---- !u!4 &263956615
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 263956613}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.552, y: 1.2456955, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &470861096
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -466,6 +417,7 @@ MonoBehaviour:
   autoInjectGameObjects: []
   _gameConfig: {fileID: 11400000, guid: fd19c904f2e108045a9c2890baec4b45, type: 2}
   _motorConfig: {fileID: 11400000, guid: 8e88ec29b9230734397e8ce22461b336, type: 2}
+  _statsConfig: {fileID: 11400000, guid: 9ad17b5df264d264bbd5a6a110bb0be4, type: 2}
 --- !u!4 &654924459
 Transform:
   m_ObjectHideFlags: 0
@@ -3852,7 +3804,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 10
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 3
@@ -3883,7 +3835,7 @@ MonoBehaviour:
   avatarEntityId: 0
   visualRoot: {fileID: 1148536744}
   animator: {fileID: 1995038097}
-  _heavyEmission: {fileID: 2028908355}
+  _flash: {fileID: 2000412068}
 --- !u!4 &1462963557
 Transform:
   m_ObjectHideFlags: 0
@@ -4035,14 +3987,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8265534797821088559, guid: 810bea8e6846b6a4a9e0fe10416b5395,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.142
+      objectReference: {fileID: 0}
+    - target: {fileID: 8265534797821088559, guid: 810bea8e6846b6a4a9e0fe10416b5395,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.001
+      objectReference: {fileID: 0}
+    - target: {fileID: 8265534797821088559, guid: 810bea8e6846b6a4a9e0fe10416b5395,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8765451603757097403, guid: 810bea8e6846b6a4a9e0fe10416b5395,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8765451603743435995, guid: 810bea8e6846b6a4a9e0fe10416b5395,
+    - targetCorrespondingSourceObject: {fileID: 1342997618958094381, guid: 810bea8e6846b6a4a9e0fe10416b5395,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2028908355}
+      addedObject: {fileID: 2000412068}
   m_SourcePrefab: {fileID: 100100000, guid: 810bea8e6846b6a4a9e0fe10416b5395, type: 3}
 --- !u!1 &1555620534
 GameObject:
@@ -4362,28 +4334,36 @@ Animator:
     type: 3}
   m_PrefabInstance: {fileID: 1534051978}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &2028908353 stripped
+--- !u!1 &2000412066 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 8765451603743435995, guid: 810bea8e6846b6a4a9e0fe10416b5395,
+  m_CorrespondingSourceObject: {fileID: 1342997618958094381, guid: 810bea8e6846b6a4a9e0fe10416b5395,
     type: 3}
   m_PrefabInstance: {fileID: 1534051978}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2028908355
+--- !u!114 &2000412068
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2028908353}
+  m_GameObject: {fileID: 2000412066}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ebdeaf22d5f948889488c66751564e19, type: 3}
+  m_Script: {fileID: 11500000, guid: 6e71271f799743a390b20b7de2e5a0ed, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Riftborne.Unity::Riftborne.Unity.Shader.HeavyEmissionDriver
-  _root: {fileID: 0}
-  _heavyColor: {r: 1, g: 0.1, b: 0.1, a: 1}
-  _emissionStrength: 3
-  _renderers: []
+  m_EditorClassIdentifier: Riftborne.Unity::Riftborne.Unity.VFX.ChargeFullFlashView
+  _flashRenderer: {fileID: 2093016101}
+  _durationSeconds: 0.36
+  _flashColor: {r: 0.9528302, g: 0.020753613, b: 0, a: 1}
+  _scalePeak: 4
+  _peakAt: 0
+  _forwardOffset: 0.12
+--- !u!212 &2093016101 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 5451917190241379653, guid: 810bea8e6846b6a4a9e0fe10416b5395,
+    type: 3}
+  m_PrefabInstance: {fileID: 1534051978}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -4397,4 +4377,3 @@ SceneRoots:
   - {fileID: 1774485665}
   - {fileID: 1893320947}
   - {fileID: 1786111481}
-  - {fileID: 263956615}

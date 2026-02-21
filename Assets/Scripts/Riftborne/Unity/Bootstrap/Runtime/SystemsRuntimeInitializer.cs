@@ -14,6 +14,11 @@ namespace Riftborne.Unity.Bootstrap.Runtime
             builder.Register<MotorPrePhysicsTickSystem>(Lifetime.Singleton);
             builder.Register<PostPhysicsStateSyncSystem>(Lifetime.Singleton);
             builder.Register<AnimationStatePostPhysicsSystem>(Lifetime.Singleton);
+            builder.Register<StatsInitPostPhysicsSystem>(Lifetime.Singleton);
+            builder.Register<StatsRegenPostPhysicsSystem>(Lifetime.Singleton);
+            builder.Register<StatsApplyDeltasPostPhysicsSystem>(Lifetime.Singleton);
+            builder.Register<StatsEffectsTickPostPhysicsSystem>(Lifetime.Singleton);
+            builder.Register<StatsRebuildModifiersPostPhysicsSystem>(Lifetime.Singleton);
 
             builder.Register<ITickPipeline, TickPipeline>(Lifetime.Singleton);
         }
