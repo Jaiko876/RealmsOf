@@ -7,6 +7,7 @@ namespace Riftborne.Core.Stores
     {
         void Set(GameEntityId id, ActionState action);
         bool TryConsume(GameEntityId id, out ActionState action);
+        void Remove(GameEntityId id);
         void Clear();
     }
 }

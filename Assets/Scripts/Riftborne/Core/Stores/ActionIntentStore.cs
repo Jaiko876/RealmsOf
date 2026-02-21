@@ -25,6 +25,8 @@ namespace Riftborne.Core.Stores
             action = ActionState.None;
             return false;
         }
+        
+        public void Remove(GameEntityId id) => _map.Remove(id);
 
         public void Clear() => _map.Clear();
     }

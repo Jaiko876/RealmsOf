@@ -39,5 +39,10 @@ namespace Riftborne.Core.Model
 
         public void SetTick(int tick) => Tick = tick;
         public void AdvanceTick() => Tick++;
+        
+        public bool RemoveEntity(GameEntityId id)
+        {
+            return _entities.Remove(id);
+        }
     }
 }

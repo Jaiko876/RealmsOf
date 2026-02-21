@@ -46,6 +46,7 @@ namespace Riftborne.Unity.Bootstrap
             ));
 
             // --- Entry point: соберёт runtime scope и запустит матч ---
+            builder.Register<SpawningRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<StatsRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<PhysicRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<SystemsRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();

@@ -20,5 +20,24 @@ namespace Riftborne.Core.Model
         {
             _map.Remove(playerId);
         }
+        
+        public void RemoveByEntity(GameEntityId entityId)
+        {
+            PlayerId found = default;
+            bool has = false;
+
+            foreach (var kv in _map)
+            {
+                if (kv.Value.Equals(entityId))
+                {
+                    found = kv.Key;
+                    has = true;
+                    break;
+                }
+            }
+
+            if (has)
+                _map.Remove(found);
+        }
     }
 }

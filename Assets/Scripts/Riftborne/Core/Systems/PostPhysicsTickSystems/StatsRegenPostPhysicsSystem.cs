@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Riftborne.Core.Model;
 using Riftborne.Core.Simulation;
-using Riftborne.Core.Stores;
 using Riftborne.Core.Stats;
+using Riftborne.Core.Stores;
 
 namespace Riftborne.Core.Systems.PostPhysicsTickSystems
 {
@@ -27,6 +27,8 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
 
         // Fractional accumulation per entity (so regen works with any tick rate).
         private readonly Dictionary<GameEntityId, Accumulator> _acc = new Dictionary<GameEntityId, Accumulator>();
+
+        private readonly List<GameEntityId> _tmpKeys = new List<GameEntityId>(64);
 
         public StatsRegenPostPhysicsSystem(
             GameState state,
@@ -71,8 +73,19 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
                 _acc[id] = a;
             }
 
-            // Cleanup (optional): If you don't have despawn yet, keep it.
-            // Once despawn exists, remove accumulators for missing entities.
+            // Cleanup: remove accumulators for missing entities (despawn-safe).
+            if (_acc.Count > 0)
+            {
+                _tmpKeys.Clear();
+                foreach (var k in _acc.Keys) _tmpKeys.Add(k);
+
+                for (int i = 0; i < _tmpKeys.Count; i++)
+                {
+                    var id = _tmpKeys[i];
+                    if (!_state.Entities.ContainsKey(id))
+                        _acc.Remove(id);
+                }
+            }
         }
 
         private static void Accumulate(ref float acc, float perSecond, float dt)
