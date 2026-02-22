@@ -19,12 +19,17 @@ namespace Riftborne.Unity.Spawning
         }
 
         [SerializeField] private Entry[] prefabs;
-        private readonly IObjectResolver _resolver;
 
-        private readonly Dictionary<string, GameObject> _catalog = new Dictionary<string, GameObject>(StringComparer.Ordinal);
-        private readonly Dictionary<int, GameObject> _alive = new Dictionary<int, GameObject>();
+        private IObjectResolver _resolver;
 
-        public UnitySpawnBackend(IObjectResolver resolver)
+        private readonly Dictionary<string, GameObject> _catalog =
+            new Dictionary<string, GameObject>(StringComparer.Ordinal);
+
+        private readonly Dictionary<int, GameObject> _alive =
+            new Dictionary<int, GameObject>();
+
+        [Inject]
+        public void Construct(IObjectResolver resolver)
         {
             _resolver = resolver;
         }
@@ -32,12 +37,16 @@ namespace Riftborne.Unity.Spawning
         private void Awake()
         {
             _catalog.Clear();
-            if (prefabs == null) return;
+
+            if (prefabs == null)
+                return;
 
             for (int i = 0; i < prefabs.Length; i++)
             {
                 var e = prefabs[i];
-                if (string.IsNullOrEmpty(e.Key) || e.Prefab == null) continue;
+                if (string.IsNullOrEmpty(e.Key) || e.Prefab == null)
+                    continue;
+
                 _catalog[e.Key] = e.Prefab;
             }
         }
@@ -51,8 +60,10 @@ namespace Riftborne.Unity.Spawning
                 throw new InvalidOperationException("Unknown prefabKey: " + prefabKey);
 
             var go = Instantiate(prefab, new Vector3(x, y, 0f), Quaternion.identity);
-            
-            _resolver.InjectGameObject(go);
+
+            // ВАЖНО: Inject только если resolver реально есть
+            if (_resolver != null)
+                _resolver.InjectGameObject(go);
 
             // важно: проставить id до регистрации body
             var body = go.GetComponentInChildren<PhysicsBodyAuthoring>(true);

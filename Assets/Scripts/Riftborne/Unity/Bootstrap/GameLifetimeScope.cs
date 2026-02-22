@@ -4,6 +4,7 @@ using Riftborne.Configs;
 using Riftborne.Core.Model;
 using Riftborne.Core.Simulation;
 using Riftborne.Unity.Bootstrap.Runtime;
+using Riftborne.Unity.Debugging;
 using Riftborne.Unity.Input;
 using Riftborne.Unity.View;
 using UnityEngine;
@@ -56,6 +57,7 @@ namespace Riftborne.Unity.Bootstrap
             builder.Register<StoresRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             
             builder.RegisterEntryPoint<GameRuntimeComposer>();
+            
             
             // --- Scene components (в root, чтобы composer мог их найти) ---
             builder.RegisterComponentInHierarchy<PlayerView>();

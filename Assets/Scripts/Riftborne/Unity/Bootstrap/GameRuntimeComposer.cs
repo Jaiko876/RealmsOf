@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Riftborne.Core.Simulation;
 using Riftborne.Unity.Bootstrap.Runtime;
+using Riftborne.Unity.Debugging;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -55,6 +56,8 @@ namespace Riftborne.Unity.Bootstrap
                 {
                     _initializers[i].Initialize(builder);
                 }
+                builder.RegisterComponentInHierarchy<PlayerStatsDebugLog>();
+
             });
         }
     }
