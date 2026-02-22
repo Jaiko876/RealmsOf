@@ -42,7 +42,7 @@ namespace Riftborne.Unity.View
         [Inject]
         public void Construct(GameState gameState) => _gameState = gameState;
 
-        private void Awake()
+        private void Start()
         {
             _playerId = new PlayerId(playerId);
             _entityId = new GameEntityId(avatarEntityId);

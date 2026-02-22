@@ -3,9 +3,12 @@ using Riftborne.App.Time.Time;
 using Riftborne.Configs;
 using Riftborne.Core.Model;
 using Riftborne.Core.Simulation;
+using Riftborne.Core.Spawning;
 using Riftborne.Unity.Bootstrap.Runtime;
 using Riftborne.Unity.Debugging;
 using Riftborne.Unity.Input;
+using Riftborne.Unity.Spawning;
+using Riftborne.Unity.UI;
 using Riftborne.Unity.View;
 using UnityEngine;
 using VContainer;
@@ -45,6 +48,8 @@ namespace Riftborne.Unity.Bootstrap
                 tickDeltaTime: dt,
                 physicsSubsteps: 1
             ));
+            
+            builder.RegisterComponentInHierarchy<UnitySpawnBackend>().As<ISpawnBackend>();
 
             // --- Entry point: соберёт runtime scope и запустит матч ---
             builder.Register<SpawningRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
@@ -57,12 +62,6 @@ namespace Riftborne.Unity.Bootstrap
             builder.Register<StoresRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             
             builder.RegisterEntryPoint<GameRuntimeComposer>();
-            
-            
-            // --- Scene components (в root, чтобы composer мог их найти) ---
-            builder.RegisterComponentInHierarchy<PlayerView>();
-            builder.RegisterComponentInHierarchy<PlayerInputController>();
-            builder.RegisterComponentInHierarchy<PlayerInputAdapter>();
         }
     }
 }

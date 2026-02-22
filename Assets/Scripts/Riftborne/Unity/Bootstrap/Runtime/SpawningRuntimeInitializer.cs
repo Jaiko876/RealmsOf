@@ -17,9 +17,6 @@ namespace Riftborne.Unity.Bootstrap.Runtime
             // ids: старт с 1000, чтобы не конфликтовать с тем, что руками в сцене
             builder.Register<IEntityIdAllocator>(c => new SequentialEntityIdAllocator(1000), Lifetime.Singleton);
 
-            // Unity backend: должен быть компонентом в сцене
-            builder.RegisterComponentInHierarchy<UnitySpawnBackend>().As<ISpawnBackend>();
-
             builder.Register<IEntityLifecycle, EntityLifecycle>(Lifetime.Singleton);
 
             // command handlers + registrations

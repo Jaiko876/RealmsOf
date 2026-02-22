@@ -4,6 +4,9 @@ using System.Linq;
 using Riftborne.Core.Simulation;
 using Riftborne.Unity.Bootstrap.Runtime;
 using Riftborne.Unity.Debugging;
+using Riftborne.Unity.Input;
+using Riftborne.Unity.UI;
+using Riftborne.Unity.View;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -57,6 +60,12 @@ namespace Riftborne.Unity.Bootstrap
                     _initializers[i].Initialize(builder);
                 }
                 builder.RegisterComponentInHierarchy<PlayerStatsDebugLog>();
+                // --- Scene components (в root, чтобы composer мог их найти) ---
+                builder.RegisterComponentInHierarchy<PlayerHudBarsPresenter>();
+                builder.RegisterComponentInHierarchy<WorldStaggerBarView>();
+                builder.RegisterComponentInHierarchy<PlayerView>();
+                builder.RegisterComponentInHierarchy<PlayerInputController>();
+                builder.RegisterComponentInHierarchy<PlayerInputAdapter>();
 
             });
         }
