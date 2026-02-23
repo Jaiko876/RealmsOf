@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60be3b548827498b8b1ec6fa3bb744d4, type: 3}
   m_Name: StatsConfig
   m_EditorClassIdentifier: Riftborne.Configs::Riftborne.Configs.StatsConfigAsset
-  HpMax: 200
+  HpMax: 300
   StaminaMax: 200
   StaggerMax: 100
   Attack: 10
   Defense: 0
   MoveSpeed: 1
   AttackSpeed: 1
+  ChargeSpeed: 1
   StaggerResist: 0
   HpRegenPerSec: 1
   StaminaRegenPerSec: 12

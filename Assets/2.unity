@@ -13115,6 +13115,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 5100538786569759410, guid: f11ce9458ea7d8d469c9419928e409d5,
+        type: 3}
+      propertyPath: attackLayerBlendInSeconds
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5100538786569759410, guid: f11ce9458ea7d8d469c9419928e409d5,
+        type: 3}
+      propertyPath: attackLayerBlendOutSeconds
+      value: 0.12
+      objectReference: {fileID: 0}
     - target: {fileID: 6096784165659423105, guid: f11ce9458ea7d8d469c9419928e409d5,
         type: 3}
       propertyPath: m_LocalPosition.x

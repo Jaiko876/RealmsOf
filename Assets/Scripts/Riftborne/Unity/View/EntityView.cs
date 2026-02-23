@@ -35,6 +35,16 @@ namespace Riftborne.Unity.View
 
         private static readonly int AttackAnimSpeedHash = Animator.StringToHash("AttackAnimSpeed");
         private static readonly int ChargeAnimSpeedHash = Animator.StringToHash("ChargeAnimSpeed");
+        
+        [Header("Animator Layers")]
+        [SerializeField] private string attackLayerName = "Attack Layer";
+        [SerializeField] private string attackStateTag = "Attack";
+        [SerializeField] private float attackLayerBlendInSeconds = 0.05f;
+        [SerializeField] private float attackLayerBlendOutSeconds = 7.5f;
+
+        private int _attackLayerIndex = -1;
+        private int _attackTagHash;
+        private float _attackLayerWeight;
 
         private GameState _gameState;
         private GameEntityId _entityId;
@@ -51,6 +61,18 @@ namespace Riftborne.Unity.View
 
             if (visualRoot == null)
                 visualRoot = transform;
+            
+            if (animator != null)
+            {
+                _attackLayerIndex = animator.GetLayerIndex(attackLayerName);
+                _attackTagHash = Animator.StringToHash(attackStateTag);
+
+                if (_attackLayerIndex >= 0)
+                {
+                    _attackLayerWeight = 0f;
+                    animator.SetLayerWeight(_attackLayerIndex, 0f);
+                }
+            }
 
             if (flipRoot == null)
             {
@@ -125,16 +147,59 @@ namespace Riftborne.Unity.View
 
             SyncCharge(a.Charge01, facing);
 
+            ApplyAttackLayerWeight(a);
+
             if (a.Action != ActionState.None && a.ActionTick != _lastActionTick)
             {
                 _lastActionTick = a.ActionTick;
 
-                animator.ResetTrigger(AtkLightHash);
-                animator.ResetTrigger(AtkHeavyHash);
-
                 if (a.Action == ActionState.LightAttack) animator.SetTrigger(AtkLightHash);
                 else if (a.Action == ActionState.HeavyAttack) animator.SetTrigger(AtkHeavyHash);
             }
+        }
+        
+        private void ApplyAttackLayerWeight(AnimationState a)
+        {
+            if (animator == null) return;
+            if (_attackLayerIndex < 0) return;
+            if (_attackLayerIndex >= animator.layerCount) return;
+
+            bool inAttack = IsAttackPlayingOnLayer();
+
+            bool wantsByState =
+                a.HeavyCharging
+                || a.Action == ActionState.LightAttack
+                || a.Action == ActionState.HeavyAttack;
+
+            float target = (wantsByState || inAttack) ? 1f : 0f;
+
+            float tau = target > _attackLayerWeight ? attackLayerBlendInSeconds : attackLayerBlendOutSeconds;
+            _attackLayerWeight = Damp01(_attackLayerWeight, target, tau, Time.deltaTime);
+
+            animator.SetLayerWeight(_attackLayerIndex, _attackLayerWeight);
+        }
+
+        private bool IsAttackPlayingOnLayer()
+        {
+            var cur = animator.GetCurrentAnimatorStateInfo(_attackLayerIndex);
+            if (cur.tagHash == _attackTagHash)
+                return true;
+
+            if (!animator.IsInTransition(_attackLayerIndex))
+                return false;
+
+            var next = animator.GetNextAnimatorStateInfo(_attackLayerIndex);
+            return next.tagHash == _attackTagHash;
+        }
+
+        private static float Damp01(float current, float target, float tauSeconds, float dt)
+        {
+            if (tauSeconds <= 0f) return target;
+            if (dt <= 0f) return current;
+
+            // Экспоненциальное приближение: мягко, без "ступеньки" в конце.
+            float k = 1f - Mathf.Exp(-dt / tauSeconds);
+            return Mathf.Lerp(current, target, k);
         }
     }
 }
