@@ -26,7 +26,6 @@ namespace Riftborne.Configs
                 _combatInput.HeavyThresholdBaseTicks,
                 _combatInput.FullChargeExtraBaseTicks,
                 _combatInput.LightCooldownBaseTicks,
-                _combatInput.HeavyCooldownBaseTicks,
                 _combatInput.MinAttackSpeed,
                 _combatInput.MaxAttackSpeed,
                 _combatInput.MinChargeSpeed,
@@ -36,7 +35,7 @@ namespace Riftborne.Configs
             => new StatsToPhysicsTuning(_statsToPhysics.MinMoveSpeedMultiplier, _statsToPhysics.MaxMoveSpeedMultiplier);
 
         public InputTuning Input
-            => new InputTuning(_input.FacingDeadzone);
+            => new InputTuning(_input.FacingDeadzone, _input.MoveSpeedDeadzone01);
 
         public PhysicsProbesTuning PhysicsProbes
             => new PhysicsProbesTuning(
@@ -63,7 +62,6 @@ namespace Riftborne.Configs
             public int FullChargeExtraBaseTicks;
 
             public int LightCooldownBaseTicks;
-            public int HeavyCooldownBaseTicks;
 
             public float MinAttackSpeed;
             public float MaxAttackSpeed;
@@ -76,7 +74,6 @@ namespace Riftborne.Configs
                 HeavyThresholdBaseTicks = 18,
                 FullChargeExtraBaseTicks = 42,
                 LightCooldownBaseTicks = 18,
-                HeavyCooldownBaseTicks = 26,
                 MinAttackSpeed = 0.20f,
                 MaxAttackSpeed = 3.00f,
                 MinChargeSpeed = 0.20f,
@@ -101,10 +98,12 @@ namespace Riftborne.Configs
         private struct InputSection
         {
             public float FacingDeadzone;
+            public float MoveSpeedDeadzone01;
 
             public static InputSection Default => new InputSection
             {
-                FacingDeadzone = 0.10f
+                FacingDeadzone = 0.10f,
+                MoveSpeedDeadzone01 = 0.01f
             };
         }
 

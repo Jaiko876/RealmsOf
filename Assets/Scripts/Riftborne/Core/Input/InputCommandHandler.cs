@@ -1,4 +1,6 @@
+using System;
 using Riftborne.Core.Commands;
+using Riftborne.Core.Config;
 using Riftborne.Core.Physics.Model;
 using Riftborne.Core.Stores;
 
@@ -7,19 +9,24 @@ namespace Riftborne.Core.Input
     public sealed class InputCommandHandler : ICommandHandler<InputCommand>
     {
         private readonly IMotorInputStore _motorInputs;
+        private readonly InputTuning _tuning;
 
-        public InputCommandHandler(IMotorInputStore motorInputs)
+        public InputCommandHandler(IMotorInputStore motorInputs, IGameplayTuning gameplayTuning)
         {
-            _motorInputs = motorInputs;
+            _motorInputs = motorInputs ?? throw new ArgumentNullException(nameof(motorInputs));
+            if (gameplayTuning == null) throw new ArgumentNullException(nameof(gameplayTuning));
+
+            _tuning = gameplayTuning.Input;
         }
 
         public void Handle(InputCommand command)
         {
             var jumpPressed = (command.Buttons & InputButtons.JumpPressed) != 0;
-            var jumpHeld    = (command.Buttons & InputButtons.JumpHeld) != 0;
-            
+            var jumpHeld = (command.Buttons & InputButtons.JumpHeld) != 0;
+
             sbyte facing = 0;
-            const float dead = 0.1f;
+            float dead = _tuning.FacingDeadzone;
+
             if (command.Dx > dead) facing = 1;
             else if (command.Dx < -dead) facing = -1;
 
@@ -28,8 +35,7 @@ namespace Riftborne.Core.Input
                 command.Dx,
                 jumpPressed,
                 jumpHeld,
-                facing
-            );
+                facing);
 
             _motorInputs.Set(command.EntityId, input);
         }

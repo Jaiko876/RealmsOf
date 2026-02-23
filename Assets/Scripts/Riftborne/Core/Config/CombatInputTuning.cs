@@ -5,9 +5,8 @@ namespace Riftborne.Core.Config
         public readonly int HeavyThresholdBaseTicks;
         public readonly int FullChargeExtraBaseTicks;
 
-        public readonly int LightCooldownBaseTicks;
-        public readonly int HeavyCooldownBaseTicks;
-
+        public readonly int AttackCooldownBaseTicks;
+        
         public readonly float MinAttackSpeed;
         public readonly float MaxAttackSpeed;
 
@@ -17,8 +16,7 @@ namespace Riftborne.Core.Config
         public CombatInputTuning(
             int heavyThresholdBaseTicks,
             int fullChargeExtraBaseTicks,
-            int lightCooldownBaseTicks,
-            int heavyCooldownBaseTicks,
+            int attackCooldownBaseTicks,
             float minAttackSpeed,
             float maxAttackSpeed,
             float minChargeSpeed,
@@ -26,8 +24,7 @@ namespace Riftborne.Core.Config
         {
             HeavyThresholdBaseTicks = heavyThresholdBaseTicks;
             FullChargeExtraBaseTicks = fullChargeExtraBaseTicks;
-            LightCooldownBaseTicks = lightCooldownBaseTicks;
-            HeavyCooldownBaseTicks = heavyCooldownBaseTicks;
+            AttackCooldownBaseTicks = attackCooldownBaseTicks;
             MinAttackSpeed = minAttackSpeed;
             MaxAttackSpeed = maxAttackSpeed;
             MinChargeSpeed = minChargeSpeed;

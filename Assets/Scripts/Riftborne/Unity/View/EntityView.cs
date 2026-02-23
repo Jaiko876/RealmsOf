@@ -7,34 +7,36 @@ using AnimationState = Riftborne.Core.Model.Animation.AnimationState;
 
 namespace Riftborne.Unity.View
 {
-    public sealed class PlayerView : MonoBehaviour
+    public sealed class EntityView : MonoBehaviour
     {
-        [SerializeField] private int playerId = 0;
-        [SerializeField] private int avatarEntityId = 0;
+        [Header("Entity Binding")]
+        [SerializeField] private int entityId = 0;
 
         [Header("View Roots")]
-        [SerializeField] private Transform visualRoot;   // интерполяция позиции
-        [SerializeField] private Transform flipRoot;     // флип по X (спрайты/аниматор)
-        
+        [SerializeField] private Transform visualRoot;
+        [SerializeField] private Transform flipRoot;
+
         [Header("Animation")]
         [SerializeField] private Animator animator;
-        [SerializeField] private ChargeFullFlashView _flash;
-
-        private ActionState _prevAction;
+        [SerializeField] private ChargeFullFlashView flash;
 
         private static readonly int GroundedHash = Animator.StringToHash("Grounded");
         private static readonly int JustLandedHash = Animator.StringToHash("JustLanded");
-        private static readonly int Moving = Animator.StringToHash("Moving");
+        private static readonly int MovingHash = Animator.StringToHash("Moving");
         private static readonly int Speed01Hash = Animator.StringToHash("Speed01");
         private static readonly int AirSpeed01Hash = Animator.StringToHash("AirSpeed01");
         private static readonly int AirTHash = Animator.StringToHash("AirT");
+
         private static readonly int AtkLightHash = Animator.StringToHash("AtkLight");
         private static readonly int AtkHeavyHash = Animator.StringToHash("AtkHeavy");
+
         private static readonly int HeavyChargeHash = Animator.StringToHash("HeavyCharge");
         private static readonly int Charge01Hash = Animator.StringToHash("Charge01");
 
+        private static readonly int AttackAnimSpeedHash = Animator.StringToHash("AttackAnimSpeed");
+        private static readonly int ChargeAnimSpeedHash = Animator.StringToHash("ChargeAnimSpeed");
+
         private GameState _gameState;
-        private PlayerId _playerId;
         private GameEntityId _entityId;
 
         private bool _prevFull;
@@ -44,20 +46,17 @@ namespace Riftborne.Unity.View
 
         private void Start()
         {
-            _playerId = new PlayerId(playerId);
-            _entityId = new GameEntityId(avatarEntityId);
+            _entityId = new GameEntityId(entityId);
 
             if (visualRoot == null)
                 visualRoot = transform;
 
-            // По умолчанию: если flipRoot не задан — считаем что флипать надо animator.transform (или visualRoot).
             if (flipRoot == null)
             {
                 if (animator != null) flipRoot = animator.transform;
                 else flipRoot = visualRoot;
             }
 
-            _gameState.PlayerAvatars.Set(_playerId, _entityId);
             _gameState.GetOrCreateEntity(_entityId);
         }
 
@@ -65,7 +64,6 @@ namespace Riftborne.Unity.View
         {
             var e = _gameState.GetOrCreateEntity(_entityId);
 
-            // 1) Интерполяция позиции (как было)
             float alpha = 1f;
             var fd = Time.fixedDeltaTime;
             if (fd > 0f)
@@ -78,10 +76,7 @@ namespace Riftborne.Unity.View
             var y = Mathf.Lerp(e.PrevY, e.Y, alpha);
             visualRoot.position = new Vector3(x, y, 0f);
 
-            // 2) Facing: ФЛИПАЕМ ТОЛЬКО flipRoot (visualRoot не трогаем)
             ApplyFacing(e.Facing);
-
-            // 3) Анимация
             ApplyAnimation(e.AnimationState, e.Facing);
         }
 
@@ -99,12 +94,11 @@ namespace Riftborne.Unity.View
         {
             bool full = charge01 >= 0.999f;
 
-            if (_flash != null)
+            if (flash != null)
             {
-                _flash.SetFacing(facing);
-
+                flash.SetFacing(facing);
                 if (full && !_prevFull)
-                    _flash.PlayOnce();
+                    flash.PlayOnce();
             }
 
             _prevFull = full;
@@ -116,7 +110,7 @@ namespace Riftborne.Unity.View
 
             animator.SetBool(GroundedHash, a.Grounded);
             animator.SetBool(JustLandedHash, a.JustLanded);
-            animator.SetBool(Moving, a.Moving);
+            animator.SetBool(MovingHash, a.Moving);
 
             animator.SetFloat(Speed01Hash, a.Speed01);
             animator.SetFloat(AirSpeed01Hash, a.AirSpeed01);
@@ -125,10 +119,12 @@ namespace Riftborne.Unity.View
             animator.SetBool(HeavyChargeHash, a.HeavyCharging);
             animator.SetFloat(Charge01Hash, a.Charge01);
 
-            // ВАЖНО: раньше ты всегда передавал 1 -> ломало VFX при флипе
+            animator.SetFloat(AttackAnimSpeedHash, a.AttackAnimSpeed);
+            animator.SetFloat(ChargeAnimSpeedHash, a.ChargeAnimSpeed);
+
             SyncCharge(a.Charge01, facing);
 
-            if (a.Action != ActionState.None && a.Action != _prevAction)
+            if (a.Action != ActionState.None)
             {
                 animator.ResetTrigger(AtkLightHash);
                 animator.ResetTrigger(AtkHeavyHash);
@@ -136,8 +132,6 @@ namespace Riftborne.Unity.View
                 if (a.Action == ActionState.LightAttack) animator.SetTrigger(AtkLightHash);
                 else if (a.Action == ActionState.HeavyAttack) animator.SetTrigger(AtkHeavyHash);
             }
-
-            _prevAction = a.Action;
         }
     }
 }

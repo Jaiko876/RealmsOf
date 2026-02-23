@@ -1,3 +1,4 @@
+using System;
 using Riftborne.App.Commands;
 using Riftborne.App.Time.Time;
 using Riftborne.Configs;
@@ -6,11 +7,7 @@ using Riftborne.Core.Model;
 using Riftborne.Core.Simulation;
 using Riftborne.Core.Spawning;
 using Riftborne.Unity.Bootstrap.Runtime;
-using Riftborne.Unity.Debugging;
-using Riftborne.Unity.Input;
 using Riftborne.Unity.Spawning;
-using Riftborne.Unity.UI;
-using Riftborne.Unity.View;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -35,10 +32,10 @@ namespace Riftborne.Unity.Bootstrap
             builder.Register<GameState>(Lifetime.Singleton);
 
             // --- Configs (из инспектора) ---
-            if (_gameConfig == null) throw new System.InvalidOperationException("GameConfigAsset is not assigned in GameLifetimeScope.");
-            if (_motorConfig == null) throw new System.InvalidOperationException("MotorConfigAsset is not assigned in GameLifetimeScope.");
-            if (_statsConfig == null) throw new System.InvalidOperationException("StatsConfigAsset is not assigned in GameLifetimeScope.");
-            if (_tuningConfig == null) throw new System.InvalidOperationException("GameplayTuningAsset is not assigned in GameLifetimeScope.");
+            if (_gameConfig == null) throw new InvalidOperationException("GameConfigAsset is not assigned in GameLifetimeScope.");
+            if (_motorConfig == null) throw new InvalidOperationException("MotorConfigAsset is not assigned in GameLifetimeScope.");
+            if (_statsConfig == null) throw new InvalidOperationException("StatsConfigAsset is not assigned in GameLifetimeScope.");
+            if (_tuningConfig == null) throw new InvalidOperationException("GameplayTuningAsset is not assigned in GameLifetimeScope.");
            
             builder.RegisterInstance(_statsConfig);
             builder.RegisterInstance(_motorConfig);
@@ -55,6 +52,7 @@ namespace Riftborne.Unity.Bootstrap
             builder.RegisterComponentInHierarchy<UnitySpawnBackend>().As<ISpawnBackend>();
 
             // --- Entry point: соберёт runtime scope и запустит матч ---
+            builder.Register<AnimationsRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<SpawningRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<StatsRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<PhysicRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();

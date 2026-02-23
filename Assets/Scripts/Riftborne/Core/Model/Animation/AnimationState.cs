@@ -17,5 +17,7 @@
         public bool HeavyCharging;   // true когда держим и порог пройден
         public float Charge01;       // 0..1 прогресс (опционально)
         
+        public float AttackAnimSpeed;
+        public float ChargeAnimSpeed;
     }
 }

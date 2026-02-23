@@ -12055,6 +12055,26 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &1462963551 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2786707263373712057, guid: f11ce9458ea7d8d469c9419928e409d5,
+    type: 3}
+  m_PrefabInstance: {fileID: 8947748462939005693}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1462963562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1462963551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8965b02432564c41810b937448b426c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Riftborne.Unity::Riftborne.Unity.View.PlayerAvatarBinding
+  playerId: 0
+  avatarEntityId: 0
 --- !u!4 &1469351416 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6309599118117444222, guid: e8bae36b607017047ace9061609051d9,
@@ -13159,6 +13179,10 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2786707263373712057, guid: f11ce9458ea7d8d469c9419928e409d5,
+        type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 1462963562}
     - targetCorrespondingSourceObject: {fileID: 6014793330365075799, guid: f11ce9458ea7d8d469c9419928e409d5,
         type: 3}
       insertIndex: -1

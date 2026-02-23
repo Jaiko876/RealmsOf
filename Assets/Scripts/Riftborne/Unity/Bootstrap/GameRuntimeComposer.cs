@@ -61,9 +61,11 @@ namespace Riftborne.Unity.Bootstrap
                 }
                 builder.RegisterComponentInHierarchy<PlayerStatsDebugLog>();
                 // --- Scene components (в root, чтобы composer мог их найти) ---
+                builder.RegisterComponentInHierarchy<EntityView>();
+                builder.RegisterComponentInHierarchy<PlayerAvatarBinding>();
+                
                 builder.RegisterComponentInHierarchy<PlayerHudBarsPresenter>();
                 builder.RegisterComponentInHierarchy<WorldStaggerBarView>();
-                builder.RegisterComponentInHierarchy<PlayerView>();
                 builder.RegisterComponentInHierarchy<PlayerInputController>();
                 builder.RegisterComponentInHierarchy<PlayerInputAdapter>();
 

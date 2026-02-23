@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using Riftborne.Core.Commands;
+using Riftborne.Core.Config;
 using Riftborne.Core.Model;
 using Riftborne.Core.Model.Animation;
 using Riftborne.Core.Stats;
@@ -13,34 +15,7 @@ namespace Riftborne.Core.Input
         private readonly IAttackChargeStore _charge;
         private readonly IStatsStore _stats;
         private readonly IAttackCooldownStore _cooldowns;
-
-        // =========================
-        // Heavy charge (ChargeSpeed)
-        // =========================
-
-        // Сколько тиков надо держать, чтобы включить charge (при ChargeSpeed=1).
-        // При TickRate=50: 18 тиков ≈ 0.36s
-        private const int HeavyThresholdBaseTicks = 18;
-
-        // За сколько тиков после порога набираем Charge01 до 1 (при ChargeSpeed=1).
-        // При TickRate=50: 42 тика ≈ 0.84s
-        private const int FullChargeExtraBaseTicks = 42;
-
-        // =========================
-        // Attack cooldown (AttackSpeed)
-        // =========================
-
-        // Базовые кд (при AttackSpeed=1).
-        // Это ограничивает частоту появления intent-ов атак.
-        private const int LightCooldownBaseTicks = 18; // ~0.36s @ 50 tps
-        private const int HeavyCooldownBaseTicks = 26; // ~0.52s @ 50 tps
-
-        // Guard rails
-        private const float MinAttackSpeed = 0.20f;
-        private const float MaxAttackSpeed = 3.00f;
-
-        private const float MinChargeSpeed = 0.20f;
-        private const float MaxChargeSpeed = 3.00f;
+        private readonly CombatInputTuning _tuning;
 
         private struct Hold
         {
@@ -54,18 +29,23 @@ namespace Riftborne.Core.Input
             IActionIntentStore actions,
             IAttackChargeStore charge,
             IStatsStore stats,
-            IAttackCooldownStore cooldowns)
+            IAttackCooldownStore cooldowns,
+            IGameplayTuning gameplayTuning)
         {
-            _actions = actions;
-            _charge = charge;
-            _stats = stats;
-            _cooldowns = cooldowns;
+            _actions = actions ?? throw new ArgumentNullException(nameof(actions));
+            _charge = charge ?? throw new ArgumentNullException(nameof(charge));
+            _stats = stats ?? throw new ArgumentNullException(nameof(stats));
+            _cooldowns = cooldowns ?? throw new ArgumentNullException(nameof(cooldowns));
+
+            if (gameplayTuning == null)
+                throw new ArgumentNullException(nameof(gameplayTuning));
+
+            _tuning = gameplayTuning.CombatInput;
         }
 
         public void Handle(InputCommand command)
         {
             var id = command.EntityId;
-
             var held = (command.Buttons & InputButtons.AttackHeld) != 0;
 
             _hold.TryGetValue(id, out var h);
@@ -74,35 +54,24 @@ namespace Riftborne.Core.Input
             if (heldStarted)
                 h.HeldTicks = 0;
 
-            // тик удержания
             if (held)
                 h.HeldTicks++;
 
-            // отпускание (release edge)
             bool released = (!held && h.PrevHeld);
 
-            // вычислим масштабированные тики heavy threshold и full charge от ChargeSpeed
-            int heavyThresholdTicks = HeavyThresholdBaseTicks;
-            int fullChargeExtraTicks = FullChargeExtraBaseTicks;
+            // ===== Charge (ChargeSpeed) =====
+            float chargeSpeed = GetStatClamped(id, StatId.ChargeSpeed, 1f, _tuning.MinChargeSpeed, _tuning.MaxChargeSpeed);
 
-            float chargeSpeed = GetEffectiveStatOrDefault(id, StatId.ChargeSpeed, 1f);
-            chargeSpeed = Clamp(chargeSpeed, MinChargeSpeed, MaxChargeSpeed);
+            int heavyThresholdTicks = CeilDiv(_tuning.HeavyThresholdBaseTicks, chargeSpeed);
+            int fullChargeExtraTicks = CeilDiv(_tuning.FullChargeExtraBaseTicks, chargeSpeed);
 
-            heavyThresholdTicks = CeilDiv(HeavyThresholdBaseTicks, chargeSpeed);
-            fullChargeExtraTicks = CeilDiv(FullChargeExtraBaseTicks, chargeSpeed);
-
-            // вычислим charging + charge01
             bool charging = held && (h.HeldTicks >= heavyThresholdTicks);
-            float charge01 = 0f;
 
+            float charge01 = 0f;
             if (charging)
             {
                 int over = h.HeldTicks - heavyThresholdTicks;
-                if (over <= 0)
-                {
-                    charge01 = 0f;
-                }
-                else
+                if (over > 0)
                 {
                     float t = over / (float)fullChargeExtraTicks;
                     if (t < 0f) t = 0f;
@@ -111,26 +80,24 @@ namespace Riftborne.Core.Input
                 }
             }
 
-            // пишем store (персистентный визуальный флаг)
             _charge.Set(id, charging, charge01);
 
-            // на отпускании решаем, что было: light или heavy
-            // + гейт по кд, зависящему от AttackSpeed
+            // ===== Release -> fire intent with ONE cooldown (AttackSpeed) =====
             if (released)
             {
                 bool heavy = h.HeldTicks >= heavyThresholdTicks;
-
                 int tick = command.Tick;
 
                 if (_cooldowns.CanAttack(id, tick))
                 {
-                    int cooldownTicks = ComputeCooldownTicks(id, heavy);
-                    _cooldowns.ConsumeAttack(id, tick, cooldownTicks);
+                    // Единый кулдаун на "атаку вообще", зависит только от AttackSpeed.
+                    // В тюнинге используем LightCooldownBaseTicks как общий параметр (по смыслу это AttackCooldownBaseTicks).
+                    int cooldownTicks = ComputeAttackCooldownTicks(id);
 
+                    _cooldowns.ConsumeAttack(id, tick, cooldownTicks);
                     _actions.Set(id, heavy ? ActionState.HeavyAttack : ActionState.LightAttack);
                 }
 
-                // сброс (даже если кд не позволил)
                 h.HeldTicks = 0;
                 _charge.Set(id, false, 0f);
             }
@@ -139,34 +106,28 @@ namespace Riftborne.Core.Input
             _hold[id] = h;
         }
 
-        private int ComputeCooldownTicks(GameEntityId id, bool heavy)
+        private int ComputeAttackCooldownTicks(GameEntityId id)
         {
-            float attackSpeed = GetEffectiveStatOrDefault(id, StatId.AttackSpeed, 1f);
-            attackSpeed = Clamp(attackSpeed, MinAttackSpeed, MaxAttackSpeed);
+            float attackSpeed = GetStatClamped(id, StatId.AttackSpeed, 1f, _tuning.MinAttackSpeed, _tuning.MaxAttackSpeed);
 
-            int baseTicks = heavy ? HeavyCooldownBaseTicks : LightCooldownBaseTicks;
-            return CeilDiv(baseTicks, attackSpeed);
+            // ВАЖНО: один базовый параметр. Сейчас берём LightCooldownBaseTicks как "общий".
+            // Если хочешь — позже переименуем в CombatInputTuning на AttackCooldownBaseTicks и уберём HeavyCooldownBaseTicks из ассета.
+            return CeilDiv(_tuning.AttackCooldownBaseTicks, attackSpeed);
         }
 
-        private float GetEffectiveStatOrDefault(GameEntityId id, StatId stat, float fallback)
+        private float GetStatClamped(GameEntityId id, StatId stat, float fallback, float min, float max)
         {
-            if (_stats == null)
-                return fallback;
+            float v = fallback;
 
-            if (!_stats.TryGet(id, out var s) || !s.IsInitialized)
-                return fallback;
+            if (_stats.TryGet(id, out var s) && s.IsInitialized)
+                v = s.GetEffective(stat);
 
-            return s.GetEffective(stat);
-        }
-
-        private static float Clamp(float v, float min, float max)
-        {
             if (v < min) return min;
             if (v > max) return max;
             return v;
         }
 
-        // ceil(baseTicks / speed), но без Math/MathF
+        // ceil(baseTicks / speed), без Math/MathF (C#9 friendly)
         private static int CeilDiv(int baseTicks, float speed)
         {
             if (baseTicks <= 0) return 0;
@@ -176,9 +137,7 @@ namespace Riftborne.Core.Input
             int i = (int)raw;
             if (raw > i) i++;
 
-            // чтобы не получить 0 тиков при огромной speed
             if (i < 1) i = 1;
-
             return i;
         }
     }

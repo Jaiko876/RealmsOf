@@ -1,4 +1,6 @@
 ﻿using System;
+using Riftborne.Core.Animation.Abstractions;
+using Riftborne.Core.Config;
 using Riftborne.Core.Model;
 using Riftborne.Core.Model.Animation;
 using Riftborne.Core.Physics.Model;
@@ -12,19 +14,29 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
         private readonly MotorParams _motor;
         private readonly IActionIntentStore _actions;
         private readonly IAttackChargeStore _charge;
+        private readonly IAnimationModifiersProvider _animMods;
+        private readonly InputTuning _inputTuning;
 
-        private const float SpeedDeadZone01 = 0.01f;
-
-        public AnimationStatePostPhysicsSystem(GameState state, MotorParams motor, IActionIntentStore actions, IAttackChargeStore charge)
+        public AnimationStatePostPhysicsSystem(
+            GameState state,
+            MotorParams motor,
+            IActionIntentStore actions,
+            IAttackChargeStore charge,
+            IAnimationModifiersProvider animMods,
+            IGameplayTuning tuning)
         {
-            _state = state;
-            _motor = motor;
-            _actions = actions;
-            _charge = charge;
+            _state = state ?? throw new ArgumentNullException(nameof(state));
+            _motor = motor ?? throw new ArgumentNullException(nameof(motor));
+            _actions = actions ?? throw new ArgumentNullException(nameof(actions));
+            _charge = charge ?? throw new ArgumentNullException(nameof(charge));
+            _animMods = animMods ?? throw new ArgumentNullException(nameof(animMods));
+            _inputTuning = (tuning ?? throw new ArgumentNullException(nameof(tuning))).Input;
         }
 
         public void Tick(int tick)
         {
+            float speedDeadZone01 = _inputTuning.MoveSpeedDeadzone01;
+
             foreach (var kv in _state.Entities)
             {
                 var e = kv.Value;
@@ -35,14 +47,12 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
                 a.Grounded = e.Grounded;
                 a.JustLanded = (!e.PrevGrounded && e.Grounded);
 
-                // Speed01
                 var speedAbs = Math.Abs(e.Vx);
                 a.Speed01 = Normalize01(speedAbs, _motor.MaxSpeedX);
-                a.Speed01 = ApplyDeadZone01(a.Speed01, SpeedDeadZone01);
-                
+                a.Speed01 = ApplyDeadZone01(a.Speed01, speedDeadZone01);
+
                 a.Moving = a.Speed01 > 0f;
 
-                // Air params
                 if (e.Grounded)
                 {
                     a.AirSpeed01 = 0f;
@@ -51,11 +61,9 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
                 else
                 {
                     a.AirSpeed01 = a.Speed01;
-
-                    // Apex (Vy=0) -> 0.5, вверх -> (0..0.5), вниз -> (0.5..1)
                     a.AirT = ComputeAirT(e.Vy, _motor.JumpVelocity, _motor.MaxFallSpeed);
                 }
-                
+
                 if (_charge.TryGet(e.Id, out var charging, out var charge01))
                 {
                     a.HeavyCharging = charging;
@@ -67,8 +75,10 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
                     a.Charge01 = 0f;
                 }
 
-                
-                // Action (одноразовый “event” на тик)
+                var mods = _animMods.Get(e.Id);
+                a.AttackAnimSpeed = mods.AttackAnimSpeed;
+                a.ChargeAnimSpeed = mods.ChargeAnimSpeed;
+
                 if (_actions.TryConsume(e.Id, out var act))
                     a.Action = act;
                 else
@@ -90,12 +100,6 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
             return v;
         }
 
-        /// <summary>
-        /// AirT in [0..1]:
-        /// 0   = сильный подъём (Vy ~ +jumpVel)
-        /// 0.5 = вершина (Vy ~ 0)
-        /// 1   = сильное падение (Vy ~ -maxFall)
-        /// </summary>
         private static float ComputeAirT(float vy, float jumpVel, float maxFall)
         {
             if (jumpVel < 0.0001f) jumpVel = 0.0001f;
@@ -103,16 +107,12 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
 
             if (vy >= 0f)
             {
-                // Up: vy in [0..jumpVel] => t in [0.5..0]
-                var u = Clamp01(vy / jumpVel);      // 0..1
-                return 0.5f * (1f - u);             // 0.5..0
+                var u = Clamp01(vy / jumpVel);
+                return 0.5f * (1f - u);
             }
-            else
-            {
-                // Down: vy in [-maxFall..0] => t in [1..0.5]
-                var d = Clamp01((-vy) / maxFall);   // 0..1
-                return 0.5f + 0.5f * d;             // 0.5..1
-            }
+
+            var d = Clamp01((-vy) / maxFall);
+            return 0.5f + 0.5f * d;
         }
 
         private static float Clamp01(float v)
