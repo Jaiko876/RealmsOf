@@ -3,6 +3,7 @@ using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
 using Riftborne.Core.Physics.Registry;
 using Riftborne.Core.Simulation;
+using Riftborne.Core.Stats;
 using Riftborne.Physics;
 using Riftborne.Physics.Unity2D;
 using VContainer;
@@ -34,6 +35,7 @@ namespace Riftborne.Unity.Bootstrap.Runtime
             }, Lifetime.Singleton);
 
             builder.Register<IBodyProvider<GameEntityId>, BodyRegistry>(Lifetime.Singleton);
+            builder.Register<IPhysicsModifiersProvider, StatsPhysicsModifiersProvider>(Lifetime.Singleton);
 
             builder.Register<IPhysicsWorld, Unity2DPhysicsWorld>(Lifetime.Singleton);
             builder.Register<IGroundSensor, Unity2DGroundSensor>(Lifetime.Singleton);
