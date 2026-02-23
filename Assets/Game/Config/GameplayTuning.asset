@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51cdb593e2054368963caf7aae3f6efb, type: 3}
+  m_Name: GameplayTuning
+  m_EditorClassIdentifier: Riftborne.Configs::Riftborne.Configs.GameplayTuningAsset
+  _combatInput:
+    HeavyThresholdBaseTicks: 18
+    FullChargeExtraBaseTicks: 42
+    LightCooldownBaseTicks: 18
+    HeavyCooldownBaseTicks: 26
+    MinAttackSpeed: 0.2
+    MaxAttackSpeed: 3
+    MinChargeSpeed: 0.2
+    MaxChargeSpeed: 3
+  _statsToPhysics:
+    MinMoveSpeedMultiplier: 0.1
+    MaxMoveSpeedMultiplier: 3
+  _input:
+    FacingDeadzone: 0.1
+  _physicsProbes:
+    GroundSkin: 0.02
+    GroundCheckDepth: 0.08
+    GroundWidthMultiplier: 0.9
+    GroundProbeHeight: 0.02
+    WallSkin: 0.02
+    WallCheckDistance: 0.08
+    WallProbeThickness: 0.02
+    WallHeightShrink: 0.12
+    WallMinWallNormalAbsX: 0.6
+  _physicsWorld:
+    MaxSubSteps: 8

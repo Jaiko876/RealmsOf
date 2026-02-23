@@ -21,6 +21,7 @@ namespace Riftborne.Unity.Bootstrap
         [SerializeField] private GameConfigAsset _gameConfig;
         [SerializeField] private MotorConfigAsset _motorConfig;
         [SerializeField] private StatsConfigAsset _statsConfig;
+        [SerializeField] private GameplayTuningAsset _tuningConfig;
         
 
         protected override void Configure(IContainerBuilder builder)
@@ -36,10 +37,12 @@ namespace Riftborne.Unity.Bootstrap
             if (_gameConfig == null) throw new System.InvalidOperationException("GameConfigAsset is not assigned in GameLifetimeScope.");
             if (_motorConfig == null) throw new System.InvalidOperationException("MotorConfigAsset is not assigned in GameLifetimeScope.");
             if (_statsConfig == null) throw new System.InvalidOperationException("StatsConfigAsset is not assigned in GameLifetimeScope.");
+            if (_tuningConfig == null) throw new System.InvalidOperationException("GameplayTuningAsset is not assigned in GameLifetimeScope.");
            
             builder.RegisterInstance(_statsConfig);
             builder.RegisterInstance(_motorConfig);
             builder.RegisterInstance(_gameConfig);
+            builder.RegisterInstance(_tuningConfig);
 
             // Simulation parameters (из game config)
             var dt = 1f / Mathf.Max(1, _gameConfig.TickRate);
