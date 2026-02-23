@@ -40,6 +40,7 @@ namespace Riftborne.Unity.View
         private GameEntityId _entityId;
 
         private bool _prevFull;
+        private int _lastActionTick = int.MinValue;
 
         [Inject]
         public void Construct(GameState gameState) => _gameState = gameState;
@@ -124,8 +125,10 @@ namespace Riftborne.Unity.View
 
             SyncCharge(a.Charge01, facing);
 
-            if (a.Action != ActionState.None)
+            if (a.Action != ActionState.None && a.ActionTick != _lastActionTick)
             {
+                _lastActionTick = a.ActionTick;
+
                 animator.ResetTrigger(AtkLightHash);
                 animator.ResetTrigger(AtkHeavyHash);
 

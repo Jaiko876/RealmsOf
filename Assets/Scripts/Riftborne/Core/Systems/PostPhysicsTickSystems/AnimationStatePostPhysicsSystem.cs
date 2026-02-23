@@ -80,9 +80,15 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
                 a.ChargeAnimSpeed = mods.ChargeAnimSpeed;
 
                 if (_actions.TryConsume(e.Id, out var act))
+                {
                     a.Action = act;
+                    a.ActionTick = tick; // <-- маркер события
+                }
                 else
+                {
                     a.Action = ActionState.None;
+                    // ActionTick НЕ трогаем: он хранит "последний event", view по нему edge-detect делает.
+                }
 
                 e.SetAnimationState(a);
             }
