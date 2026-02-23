@@ -27,6 +27,12 @@ MonoBehaviour:
   _input:
     FacingDeadzone: 0.1
   _physicsProbes:
+    GroundLayers:
+      serializedVersion: 2
+      m_Bits: 8
+    WallLayers:
+      serializedVersion: 2
+      m_Bits: 8
     GroundSkin: 0.02
     GroundCheckDepth: 0.08
     GroundWidthMultiplier: 0.9

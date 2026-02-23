@@ -1,6 +1,7 @@
 ﻿using Riftborne.Configs;
 using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
+using Riftborne.Core.Physics.Provider;
 using Riftborne.Core.Physics.Registry;
 using Riftborne.Core.Simulation;
 using Riftborne.Core.Stats;

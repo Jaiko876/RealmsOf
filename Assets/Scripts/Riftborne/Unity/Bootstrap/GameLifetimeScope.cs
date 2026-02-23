@@ -1,6 +1,7 @@
 using Riftborne.App.Commands;
 using Riftborne.App.Time.Time;
 using Riftborne.Configs;
+using Riftborne.Core.Config;
 using Riftborne.Core.Model;
 using Riftborne.Core.Simulation;
 using Riftborne.Core.Spawning;
@@ -42,14 +43,13 @@ namespace Riftborne.Unity.Bootstrap
             builder.RegisterInstance(_statsConfig);
             builder.RegisterInstance(_motorConfig);
             builder.RegisterInstance(_gameConfig);
-            builder.RegisterInstance(_tuningConfig);
+            builder.RegisterInstance(_tuningConfig).As<IGameplayTuning>(); 
 
-            // Simulation parameters (из game config)
             var dt = 1f / Mathf.Max(1, _gameConfig.TickRate);
             builder.RegisterInstance(new SimulationParameters(
                 unitsPerTick: _gameConfig.UnitsPerTick,
                 tickDeltaTime: dt,
-                physicsSubsteps: 1
+                physicsSubsteps: Mathf.Max(1, _tuningConfig.PhysicsWorld.MaxSubSteps) // <-- из tuning
             ));
             
             builder.RegisterComponentInHierarchy<UnitySpawnBackend>().As<ISpawnBackend>();

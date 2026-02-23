@@ -1,3 +1,5 @@
+using System;
+using Riftborne.Core.Config;
 using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
 using UnityEngine;
@@ -10,18 +12,19 @@ namespace Riftborne.Physics.Unity2D
         private readonly ContactFilter2D _filter;
         private readonly RaycastHit2D[] _hits = new RaycastHit2D[4];
 
-        // Настройки “ног”
-        private const float Skin = 0.02f;        // чуть внутрь коллайдера
-        private const float CheckDepth = 0.08f;  // насколько вниз проверяем
+        private readonly PhysicsProbesTuning.GroundProbeTuning _tuning;
 
-        public Unity2DGroundSensor(IBodyProvider<GameEntityId> bodies)
+        public Unity2DGroundSensor(IBodyProvider<GameEntityId> bodies, IGameplayTuning tuning)
         {
-            _bodies = bodies;
+            if (bodies == null) throw new ArgumentNullException(nameof(bodies));
+            if (tuning == null) throw new ArgumentNullException(nameof(tuning));
 
-            // Фильтр: только "Ground" слои, без триггеров
+            _bodies = bodies;
+            _tuning = tuning.PhysicsProbes.Ground;
+
             _filter = new ContactFilter2D();
             _filter.useLayerMask = true;
-            _filter.layerMask = LayerMask.GetMask("Ground"); // создай слой Ground и назначь его полу
+            _filter.layerMask = tuning.PhysicsProbes.Ground.GroundLayerMask;
             _filter.useTriggers = false;
         }
 
@@ -36,22 +39,26 @@ namespace Riftborne.Physics.Unity2D
 
             var b = u.Collider.bounds;
 
-            // Центр “ног” — по x по центру, по y на нижней границе
-            var origin = new Vector2(b.center.x, b.min.y + Skin);
+            var origin = new Vector2(b.center.x, b.min.y + _tuning.Skin);
 
-            // Ширина бокса: чуть уже коллайдера (чтобы не цеплять стены)
-            var size = new Vector2(b.size.x * 0.9f, 0.02f);
+            var widthMul = _tuning.WidthMultiplier;
+            if (widthMul < 0.05f) widthMul = 0.05f;
+            if (widthMul > 1.00f) widthMul = 1.00f;
 
-            // Cast вниз
-            int count = Physics2D.BoxCast(origin, size, 0f, Vector2.down, _filter, _hits, CheckDepth);
+            var probeH = _tuning.ProbeHeight;
+            if (probeH < 0.001f) probeH = 0.001f;
+
+            var size = new Vector2(b.size.x * widthMul, probeH);
+
+            int count = Physics2D.BoxCast(origin, size, 0f, Vector2.down, _filter, _hits, _tuning.CheckDepth);
             for (int i = 0; i < count; i++)
             {
                 var c = _hits[i].collider;
                 if (c != null && c != u.Collider)
                     return true;
             }
-            return false;
 
+            return false;
         }
     }
 }

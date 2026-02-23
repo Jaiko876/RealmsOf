@@ -44,14 +44,15 @@ namespace Riftborne.Configs
                     _physicsProbes.GroundSkin,
                     _physicsProbes.GroundCheckDepth,
                     _physicsProbes.GroundWidthMultiplier,
-                    _physicsProbes.GroundProbeHeight),
+                    _physicsProbes.GroundProbeHeight,
+                    _physicsProbes.GroundLayers.value),
                 new PhysicsProbesTuning.WallProbeTuning(
                     _physicsProbes.WallSkin,
                     _physicsProbes.WallCheckDistance,
                     _physicsProbes.WallProbeThickness,
                     _physicsProbes.WallHeightShrink,
-                    _physicsProbes.WallMinWallNormalAbsX));
-
+                    _physicsProbes.WallMinWallNormalAbsX,
+                    _physicsProbes.WallLayers.value));
         public PhysicsWorldTuning PhysicsWorld
             => new PhysicsWorldTuning(_physicsWorld.MaxSubSteps);
 
@@ -110,6 +111,10 @@ namespace Riftborne.Configs
         [System.Serializable]
         private struct PhysicsProbesSection
         {
+            [Header("Layer Masks (multi-select)")]
+            public LayerMask GroundLayers; // несколько слоёв для grounded-check
+            public LayerMask WallLayers;   // несколько слоёв для wall-check
+
             public float GroundSkin;
             public float GroundCheckDepth;
             public float GroundWidthMultiplier;
@@ -123,6 +128,9 @@ namespace Riftborne.Configs
 
             public static PhysicsProbesSection Default => new PhysicsProbesSection
             {
+                GroundLayers = -1, // Everything по умолчанию, потом в инспекторе выставишь нормально
+                WallLayers = -1,
+
                 GroundSkin = 0.02f,
                 GroundCheckDepth = 0.08f,
                 GroundWidthMultiplier = 0.90f,

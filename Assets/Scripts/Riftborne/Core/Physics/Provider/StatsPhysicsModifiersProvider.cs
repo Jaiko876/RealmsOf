@@ -1,25 +1,22 @@
+using System;
+using Riftborne.Core.Config;
 using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
 using Riftborne.Core.Physics.Model;
+using Riftborne.Core.Stats;
 using Riftborne.Core.Stores;
 
-namespace Riftborne.Core.Stats
+namespace Riftborne.Core.Physics.Provider
 {
-    /// <summary>
-    /// Bridge: Stats -> PhysicsModifiers (movement).
-    /// Keeps Physics independent from Stats internals.
-    /// </summary>
     public sealed class StatsPhysicsModifiersProvider : IPhysicsModifiersProvider
     {
         private readonly IStatsStore _stats;
+        private readonly IGameplayTuning _tuning;
 
-        // Guard rails (so a broken build can't produce absurd physics).
-        private const float MinMoveSpeedMul = 0.10f;
-        private const float MaxMoveSpeedMul = 3.00f;
-
-        public StatsPhysicsModifiersProvider(IStatsStore stats)
+        public StatsPhysicsModifiersProvider(IStatsStore stats, IGameplayTuning tuning)
         {
-            _stats = stats;
+            _stats = stats ?? throw new ArgumentNullException(nameof(stats));
+            _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
         }
 
         public PhysicsModifiers Get(GameEntityId entityId)
@@ -27,10 +24,11 @@ namespace Riftborne.Core.Stats
             if (!_stats.TryGet(entityId, out var s) || !s.IsInitialized)
                 return PhysicsModifiers.None;
 
-            float mul = s.GetEffective(StatId.MoveSpeed);
-            mul = Clamp(mul, MinMoveSpeedMul, MaxMoveSpeedMul);
+            var sp = _tuning.StatsToPhysics;
 
-            // For now: accel/decel scale together with max speed (feels consistent).
+            float mul = s.GetEffective(StatId.MoveSpeed);
+            mul = Clamp(mul, sp.MinMoveSpeedMultiplier, sp.MaxMoveSpeedMultiplier);
+
             return new PhysicsModifiers(
                 gravityScaleMultiplier: 1f,
                 impulseX: 0f,

@@ -17,13 +17,15 @@ namespace Riftborne.Core.Config
             public readonly float CheckDepth;
             public readonly float WidthMultiplier;
             public readonly float ProbeHeight;
+            public readonly int GroundLayerMask;
 
-            public GroundProbeTuning(float skin, float checkDepth, float widthMultiplier, float probeHeight)
+            public GroundProbeTuning(float skin, float checkDepth, float widthMultiplier, float probeHeight, int groundLayerMask)
             {
                 Skin = skin;
                 CheckDepth = checkDepth;
                 WidthMultiplier = widthMultiplier;
                 ProbeHeight = probeHeight;
+                GroundLayerMask = groundLayerMask;
             }
         }
 
@@ -34,14 +36,16 @@ namespace Riftborne.Core.Config
             public readonly float ProbeThickness;
             public readonly float HeightShrink;
             public readonly float MinWallNormalAbsX;
+            public readonly int WallLayerMask;
 
-            public WallProbeTuning(float skin, float checkDistance, float probeThickness, float heightShrink, float minWallNormalAbsX)
+            public WallProbeTuning(float skin, float checkDistance, float probeThickness, float heightShrink, float minWallNormalAbsX, int wallLayerMask)
             {
                 Skin = skin;
                 CheckDistance = checkDistance;
                 ProbeThickness = probeThickness;
                 HeightShrink = heightShrink;
                 MinWallNormalAbsX = minWallNormalAbsX;
+                WallLayerMask = wallLayerMask;
             }
         }
     }
