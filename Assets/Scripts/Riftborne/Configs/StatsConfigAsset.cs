@@ -16,6 +16,7 @@ namespace Riftborne.Configs
         [Min(0f)] public float Defense = 0f;
         [Min(0f)] public float MoveSpeed = 1f;
         [Min(0f)] public float AttackSpeed = 1f;
+        [Min(0f)] public float ChargeSpeed = 1f;
         [Min(0f)] public float StaggerResist = 0f;
 
         [Header("Regen/Decay (per second)")]
@@ -33,6 +34,7 @@ namespace Riftborne.Configs
                 defense: Defense,
                 moveSpeed: MoveSpeed,
                 attackSpeed: AttackSpeed,
+                chargeSpeed: ChargeSpeed,
                 staggerResist: StaggerResist,
                 hpRegenPerSec: HpRegenPerSec,
                 staminaRegenPerSec: StaminaRegenPerSec,

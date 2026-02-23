@@ -10,12 +10,13 @@
         Defense = 4,
         MoveSpeed = 5,
         AttackSpeed = 6,
-        StaggerResist = 7,
+        ChargeSpeed = 7,
+        StaggerResist = 8,
 
-        HpRegenPerSec = 8,
-        StaminaRegenPerSec = 9,
-        StaggerDecayPerSec = 10,
+        HpRegenPerSec = 9,
+        StaminaRegenPerSec = 10,
+        StaggerDecayPerSec = 11,
 
-        Count = 11
+        Count = 12
     }
 }

@@ -10,6 +10,7 @@
         public readonly float Defense;
         public readonly float MoveSpeed;
         public readonly float AttackSpeed;
+        public readonly float ChargeSpeed;
         public readonly float StaggerResist;
 
         public readonly float HpRegenPerSec;
@@ -18,17 +19,20 @@
 
         public StatsDefaults(
             int hpMax, int staminaMax, int staggerMax,
-            float attack, float defense, float moveSpeed, float attackSpeed, float staggerResist,
+            float attack, float defense, float moveSpeed, float attackSpeed, float chargeSpeed, float staggerResist,
             float hpRegenPerSec, float staminaRegenPerSec, float staggerDecayPerSec)
         {
             HpMax = hpMax;
             StaminaMax = staminaMax;
             StaggerMax = staggerMax;
+
             Attack = attack;
             Defense = defense;
             MoveSpeed = moveSpeed;
             AttackSpeed = attackSpeed;
+            ChargeSpeed = chargeSpeed;
             StaggerResist = staggerResist;
+
             HpRegenPerSec = hpRegenPerSec;
             StaminaRegenPerSec = staminaRegenPerSec;
             StaggerDecayPerSec = staggerDecayPerSec;

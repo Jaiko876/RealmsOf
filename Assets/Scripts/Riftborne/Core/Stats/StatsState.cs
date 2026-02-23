@@ -65,6 +65,7 @@ namespace Riftborne.Core.Stats
             SetBase(StatId.Defense, d.Defense);
             SetBase(StatId.MoveSpeed, d.MoveSpeed);
             SetBase(StatId.AttackSpeed, d.AttackSpeed);
+            SetBase(StatId.ChargeSpeed, d.ChargeSpeed);
             SetBase(StatId.StaggerResist, d.StaggerResist);
 
             SetBase(StatId.HpRegenPerSec, d.HpRegenPerSec);
