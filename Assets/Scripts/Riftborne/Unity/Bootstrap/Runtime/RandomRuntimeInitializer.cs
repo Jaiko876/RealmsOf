@@ -1,4 +1,5 @@
-﻿using Riftborne.Core.Factory;
+﻿using Riftborne.App.Random;
+using Riftborne.Core.Random.Abstractions;
 using VContainer;
 
 namespace Riftborne.Unity.Bootstrap.Runtime

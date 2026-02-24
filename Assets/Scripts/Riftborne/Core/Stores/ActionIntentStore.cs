@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Riftborne.Core.Model;
 using Riftborne.Core.Model.Animation;
+using Riftborne.Core.Stores.Abstractions;
 
 namespace Riftborne.Core.Stores
 {

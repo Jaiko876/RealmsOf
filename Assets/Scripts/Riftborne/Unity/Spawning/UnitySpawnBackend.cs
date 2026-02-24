@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Riftborne.App.Spawning.Abstractions;
 using Riftborne.Core.Model;
-using Riftborne.Core.Spawning;
 using Riftborne.Physics.Unity2D;
 using UnityEngine;
 using VContainer;

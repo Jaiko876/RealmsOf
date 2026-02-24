@@ -1,11 +1,11 @@
-﻿using Riftborne.Configs;
+﻿using Riftborne.App.Physics.Providers;
+using Riftborne.App.Physics.Registry;
+using Riftborne.Configs;
+using Riftborne.Core.Gameplay.Physics.Providers;
 using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
-using Riftborne.Core.Physics.Provider;
-using Riftborne.Core.Physics.Registry;
-using Riftborne.Core.Simulation;
-using Riftborne.Core.Stats;
-using Riftborne.Physics;
+using Riftborne.Core.Physics.Motors;
+using Riftborne.Core.TIme;
 using Riftborne.Physics.Unity2D;
 using VContainer;
 using VContainer.Unity;

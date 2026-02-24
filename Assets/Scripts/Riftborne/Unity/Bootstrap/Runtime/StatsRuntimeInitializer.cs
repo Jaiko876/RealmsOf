@@ -1,6 +1,7 @@
-﻿using Riftborne.Configs;
-using Riftborne.Core.Factory;
+﻿using Riftborne.App.Stats.Catalog;
+using Riftborne.Configs;
 using Riftborne.Core.Stats;
+using Riftborne.Core.Stats.Effects;
 using VContainer;
 
 namespace Riftborne.Unity.Bootstrap.Runtime

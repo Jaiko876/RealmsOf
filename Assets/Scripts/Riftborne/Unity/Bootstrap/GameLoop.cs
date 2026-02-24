@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
-using Riftborne.App.Commands;
-using Riftborne.App.Time.Time;
-using Riftborne.Core.Simulation;
+using Riftborne.App.Commands.Queue;
+using Riftborne.App.Simulation;
+using Riftborne.App.Time;
 using Riftborne.Unity.Input;
 using VContainer;
 using VContainer.Unity;

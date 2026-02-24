@@ -1,8 +1,10 @@
-﻿using Riftborne.Core.Model;
+﻿using Riftborne.Core.Gameplay.Physics.Providers;
+using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
 using Riftborne.Core.Physics.Model;
-using Riftborne.Core.Simulation;
-using Riftborne.Core.Stores;
+using Riftborne.Core.Physics.Runtime;
+using Riftborne.Core.Stores.Abstractions;
+using Riftborne.Core.TIme;
 
 namespace Riftborne.Core.Systems.PrePhysicsTickSystems
 {
@@ -62,7 +64,7 @@ namespace Riftborne.Core.Systems.PrePhysicsTickSystems
 
                 var mods = _modifiers.Get(entityId);
 
-                var ctx = new MotorContext(
+                var ctx = new MotorTickContext(
                     _parameters.TickDeltaTime,
                     body,
                     _motorParams,

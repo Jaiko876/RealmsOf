@@ -1,4 +1,4 @@
-﻿using Riftborne.Core.Simulation;
+﻿using Riftborne.App.Simulation;
 using VContainer;
 using VContainer.Unity;
 

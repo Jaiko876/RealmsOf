@@ -1,3 +1,5 @@
+using Riftborne.Core.Random.Abstractions;
+
 namespace Riftborne.Core.Random
 {
 

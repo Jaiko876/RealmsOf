@@ -1,5 +1,4 @@
-﻿using Riftborne.Core.Animation.Abstractions;
-using Riftborne.Core.Animation.Provider;
+﻿using Riftborne.App.Animation.Provider;
 using VContainer;
 
 namespace Riftborne.Unity.Bootstrap.Runtime

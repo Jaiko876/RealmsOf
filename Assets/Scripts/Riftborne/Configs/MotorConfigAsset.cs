@@ -1,5 +1,5 @@
 using Riftborne.Core.Physics.Model;
-using Riftborne.Core.Simulation;
+using Riftborne.Core.TIme;
 using UnityEngine;
 
 namespace Riftborne.Configs

@@ -1,5 +1,5 @@
 using Riftborne.Core.Model;
-using Riftborne.Core.Stores;
+using Riftborne.Core.Stores.Abstractions;
 using UnityEngine;
 using VContainer;
 

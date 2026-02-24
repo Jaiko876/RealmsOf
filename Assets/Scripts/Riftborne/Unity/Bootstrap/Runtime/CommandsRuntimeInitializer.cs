@@ -1,6 +1,7 @@
-﻿using Riftborne.App.Commands;
-using Riftborne.Core.Commands;
-using Riftborne.Core.Input;
+﻿using Riftborne.App.Commands.Dispatching;
+using Riftborne.App.Commands.Handlers;
+using Riftborne.App.Input.Handlers;
+using Riftborne.Core.Input.Commands;
 using VContainer;
 
 namespace Riftborne.Unity.Bootstrap.Runtime

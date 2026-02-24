@@ -1,4 +1,5 @@
 ﻿using Riftborne.Core.Stores;
+using Riftborne.Core.Stores.Abstractions;
 using VContainer;
 
 namespace Riftborne.Unity.Bootstrap.Runtime

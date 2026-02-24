@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using Riftborne.Core.Stores;
 using Riftborne.Core.Stats;
+using Riftborne.Core.Stores.Abstractions;
 
 namespace Riftborne.Core.Systems.PostPhysicsTickSystems
 {

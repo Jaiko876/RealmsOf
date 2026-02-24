@@ -1,4 +1,4 @@
-﻿using Riftborne.Core.Stores;
+﻿using Riftborne.Core.Stores.Abstractions;
 
 namespace Riftborne.Core.Systems.PostPhysicsTickSystems
 {
