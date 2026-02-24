@@ -13,6 +13,7 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
         private readonly GameState _state;
         private readonly MotorParams _motor;
         private readonly IActionIntentStore _actions;
+        private readonly IActionTimingStore _timings;
         private readonly IAttackChargeStore _charge;
         private readonly IAnimationModifiersProvider _animMods;
         private readonly InputTuning _inputTuning;
@@ -21,6 +22,7 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
             GameState state,
             MotorParams motor,
             IActionIntentStore actions,
+            IActionTimingStore timings,
             IAttackChargeStore charge,
             IAnimationModifiersProvider animMods,
             IGameplayTuning tuning)
@@ -28,6 +30,7 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
             _state = state ?? throw new ArgumentNullException(nameof(state));
             _motor = motor ?? throw new ArgumentNullException(nameof(motor));
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
+            _timings = timings ?? throw new ArgumentNullException(nameof(timings));
             _charge = charge ?? throw new ArgumentNullException(nameof(charge));
             _animMods = animMods ?? throw new ArgumentNullException(nameof(animMods));
             _inputTuning = (tuning ?? throw new ArgumentNullException(nameof(tuning))).Input;
@@ -79,15 +82,25 @@ namespace Riftborne.Core.Systems.PostPhysicsTickSystems
                 a.AttackAnimSpeed = mods.AttackAnimSpeed;
                 a.ChargeAnimSpeed = mods.ChargeAnimSpeed;
 
+                // IMPORTANT: Action + ActionDurationTicks are "event payload".
                 if (_actions.TryConsume(e.Id, out var act))
                 {
                     a.Action = act;
-                    a.ActionTick = tick; // <-- маркер события
+                    a.ActionTick = tick;
+
+                    a.ActionDurationTicks = 0;
+
+                    // Timing is optional; if absent => view uses AttackAnimSpeed as-is.
+                    if (_timings.TryConsume(e.Id, out var timedAct, out var durationTicks) && timedAct == act)
+                    {
+                        a.ActionDurationTicks = durationTicks;
+                    }
                 }
                 else
                 {
                     a.Action = ActionState.None;
-                    // ActionTick НЕ трогаем: он хранит "последний event", view по нему edge-detect делает.
+                    // ActionTick не трогаем (edge-detect во view)
+                    a.ActionDurationTicks = 0;
                 }
 
                 e.SetAnimationState(a);

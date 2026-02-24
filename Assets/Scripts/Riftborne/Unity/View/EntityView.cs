@@ -35,12 +35,20 @@ namespace Riftborne.Unity.View
 
         private static readonly int AttackAnimSpeedHash = Animator.StringToHash("AttackAnimSpeed");
         private static readonly int ChargeAnimSpeedHash = Animator.StringToHash("ChargeAnimSpeed");
-        
+
         [Header("Animator Layers")]
         [SerializeField] private string attackLayerName = "Attack Layer";
         [SerializeField] private string attackStateTag = "Attack";
         [SerializeField] private float attackLayerBlendInSeconds = 0.05f;
-        [SerializeField] private float attackLayerBlendOutSeconds = 7.5f;
+        [SerializeField] private float attackLayerBlendOutSeconds = 0.25f;
+
+        [Header("Attack Clips (seconds at speed=1)")]
+        [SerializeField] private float lightAttackClipSeconds = 0.45f;
+        [SerializeField] private float heavyAttackClipSeconds = 0.60f;
+
+        [Header("Animator Speed Clamp")]
+        [SerializeField] private float minAnimatorSpeed = 0.25f;
+        [SerializeField] private float maxAnimatorSpeed = 3.5f;
 
         private int _attackLayerIndex = -1;
         private int _attackTagHash;
@@ -61,7 +69,7 @@ namespace Riftborne.Unity.View
 
             if (visualRoot == null)
                 visualRoot = transform;
-            
+
             if (animator != null)
             {
                 _attackLayerIndex = animator.GetLayerIndex(attackLayerName);
@@ -142,25 +150,32 @@ namespace Riftborne.Unity.View
             animator.SetBool(HeavyChargeHash, a.HeavyCharging);
             animator.SetFloat(Charge01Hash, a.Charge01);
 
-            animator.SetFloat(AttackAnimSpeedHash, a.AttackAnimSpeed);
             animator.SetFloat(ChargeAnimSpeedHash, a.ChargeAnimSpeed);
 
             SyncCharge(a.Charge01, facing);
 
             ApplyAttackLayerWeight(a);
 
-            if (a.Action != ActionState.None && a.ActionTick != _lastActionTick)
+            bool isNewActionEvent = (a.Action != ActionState.None && a.ActionTick != _lastActionTick);
+            if (isNewActionEvent)
             {
                 _lastActionTick = a.ActionTick;
+
+                float speedForThisAction = ComputeActionAnimatorSpeed(a);
+                animator.SetFloat(AttackAnimSpeedHash, speedForThisAction);
 
                 if (a.Action == ActionState.LightAttack) animator.SetTrigger(AtkLightHash);
                 else if (a.Action == ActionState.HeavyAttack) animator.SetTrigger(AtkHeavyHash);
             }
+            else
+            {
+                // Continuous value (stat-driven) when no new event.
+                animator.SetFloat(AttackAnimSpeedHash, a.AttackAnimSpeed);
+            }
         }
-        
+
         private void ApplyAttackLayerWeight(AnimationState a)
         {
-            if (animator == null) return;
             if (_attackLayerIndex < 0) return;
             if (_attackLayerIndex >= animator.layerCount) return;
 
@@ -197,9 +212,44 @@ namespace Riftborne.Unity.View
             if (tauSeconds <= 0f) return target;
             if (dt <= 0f) return current;
 
-            // Экспоненциальное приближение: мягко, без "ступеньки" в конце.
             float k = 1f - Mathf.Exp(-dt / tauSeconds);
             return Mathf.Lerp(current, target, k);
+        }
+
+        private float ComputeActionAnimatorSpeed(AnimationState s)
+        {
+            // If Core didn't provide durationTicks - use stat-driven speed.
+            if (s.ActionDurationTicks <= 0)
+                return ClampAnimatorSpeed(s.AttackAnimSpeed);
+
+            float clipSeconds = GetClipSeconds(s.Action);
+            if (clipSeconds <= 0f)
+                return ClampAnimatorSpeed(s.AttackAnimSpeed);
+
+            float fixedDt = Time.fixedDeltaTime;
+            if (fixedDt <= 0f)
+                return ClampAnimatorSpeed(s.AttackAnimSpeed);
+
+            float desiredSeconds = s.ActionDurationTicks * fixedDt;
+            if (desiredSeconds <= 0f)
+                return ClampAnimatorSpeed(s.AttackAnimSpeed);
+
+            float speed = clipSeconds / desiredSeconds;
+            return ClampAnimatorSpeed(speed);
+        }
+
+        private float GetClipSeconds(ActionState action)
+        {
+            if (action == ActionState.LightAttack) return lightAttackClipSeconds;
+            if (action == ActionState.HeavyAttack) return heavyAttackClipSeconds;
+            return 0f;
+        }
+
+        private float ClampAnimatorSpeed(float v)
+        {
+            if (v < minAnimatorSpeed) return minAnimatorSpeed;
+            if (v > maxAnimatorSpeed) return maxAnimatorSpeed;
+            return v;
         }
     }
 }

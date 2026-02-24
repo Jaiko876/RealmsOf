@@ -20,6 +20,16 @@ namespace Riftborne.Configs
 
         [Header("Physics World")]
         [SerializeField] private PhysicsWorldSection _physicsWorld = PhysicsWorldSection.Default;
+        
+        [Header("Combat Animation (Authoritative durations)")]
+        [SerializeField] private CombatAnimationSection _combatAnimation = CombatAnimationSection.Default;
+        
+        public CombatAnimationTuning CombatAnimation
+            => new CombatAnimationTuning(
+                _combatAnimation.LightAttackDurationBaseTicks,
+                _combatAnimation.HeavyAttackDurationBaseTicks,
+                _combatAnimation.MinAnimatorSpeed,
+                _combatAnimation.MaxAnimatorSpeed);
 
         public CombatInputTuning CombatInput
             => new CombatInputTuning(
@@ -78,6 +88,24 @@ namespace Riftborne.Configs
                 MaxAttackSpeed = 3.00f,
                 MinChargeSpeed = 0.20f,
                 MaxChargeSpeed = 3.00f
+            };
+        }
+        
+        [System.Serializable]
+        private struct CombatAnimationSection
+        {
+            public int LightAttackDurationBaseTicks;
+            public int HeavyAttackDurationBaseTicks;
+
+            [Min(0.01f)] public float MinAnimatorSpeed;
+            [Min(0.01f)] public float MaxAnimatorSpeed;
+
+            public static CombatAnimationSection Default => new CombatAnimationSection
+            {
+                LightAttackDurationBaseTicks = 16,
+                HeavyAttackDurationBaseTicks = 22,
+                MinAnimatorSpeed = 0.25f,
+                MaxAnimatorSpeed = 3.5f
             };
         }
 

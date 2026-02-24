@@ -7,6 +7,7 @@ namespace Riftborne.Core.Spawning.Hook
     {
         private readonly IMotorStateStore _motorState;
         private readonly IActionIntentStore _actions;
+        private readonly IActionTimingStore _timings;
         private readonly IAttackChargeStore _charge;
         private readonly IStatsStore _stats;
         private readonly IStatsEffectStore _effects;
@@ -14,12 +15,14 @@ namespace Riftborne.Core.Spawning.Hook
         public StoresCleanupHook(
             IMotorStateStore motorState,
             IActionIntentStore actions,
+            IActionTimingStore timings,
             IAttackChargeStore charge,
             IStatsStore stats,
             IStatsEffectStore effects)
         {
             _motorState = motorState;
             _actions = actions;
+            _timings = timings;
             _charge = charge;
             _stats = stats;
             _effects = effects;
@@ -29,6 +32,7 @@ namespace Riftborne.Core.Spawning.Hook
         {
             _motorState.Remove(id);
             _actions.Remove(id);
+            _timings.Remove(id);
             _charge.Remove(id);
             _effects.ClearEntity(id);
             _stats.Remove(id);

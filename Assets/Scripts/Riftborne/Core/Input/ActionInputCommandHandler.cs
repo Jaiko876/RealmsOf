@@ -12,10 +12,12 @@ namespace Riftborne.Core.Input
     public sealed class ActionInputCommandHandler : ICommandHandler<InputCommand>
     {
         private readonly IActionIntentStore _actions;
+        private readonly IActionTimingStore _timings;
         private readonly IAttackChargeStore _charge;
         private readonly IStatsStore _stats;
         private readonly IAttackCooldownStore _cooldowns;
-        private readonly CombatInputTuning _tuning;
+        private readonly CombatInputTuning _inputTuning;
+        private readonly CombatAnimationTuning _animTuning;
 
         private struct Hold
         {
@@ -27,20 +29,21 @@ namespace Riftborne.Core.Input
 
         public ActionInputCommandHandler(
             IActionIntentStore actions,
+            IActionTimingStore timings,
             IAttackChargeStore charge,
             IStatsStore stats,
             IAttackCooldownStore cooldowns,
             IGameplayTuning gameplayTuning)
         {
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
+            _timings = timings ?? throw new ArgumentNullException(nameof(timings));
             _charge = charge ?? throw new ArgumentNullException(nameof(charge));
             _stats = stats ?? throw new ArgumentNullException(nameof(stats));
             _cooldowns = cooldowns ?? throw new ArgumentNullException(nameof(cooldowns));
+            if (gameplayTuning == null) throw new ArgumentNullException(nameof(gameplayTuning));
 
-            if (gameplayTuning == null)
-                throw new ArgumentNullException(nameof(gameplayTuning));
-
-            _tuning = gameplayTuning.CombatInput;
+            _inputTuning = gameplayTuning.CombatInput;
+            _animTuning = gameplayTuning.CombatAnimation;
         }
 
         public void Handle(InputCommand command)
@@ -60,10 +63,10 @@ namespace Riftborne.Core.Input
             bool released = (!held && h.PrevHeld);
 
             // ===== Charge (ChargeSpeed) =====
-            float chargeSpeed = GetStatClamped(id, StatId.ChargeSpeed, 1f, _tuning.MinChargeSpeed, _tuning.MaxChargeSpeed);
+            float chargeSpeed = GetStatClamped(id, StatId.ChargeSpeed, 1f, _inputTuning.MinChargeSpeed, _inputTuning.MaxChargeSpeed);
 
-            int heavyThresholdTicks = CeilDiv(_tuning.HeavyThresholdBaseTicks, chargeSpeed);
-            int fullChargeExtraTicks = CeilDiv(_tuning.FullChargeExtraBaseTicks, chargeSpeed);
+            int heavyThresholdTicks = CeilDiv(_inputTuning.HeavyThresholdBaseTicks, chargeSpeed);
+            int fullChargeExtraTicks = CeilDiv(_inputTuning.FullChargeExtraBaseTicks, chargeSpeed);
 
             bool charging = held && (h.HeldTicks >= heavyThresholdTicks);
 
@@ -90,12 +93,16 @@ namespace Riftborne.Core.Input
 
                 if (_cooldowns.CanAttack(id, tick))
                 {
-                    // Единый кулдаун на "атаку вообще", зависит только от AttackSpeed.
-                    // В тюнинге используем LightCooldownBaseTicks как общий параметр (по смыслу это AttackCooldownBaseTicks).
                     int cooldownTicks = ComputeAttackCooldownTicks(id);
 
                     _cooldowns.ConsumeAttack(id, tick, cooldownTicks);
-                    _actions.Set(id, heavy ? ActionState.HeavyAttack : ActionState.LightAttack);
+
+                    var action = heavy ? ActionState.HeavyAttack : ActionState.LightAttack;
+                    _actions.Set(id, action);
+
+                    // NEW: authoritative "simulation duration" for the triggered action
+                    int durationTicks = ComputeAttackActionDurationTicks(id, action);
+                    _timings.Set(id, action, durationTicks);
                 }
 
                 h.HeldTicks = 0;
@@ -108,11 +115,19 @@ namespace Riftborne.Core.Input
 
         private int ComputeAttackCooldownTicks(GameEntityId id)
         {
-            float attackSpeed = GetStatClamped(id, StatId.AttackSpeed, 1f, _tuning.MinAttackSpeed, _tuning.MaxAttackSpeed);
+            float attackSpeed = GetStatClamped(id, StatId.AttackSpeed, 1f, _inputTuning.MinAttackSpeed, _inputTuning.MaxAttackSpeed);
+            return CeilDiv(_inputTuning.AttackCooldownBaseTicks, attackSpeed);
+        }
 
-            // ВАЖНО: один базовый параметр. Сейчас берём LightCooldownBaseTicks как "общий".
-            // Если хочешь — позже переименуем в CombatInputTuning на AttackCooldownBaseTicks и уберём HeavyCooldownBaseTicks из ассета.
-            return CeilDiv(_tuning.AttackCooldownBaseTicks, attackSpeed);
+        private int ComputeAttackActionDurationTicks(GameEntityId id, ActionState action)
+        {
+            float attackSpeed = GetStatClamped(id, StatId.AttackSpeed, 1f, _inputTuning.MinAttackSpeed, _inputTuning.MaxAttackSpeed);
+
+            int baseTicks = 0;
+            if (action == ActionState.LightAttack) baseTicks = _animTuning.LightAttackDurationBaseTicks;
+            else if (action == ActionState.HeavyAttack) baseTicks = _animTuning.HeavyAttackDurationBaseTicks;
+
+            return CeilDiv(baseTicks, attackSpeed);
         }
 
         private float GetStatClamped(GameEntityId id, StatId stat, float fallback, float min, float max)
@@ -127,7 +142,6 @@ namespace Riftborne.Core.Input
             return v;
         }
 
-        // ceil(baseTicks / speed), без Math/MathF (C#9 friendly)
         private static int CeilDiv(int baseTicks, float speed)
         {
             if (baseTicks <= 0) return 0;
