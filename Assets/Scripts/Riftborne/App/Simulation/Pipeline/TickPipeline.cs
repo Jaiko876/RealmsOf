@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Riftborne.App.Animation.System;
+using Riftborne.App.Animation.Systems;
 using Riftborne.Core.Systems.PostPhysicsTickSystems;
 using Riftborne.Core.Systems.PrePhysicsTickSystems;
 

@@ -1,4 +1,4 @@
-﻿using Riftborne.App.Animation.System;
+﻿using Riftborne.App.Animation.Systems;
 using Riftborne.App.Simulation.Pipeline;
 using Riftborne.Core.Systems.PostPhysicsTickSystems;
 using Riftborne.Core.Systems.PrePhysicsTickSystems;

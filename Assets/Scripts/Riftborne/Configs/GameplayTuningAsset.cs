@@ -1,5 +1,7 @@
-using UnityEngine;
+using System;
 using Riftborne.Core.Config;
+using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Riftborne.Configs
 {
@@ -35,7 +37,7 @@ namespace Riftborne.Configs
             => new CombatInputTuning(
                 _combatInput.HeavyThresholdBaseTicks,
                 _combatInput.FullChargeExtraBaseTicks,
-                _combatInput.LightCooldownBaseTicks,
+                _combatInput.AttackCooldownBaseTicks,
                 _combatInput.MinAttackSpeed,
                 _combatInput.MaxAttackSpeed,
                 _combatInput.MinChargeSpeed,
@@ -65,13 +67,13 @@ namespace Riftborne.Configs
         public PhysicsWorldTuning PhysicsWorld
             => new PhysicsWorldTuning(_physicsWorld.MaxSubSteps);
 
-        [System.Serializable]
+        [Serializable]
         private struct CombatInputSection
         {
             public int HeavyThresholdBaseTicks;
             public int FullChargeExtraBaseTicks;
 
-            public int LightCooldownBaseTicks;
+            [FormerlySerializedAs("LightCooldownBaseTicks")] public int AttackCooldownBaseTicks;
 
             public float MinAttackSpeed;
             public float MaxAttackSpeed;
@@ -83,7 +85,7 @@ namespace Riftborne.Configs
             {
                 HeavyThresholdBaseTicks = 18,
                 FullChargeExtraBaseTicks = 42,
-                LightCooldownBaseTicks = 18,
+                AttackCooldownBaseTicks = 18,
                 MinAttackSpeed = 0.20f,
                 MaxAttackSpeed = 3.00f,
                 MinChargeSpeed = 0.20f,
@@ -91,7 +93,7 @@ namespace Riftborne.Configs
             };
         }
         
-        [System.Serializable]
+        [Serializable]
         private struct CombatAnimationSection
         {
             public int LightAttackDurationBaseTicks;
@@ -109,7 +111,7 @@ namespace Riftborne.Configs
             };
         }
 
-        [System.Serializable]
+        [Serializable]
         private struct StatsToPhysicsSection
         {
             public float MinMoveSpeedMultiplier;
@@ -122,7 +124,7 @@ namespace Riftborne.Configs
             };
         }
 
-        [System.Serializable]
+        [Serializable]
         private struct InputSection
         {
             public float FacingDeadzone;
@@ -135,7 +137,7 @@ namespace Riftborne.Configs
             };
         }
 
-        [System.Serializable]
+        [Serializable]
         private struct PhysicsProbesSection
         {
             [Header("Layer Masks (multi-select)")]
@@ -171,7 +173,7 @@ namespace Riftborne.Configs
             };
         }
 
-        [System.Serializable]
+        [Serializable]
         private struct PhysicsWorldSection
         {
             public int MaxSubSteps;

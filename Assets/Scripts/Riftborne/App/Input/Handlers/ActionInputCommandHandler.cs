@@ -13,8 +13,8 @@ namespace Riftborne.App.Input.Handlers
 {
     public sealed class ActionInputCommandHandler : ICommandHandler<InputCommand>
     {
-        private readonly IActionIntentStore _actions;
-        private readonly IActionTimingStore _timings;
+
+        private readonly IActionEventStore _events;
         private readonly IAttackChargeStore _charge;
         private readonly IStatsStore _stats;
         private readonly IAttackCooldownStore _cooldowns;
@@ -30,18 +30,16 @@ namespace Riftborne.App.Input.Handlers
         private readonly Dictionary<GameEntityId, Hold> _hold = new Dictionary<GameEntityId, Hold>();
 
         public ActionInputCommandHandler(
-            IActionIntentStore actions,
-            IActionTimingStore timings,
             IAttackChargeStore charge,
             IStatsStore stats,
             IAttackCooldownStore cooldowns,
-            IGameplayTuning gameplayTuning)
+            IGameplayTuning gameplayTuning, 
+            IActionEventStore events)
         {
-            _actions = actions ?? throw new ArgumentNullException(nameof(actions));
-            _timings = timings ?? throw new ArgumentNullException(nameof(timings));
             _charge = charge ?? throw new ArgumentNullException(nameof(charge));
             _stats = stats ?? throw new ArgumentNullException(nameof(stats));
             _cooldowns = cooldowns ?? throw new ArgumentNullException(nameof(cooldowns));
+            _events = events ?? throw new ArgumentNullException(nameof(events));
             if (gameplayTuning == null) throw new ArgumentNullException(nameof(gameplayTuning));
 
             _inputTuning = gameplayTuning.CombatInput;
@@ -100,11 +98,11 @@ namespace Riftborne.App.Input.Handlers
                     _cooldowns.ConsumeAttack(id, tick, cooldownTicks);
 
                     var action = heavy ? ActionState.HeavyAttack : ActionState.LightAttack;
-                    _actions.Set(id, action);
 
-                    // NEW: authoritative "simulation duration" for the triggered action
                     int durationTicks = ComputeAttackActionDurationTicks(id, action);
-                    _timings.Set(id, action, durationTicks);
+
+                    _events.SetTiming(id, action, durationTicks, tick);
+                    _events.SetIntent(id, action, tick);
                 }
 
                 h.HeldTicks = 0;
