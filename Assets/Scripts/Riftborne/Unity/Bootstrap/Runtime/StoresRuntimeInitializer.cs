@@ -18,6 +18,7 @@ namespace Riftborne.Unity.Bootstrap.Runtime
             builder.Register<IStatsEffectStore, StatsEffectStore>(Lifetime.Singleton);
             builder.Register<IAttackCooldownStore, AttackCooldownStore>(Lifetime.Singleton);
             builder.Register<IActionEventStore, ActionEventStore>(Lifetime.Singleton);
+            builder.Register<IAttackHoldStore, AttackHoldStore>(Lifetime.Singleton);
         }
     }
 }

@@ -10,19 +10,21 @@ namespace Riftborne.App.Spawning.Hooks
         private readonly IStatsStore _stats;
         private readonly IStatsEffectStore _effects;
         private readonly IActionEventStore _actionEventStore;
+        private readonly IAttackHoldStore _holdStore;
 
         public StoresCleanupHook(
             IMotorStateStore motorState,
             IAttackChargeStore charge,
             IStatsStore stats,
             IStatsEffectStore effects, 
-            IActionEventStore actionEventStore)
+            IActionEventStore actionEventStore, IAttackHoldStore holdStore)
         {
             _motorState = motorState;
             _charge = charge;
             _stats = stats;
             _effects = effects;
             _actionEventStore = actionEventStore;
+            _holdStore = holdStore;
         }
 
         public override void OnAfterDespawn(GameEntityId id)
@@ -32,6 +34,7 @@ namespace Riftborne.App.Spawning.Hooks
             _effects.ClearEntity(id);
             _stats.Remove(id);
             _actionEventStore.Remove(id);
+            _holdStore.Remove(id);
         }
     }
 }
