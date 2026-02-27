@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 494e641c353c40c3aa2545642d008474, type: 3}
+  m_Name: AttackAnimationConfig
+  m_EditorClassIdentifier: Riftborne.Configs::Riftborne.Configs.AttackAnimationConfigAsset
+  attackLayerName: Attack Layer
+  attackStateTag: Attack
+  attackLayerBlendInSeconds: 0.05
+  attackLayerBlendOutSeconds: 0.25
+  lightAttackClipSeconds: 0.45
+  heavyAttackClipSeconds: 0.6
+  minAnimatorSpeed: 0.25
+  maxAnimatorSpeed: 3.5
