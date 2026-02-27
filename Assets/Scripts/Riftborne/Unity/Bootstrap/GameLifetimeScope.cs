@@ -7,6 +7,7 @@ using Riftborne.Core.Config;
 using Riftborne.Core.Model;
 using Riftborne.Core.TIme;
 using Riftborne.Unity.Bootstrap.Runtime;
+using Riftborne.Unity.Input;
 using Riftborne.Unity.Spawning;
 using UnityEngine;
 using VContainer;
@@ -20,6 +21,7 @@ namespace Riftborne.Unity.Bootstrap
         [SerializeField] private MotorConfigAsset _motorConfig;
         [SerializeField] private StatsConfigAsset _statsConfig;
         [SerializeField] private GameplayTuningAsset _tuningConfig;
+        [SerializeField] private AttackAnimationConfigAsset _attackAnimConfig;
         
 
         protected override void Configure(IContainerBuilder builder)
@@ -36,11 +38,13 @@ namespace Riftborne.Unity.Bootstrap
             if (_motorConfig == null) throw new InvalidOperationException("MotorConfigAsset is not assigned in GameLifetimeScope.");
             if (_statsConfig == null) throw new InvalidOperationException("StatsConfigAsset is not assigned in GameLifetimeScope.");
             if (_tuningConfig == null) throw new InvalidOperationException("GameplayTuningAsset is not assigned in GameLifetimeScope.");
+            if (_attackAnimConfig == null) throw new InvalidOperationException("AttackAnimationConfigAsset is not assigned in GameLifetimeScope.");
            
             builder.RegisterInstance(_statsConfig);
             builder.RegisterInstance(_motorConfig);
             builder.RegisterInstance(_gameConfig);
             builder.RegisterInstance(_tuningConfig).As<IGameplayTuning>(); 
+            builder.RegisterInstance(_attackAnimConfig);
 
             var dt = 1f / Mathf.Max(1, _gameConfig.TickRate);
             builder.RegisterInstance(new SimulationParameters(
@@ -48,6 +52,9 @@ namespace Riftborne.Unity.Bootstrap
                 tickDeltaTime: dt,
                 physicsSubsteps: Mathf.Max(1, _tuningConfig.PhysicsWorld.MaxSubSteps) // <-- из tuning
             ));
+            
+            builder.RegisterComponentInHierarchy<PlayerInputController>();
+            builder.RegisterComponentInHierarchy<PlayerInputAdapter>();
             
             builder.RegisterComponentInHierarchy<UnitySpawnBackend>().As<ISpawnBackend>();
 
@@ -62,6 +69,7 @@ namespace Riftborne.Unity.Bootstrap
             builder.Register<SimulationRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<RandomRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<StoresRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
+            builder.Register<UnityRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             
             builder.RegisterEntryPoint<GameRuntimeComposer>();
         }

@@ -1050,6 +1050,7 @@ MonoBehaviour:
   _motorConfig: {fileID: 11400000, guid: 8e88ec29b9230734397e8ce22461b336, type: 2}
   _statsConfig: {fileID: 11400000, guid: 9ad17b5df264d264bbd5a6a110bb0be4, type: 2}
   _tuningConfig: {fileID: 11400000, guid: b05d3e49f000fae419123a5154c50d89, type: 2}
+  _attackAnimConfig: {fileID: 11400000, guid: da806cbc4eef36c48b7747922a409513, type: 2}
 --- !u!4 &654924459
 Transform:
   m_ObjectHideFlags: 0
@@ -13115,6 +13116,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 5100538786569759410, guid: f11ce9458ea7d8d469c9419928e409d5,
+        type: 3}
+      propertyPath: attackAnimationConfig
+      value: 
+      objectReference: {fileID: 11400000, guid: da806cbc4eef36c48b7747922a409513,
+        type: 2}
     - target: {fileID: 5100538786569759410, guid: f11ce9458ea7d8d469c9419928e409d5,
         type: 3}
       propertyPath: attackLayerBlendInSeconds

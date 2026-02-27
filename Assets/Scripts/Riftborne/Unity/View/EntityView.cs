@@ -1,67 +1,46 @@
+using System;
+using Riftborne.Configs;
 using Riftborne.Core.Model;
-using Riftborne.Core.Model.Animation;
 using Riftborne.Unity.VFX;
+using Riftborne.Unity.View.Presenters.Abstractions;
 using UnityEngine;
 using VContainer;
-using AnimationState = Riftborne.Core.Model.Animation.AnimationState;
 
 namespace Riftborne.Unity.View
 {
     public sealed class EntityView : MonoBehaviour
     {
-        [Header("Entity Binding")]
-        [SerializeField] private int entityId = 0;
+        [Header("Entity Binding")] [SerializeField]
+        private int entityId = 0;
 
-        [Header("View Roots")]
-        [SerializeField] private Transform visualRoot;
+        [Header("View Roots")] [SerializeField]
+        private Transform visualRoot;
+
         [SerializeField] private Transform flipRoot;
 
-        [Header("Animation")]
-        [SerializeField] private Animator animator;
+        [Header("Animation")] [SerializeField] private Animator animator;
         [SerializeField] private ChargeFullFlashView flash;
 
-        private static readonly int GroundedHash = Animator.StringToHash("Grounded");
-        private static readonly int JustLandedHash = Animator.StringToHash("JustLanded");
-        private static readonly int MovingHash = Animator.StringToHash("Moving");
-        private static readonly int Speed01Hash = Animator.StringToHash("Speed01");
-        private static readonly int AirSpeed01Hash = Animator.StringToHash("AirSpeed01");
-        private static readonly int AirTHash = Animator.StringToHash("AirT");
-
-        private static readonly int AtkLightHash = Animator.StringToHash("AtkLight");
-        private static readonly int AtkHeavyHash = Animator.StringToHash("AtkHeavy");
-
-        private static readonly int HeavyChargeHash = Animator.StringToHash("HeavyCharge");
-        private static readonly int Charge01Hash = Animator.StringToHash("Charge01");
-
-        private static readonly int AttackAnimSpeedHash = Animator.StringToHash("AttackAnimSpeed");
-        private static readonly int ChargeAnimSpeedHash = Animator.StringToHash("ChargeAnimSpeed");
-
-        [Header("Animator Layers")]
-        [SerializeField] private string attackLayerName = "Attack Layer";
-        [SerializeField] private string attackStateTag = "Attack";
-        [SerializeField] private float attackLayerBlendInSeconds = 0.05f;
-        [SerializeField] private float attackLayerBlendOutSeconds = 0.25f;
-
-        [Header("Attack Clips (seconds at speed=1)")]
-        [SerializeField] private float lightAttackClipSeconds = 0.45f;
-        [SerializeField] private float heavyAttackClipSeconds = 0.60f;
-
-        [Header("Animator Speed Clamp")]
-        [SerializeField] private float minAnimatorSpeed = 0.25f;
-        [SerializeField] private float maxAnimatorSpeed = 3.5f;
-
-        private int _attackLayerIndex = -1;
-        private int _attackTagHash;
-        private float _attackLayerWeight;
+        [Header("Config")] [SerializeField] private AttackAnimationConfigAsset attackAnimationConfig;
 
         private GameState _gameState;
         private GameEntityId _entityId;
 
-        private bool _prevFull;
-        private int _lastActionTick = int.MinValue;
+        private IEntityTransformPresenter _transformPresenter;
+        private IEntityAnimatorPresenter _animatorPresenter;
 
         [Inject]
-        public void Construct(GameState gameState) => _gameState = gameState;
+        public void Construct(
+            GameState gameState,
+            AttackAnimationConfigAsset attackAnimConfig,
+            IEntityTransformPresenter transformPresenter,
+            IEntityAnimatorPresenter animatorPresenter)
+        {
+            _gameState = gameState ?? throw new ArgumentNullException(nameof(gameState));
+            attackAnimationConfig = attackAnimConfig ?? throw new ArgumentNullException(nameof(attackAnimConfig));
+            _transformPresenter = transformPresenter ?? throw new ArgumentNullException(nameof(transformPresenter));
+            _animatorPresenter = animatorPresenter ?? throw new ArgumentNullException(nameof(animatorPresenter));
+        }
 
         private void Start()
         {
@@ -70,186 +49,44 @@ namespace Riftborne.Unity.View
             if (visualRoot == null)
                 visualRoot = transform;
 
-            if (animator != null)
-            {
-                _attackLayerIndex = animator.GetLayerIndex(attackLayerName);
-                _attackTagHash = Animator.StringToHash(attackStateTag);
-
-                if (_attackLayerIndex >= 0)
-                {
-                    _attackLayerWeight = 0f;
-                    animator.SetLayerWeight(_attackLayerIndex, 0f);
-                }
-            }
-
             if (flipRoot == null)
             {
                 if (animator != null) flipRoot = animator.transform;
                 else flipRoot = visualRoot;
             }
 
-            _gameState.GetOrCreateEntity(_entityId);
+            if (attackAnimationConfig == null)
+                throw new InvalidOperationException(
+                    $"{nameof(EntityView)} requires {nameof(attackAnimationConfig)} on '{name}'.");
+
+            _animatorPresenter.Initialize(animator, flash, attackAnimationConfig);
+
+            // Ensure entity exists early (binding sanity).
+            if (_gameState != null)
+                _gameState.GetOrCreateEntity(_entityId);
         }
 
         private void LateUpdate()
         {
+            if (_gameState == null)
+                return;
+
+            // In идеале тут был бы TryGetEntity, чтобы View не создавал сущности.
+            // Пока используем существующий контракт.
             var e = _gameState.GetOrCreateEntity(_entityId);
 
-            float alpha = 1f;
-            var fd = Time.fixedDeltaTime;
-            if (fd > 0f)
-            {
-                alpha = (Time.time - Time.fixedTime) / fd;
-                alpha = Mathf.Clamp01(alpha);
-            }
+            float alpha = ComputeAlpha01(Time.time, Time.fixedTime, Time.fixedDeltaTime);
 
-            var x = Mathf.Lerp(e.PrevX, e.X, alpha);
-            var y = Mathf.Lerp(e.PrevY, e.Y, alpha);
-            visualRoot.position = new Vector3(x, y, 0f);
-
-            ApplyFacing(e.Facing);
-            ApplyAnimation(e.AnimationState, e.Facing);
+            _transformPresenter.Present(e, alpha, visualRoot, flipRoot);
+            _animatorPresenter.Present(e.AnimationState, e.Facing, Time.deltaTime, Time.fixedDeltaTime);
         }
 
-        private void ApplyFacing(int facing)
+        private static float ComputeAlpha01(float time, float fixedTime, float fixedDeltaTime)
         {
-            if (flipRoot == null) return;
+            if (fixedDeltaTime <= 0f) return 1f;
 
-            var s = flipRoot.localScale;
-            var ax = Mathf.Abs(s.x);
-            s.x = facing < 0 ? -ax : ax;
-            flipRoot.localScale = s;
-        }
-
-        private void SyncCharge(float charge01, int facing)
-        {
-            bool full = charge01 >= 0.999f;
-
-            if (flash != null)
-            {
-                flash.SetFacing(facing);
-                if (full && !_prevFull)
-                    flash.PlayOnce();
-            }
-
-            _prevFull = full;
-        }
-
-        private void ApplyAnimation(AnimationState a, int facing)
-        {
-            if (animator == null) return;
-
-            animator.SetBool(GroundedHash, a.Grounded);
-            animator.SetBool(JustLandedHash, a.JustLanded);
-            animator.SetBool(MovingHash, a.Moving);
-
-            animator.SetFloat(Speed01Hash, a.Speed01);
-            animator.SetFloat(AirSpeed01Hash, a.AirSpeed01);
-            animator.SetFloat(AirTHash, a.AirT);
-
-            animator.SetBool(HeavyChargeHash, a.HeavyCharging);
-            animator.SetFloat(Charge01Hash, a.Charge01);
-
-            animator.SetFloat(ChargeAnimSpeedHash, a.ChargeAnimSpeed);
-
-            SyncCharge(a.Charge01, facing);
-
-            ApplyAttackLayerWeight(a);
-
-            bool isNewActionEvent = (a.Action != ActionState.None && a.ActionTick != _lastActionTick);
-            if (isNewActionEvent)
-            {
-                _lastActionTick = a.ActionTick;
-
-                float speedForThisAction = ComputeActionAnimatorSpeed(a);
-                animator.SetFloat(AttackAnimSpeedHash, speedForThisAction);
-
-                if (a.Action == ActionState.LightAttack) animator.SetTrigger(AtkLightHash);
-                else if (a.Action == ActionState.HeavyAttack) animator.SetTrigger(AtkHeavyHash);
-            }
-            else
-            {
-                // Continuous value (stat-driven) when no new event.
-                animator.SetFloat(AttackAnimSpeedHash, a.AttackAnimSpeed);
-            }
-        }
-
-        private void ApplyAttackLayerWeight(AnimationState a)
-        {
-            if (_attackLayerIndex < 0) return;
-            if (_attackLayerIndex >= animator.layerCount) return;
-
-            bool inAttack = IsAttackPlayingOnLayer();
-
-            bool wantsByState =
-                a.HeavyCharging
-                || a.Action == ActionState.LightAttack
-                || a.Action == ActionState.HeavyAttack;
-
-            float target = (wantsByState || inAttack) ? 1f : 0f;
-
-            float tau = target > _attackLayerWeight ? attackLayerBlendInSeconds : attackLayerBlendOutSeconds;
-            _attackLayerWeight = Damp01(_attackLayerWeight, target, tau, Time.deltaTime);
-
-            animator.SetLayerWeight(_attackLayerIndex, _attackLayerWeight);
-        }
-
-        private bool IsAttackPlayingOnLayer()
-        {
-            var cur = animator.GetCurrentAnimatorStateInfo(_attackLayerIndex);
-            if (cur.tagHash == _attackTagHash)
-                return true;
-
-            if (!animator.IsInTransition(_attackLayerIndex))
-                return false;
-
-            var next = animator.GetNextAnimatorStateInfo(_attackLayerIndex);
-            return next.tagHash == _attackTagHash;
-        }
-
-        private static float Damp01(float current, float target, float tauSeconds, float dt)
-        {
-            if (tauSeconds <= 0f) return target;
-            if (dt <= 0f) return current;
-
-            float k = 1f - Mathf.Exp(-dt / tauSeconds);
-            return Mathf.Lerp(current, target, k);
-        }
-
-        private float ComputeActionAnimatorSpeed(AnimationState s)
-        {
-            // If Core didn't provide durationTicks - use stat-driven speed.
-            if (s.ActionDurationTicks <= 0)
-                return ClampAnimatorSpeed(s.AttackAnimSpeed);
-
-            float clipSeconds = GetClipSeconds(s.Action);
-            if (clipSeconds <= 0f)
-                return ClampAnimatorSpeed(s.AttackAnimSpeed);
-
-            float fixedDt = Time.fixedDeltaTime;
-            if (fixedDt <= 0f)
-                return ClampAnimatorSpeed(s.AttackAnimSpeed);
-
-            float desiredSeconds = s.ActionDurationTicks * fixedDt;
-            if (desiredSeconds <= 0f)
-                return ClampAnimatorSpeed(s.AttackAnimSpeed);
-
-            float speed = clipSeconds / desiredSeconds;
-            return ClampAnimatorSpeed(speed);
-        }
-
-        private float GetClipSeconds(ActionState action)
-        {
-            if (action == ActionState.LightAttack) return lightAttackClipSeconds;
-            if (action == ActionState.HeavyAttack) return heavyAttackClipSeconds;
-            return 0f;
-        }
-
-        private float ClampAnimatorSpeed(float v)
-        {
-            if (v < minAnimatorSpeed) return minAnimatorSpeed;
-            if (v > maxAnimatorSpeed) return maxAnimatorSpeed;
-            return v;
+            var alpha = (time - fixedTime) / fixedDeltaTime;
+            return Mathf.Clamp01(alpha);
         }
     }
 }
