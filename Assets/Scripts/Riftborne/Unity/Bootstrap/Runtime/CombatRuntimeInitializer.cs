@@ -1,4 +1,6 @@
-﻿using Riftborne.Core.Gameplay.Combat.Rules;
+﻿using Riftborne.App.Combat.Providers;
+using Riftborne.App.Combat.Providers.Abstractions;
+using Riftborne.Core.Gameplay.Combat.Rules;
 using Riftborne.Core.Gameplay.Combat.Rules.Abstractions;
 using VContainer;
 
@@ -11,6 +13,7 @@ namespace Riftborne.Unity.Bootstrap.Runtime
         public void Initialize(IContainerBuilder builder)
         {
             builder.Register<IAttackInputRules, AttackInputRules>(Lifetime.Singleton);
+            builder.Register<ICombatSpeedProvider, StatsCombatSpeedProvider>(Lifetime.Singleton);
         }
     }
 }

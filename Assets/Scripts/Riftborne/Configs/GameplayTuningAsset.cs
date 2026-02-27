@@ -29,9 +29,7 @@ namespace Riftborne.Configs
         public CombatAnimationTuning CombatAnimation
             => new CombatAnimationTuning(
                 _combatAnimation.LightAttackDurationBaseTicks,
-                _combatAnimation.HeavyAttackDurationBaseTicks,
-                _combatAnimation.MinAnimatorSpeed,
-                _combatAnimation.MaxAnimatorSpeed);
+                _combatAnimation.HeavyAttackDurationBaseTicks);
 
         public CombatInputTuning CombatInput
             => new CombatInputTuning(
@@ -99,15 +97,10 @@ namespace Riftborne.Configs
             public int LightAttackDurationBaseTicks;
             public int HeavyAttackDurationBaseTicks;
 
-            [Min(0.01f)] public float MinAnimatorSpeed;
-            [Min(0.01f)] public float MaxAnimatorSpeed;
-
             public static CombatAnimationSection Default => new CombatAnimationSection
             {
                 LightAttackDurationBaseTicks = 16,
-                HeavyAttackDurationBaseTicks = 22,
-                MinAnimatorSpeed = 0.25f,
-                MaxAnimatorSpeed = 3.5f
+                HeavyAttackDurationBaseTicks = 22
             };
         }
 
