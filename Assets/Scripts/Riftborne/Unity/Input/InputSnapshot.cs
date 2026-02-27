@@ -9,18 +9,17 @@ namespace Riftborne.Unity.Input
         public bool JumpPressed;
 
         public bool AttackHeld;
-        public bool AttackPressed;
 
         public bool DefenseHeld;
         public bool DefensePressed;
 
         public bool EvadePressed;
 
-        public bool HasSomething =>
-            MoveX != 0f || MoveY != 0f ||
-            JumpHeld || JumpPressed ||
-            AttackHeld || AttackPressed ||
-            DefenseHeld || DefensePressed ||
-            EvadePressed;
+        public void ClearEdges()
+        {
+            JumpPressed = false;
+            DefensePressed = false;
+            EvadePressed = false;
+        }
     }
 }

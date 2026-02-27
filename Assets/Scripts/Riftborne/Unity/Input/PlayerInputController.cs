@@ -1,5 +1,5 @@
+using System;
 using Riftborne.App.Commands.Queue;
-using Riftborne.App.Time;
 using Riftborne.Core.Input;
 using Riftborne.Core.Input.Commands;
 using Riftborne.Core.Model;
@@ -8,34 +8,22 @@ using VContainer;
 
 namespace Riftborne.Unity.Input
 {
-    public class PlayerInputController : MonoBehaviour
+    public sealed class PlayerInputController : MonoBehaviour
     {
         [SerializeField] private int controlledEntityId = 0;
-        
-        [SerializeField] private int heavyHoldTicks = 12; // при TickRate=50 это ~0.2с
-        
-        private GameEntityId Controlled => new(controlledEntityId);
 
         private ICommandQueue _commandQueue;
-        private ITickClock _clock;
 
         private InputSnapshot _snapshot;
-
-        private bool _attackHeldPrevTick;
-        private int _attackHoldStartTick = -1;
-        private bool _attackHeavyFired;
-        
         private bool _prevJumpHeld;
-        private bool _prevAttackHeld;
         private bool _prevDefenseHeld;
 
+        private GameEntityId Controlled => new GameEntityId(controlledEntityId);
+
         [Inject]
-        public void Construct(
-            ICommandQueue commandQueue,
-            ITickClock clock)
+        public void Construct(ICommandQueue commandQueue)
         {
-            _commandQueue = commandQueue;
-            _clock = clock;
+            _commandQueue = commandQueue ?? throw new ArgumentNullException(nameof(commandQueue));
         }
 
         public void SetMove(float x, float y)
@@ -53,18 +41,19 @@ namespace Riftborne.Unity.Input
 
             _prevJumpHeld = held;
         }
-        
+
         public void SetAttackHeld(bool held)
         {
             _snapshot.AttackHeld = held;
         }
 
-
         public void SetDefenseHeld(bool held)
         {
             _snapshot.DefenseHeld = held;
+
             if (held && !_prevDefenseHeld)
                 _snapshot.DefensePressed = true;
+
             _prevDefenseHeld = held;
         }
 
@@ -75,31 +64,30 @@ namespace Riftborne.Unity.Input
 
         public void FlushForTick(int tick)
         {
-            var s = _snapshot;
-            var buttons = InputButtons.None;
+            if (_commandQueue == null)
+                throw new InvalidOperationException("PlayerInputController is not constructed (DI failed?).");
 
-            if (s.JumpPressed) buttons |= InputButtons.JumpPressed;
-            if (s.JumpHeld)    buttons |= InputButtons.JumpHeld;
+            InputButtons buttons = InputButtons.None;
 
-            if (s.AttackHeld)         buttons |= InputButtons.AttackHeld;         // raw (может пригодиться позже)
+            if (_snapshot.JumpPressed) buttons |= InputButtons.JumpPressed;
+            if (_snapshot.JumpHeld)    buttons |= InputButtons.JumpHeld;
 
-            if (s.DefensePressed) buttons |= InputButtons.DefensePressed;
-            if (s.DefenseHeld)    buttons |= InputButtons.DefenseHeld;
+            if (_snapshot.AttackHeld)  buttons |= InputButtons.AttackHeld;
 
-            if (s.EvadePressed) buttons |= InputButtons.EvadePressed;
+            if (_snapshot.DefensePressed) buttons |= InputButtons.DefensePressed;
+            if (_snapshot.DefenseHeld)    buttons |= InputButtons.DefenseHeld;
+
+            if (_snapshot.EvadePressed) buttons |= InputButtons.EvadePressed;
 
             _commandQueue.Enqueue(new InputCommand(
-                tick,
-                Controlled,
-                s.MoveX,
-                s.MoveY,
-                buttons
+                tick: tick,
+                entityId: Controlled,
+                dx: _snapshot.MoveX,
+                dy: _snapshot.MoveY,
+                buttons: buttons
             ));
 
-            // edges — в ноль
-            _snapshot.JumpPressed = false;
-            _snapshot.DefensePressed = false;
-            _snapshot.EvadePressed = false;
+            _snapshot.ClearEdges();
         }
     }
 }
