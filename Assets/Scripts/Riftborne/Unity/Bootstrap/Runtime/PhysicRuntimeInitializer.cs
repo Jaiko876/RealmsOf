@@ -8,7 +8,6 @@ using Riftborne.Core.Physics.Motors;
 using Riftborne.Core.TIme;
 using Riftborne.Physics.Unity2D;
 using VContainer;
-using VContainer.Unity;
 
 namespace Riftborne.Unity.Bootstrap.Runtime
 {
@@ -42,7 +41,6 @@ namespace Riftborne.Unity.Bootstrap.Runtime
             builder.Register<IGroundSensor, Unity2DGroundSensor>(Lifetime.Singleton);
             builder.Register<Unity2DWallSensor>(Lifetime.Singleton).As<IWallSensor>();
             builder.Register<ICharacterMotor, PlatformerCharacterMotor>(Lifetime.Singleton);
-            builder.RegisterComponentInHierarchy<PhysicsBodyAuthoring>();
         }
     }
 }

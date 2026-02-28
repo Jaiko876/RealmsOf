@@ -48,11 +48,6 @@ namespace Riftborne.Unity.View.Presenters
             }
         }
 
-        public void Present(UnityEngine.AnimationState a, int facing, float dt, float fixedDt)
-        {
-            throw new NotImplementedException();
-        }
-
         public void Present(AnimationState a, int facing, float dt, float fixedDt)
         {
             if (_animator == null) return;

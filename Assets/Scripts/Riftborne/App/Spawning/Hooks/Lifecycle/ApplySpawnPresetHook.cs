@@ -1,11 +1,10 @@
 using System;
-using Riftborne.App.Spawning.Hooks.Lifecycle;
 using Riftborne.Configs;
 using Riftborne.Core.Gameplay.Weapons.Model;
 using Riftborne.Core.Model;
 using Riftborne.Core.Stores.Abstractions;
 
-namespace Riftborne.App.Spawning.Hooks.lifecycle
+namespace Riftborne.App.Spawning.Hooks.Lifecycle
 {
     public sealed class ApplySpawnPresetHook : OrderedEntityLifecycleHookBase
     {

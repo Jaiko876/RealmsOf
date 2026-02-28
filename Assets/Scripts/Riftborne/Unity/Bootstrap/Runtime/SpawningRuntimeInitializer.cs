@@ -7,7 +7,9 @@ using Riftborne.App.Spawning.Hooks.Lifecycle;
 using Riftborne.App.Spawning.Lifecycle;
 using Riftborne.App.Spawning.Lifecycle.Abstractions;
 using Riftborne.Core.Input.Commands;
+using Riftborne.Unity.Spawning;
 using VContainer;
+using VContainer.Unity;
 
 namespace Riftborne.Unity.Bootstrap.Runtime
 {
@@ -17,22 +19,23 @@ namespace Riftborne.Unity.Bootstrap.Runtime
 
         public void Initialize(IContainerBuilder builder)
         {
-            // ids: старт с 1000, чтобы не конфликтовать с тем, что руками в сцене
-            builder.Register<IEntityIdAllocator>(c => new SequentialEntityIdAllocator(1000), Lifetime.Singleton);
+            // IMPORTANT: runtime-scope resolver (must be used for InjectGameObject of spawned prefabs)
+            builder.RegisterComponentInHierarchy<UnitySpawnBackend>().As<ISpawnBackend>();
 
+            builder.Register<IEntityIdAllocator>(c => new SequentialEntityIdAllocator(1000), Lifetime.Singleton);
             builder.Register<IEntityLifecycle, EntityLifecycle>(Lifetime.Singleton);
 
-            // command handlers + registrations
             builder.Register<SpawnEntityCommandHandler>(Lifetime.Singleton);
             builder.Register<DespawnEntityCommandHandler>(Lifetime.Singleton);
-            
-            //hooks
+            builder.Register<SpawnPlayerAvatarCommandHandler>(Lifetime.Singleton);
+
             builder.Register<IEntityLifecycleHook, PlayerAvatarCleanupHook>(Lifetime.Singleton);
             builder.Register<IEntityLifecycleHook, StoresCleanupHook>(Lifetime.Singleton);
             builder.Register<IEntityLifecycleHook, BodyRegistryCleanupHook>(Lifetime.Singleton);
 
             builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<SpawnEntityCommand, SpawnEntityCommandHandler>>(Lifetime.Singleton);
             builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<DespawnEntityCommand, DespawnEntityCommandHandler>>(Lifetime.Singleton);
+            builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<SpawnPlayerAvatarCommand, SpawnPlayerAvatarCommandHandler>>(Lifetime.Singleton);
         }
     }
 }

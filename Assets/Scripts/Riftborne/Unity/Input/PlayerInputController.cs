@@ -3,27 +3,40 @@ using Riftborne.App.Commands.Queue;
 using Riftborne.Core.Input;
 using Riftborne.Core.Input.Commands;
 using Riftborne.Core.Model;
+using Riftborne.Unity.Bootstrap;
 using UnityEngine;
 using VContainer;
 
 namespace Riftborne.Unity.Input
 {
-    public sealed class PlayerInputController : MonoBehaviour
+    public sealed class PlayerInputController : MonoBehaviour, ITickCommandSource
     {
-        [SerializeField] private int controlledEntityId = 0;
+        [Header("Bind (Local Player)")]
+        [SerializeField] private int playerId = 0;
+
+        [Header("Debug override (-1 = use PlayerAvatarMap)")]
+        [SerializeField] private int overrideEntityId = -1;
 
         private ICommandQueue _commandQueue;
+        private GameState _state;
 
         private InputSnapshot _snapshot;
+
         private bool _prevJumpHeld;
         private bool _prevDefenseHeld;
 
-        private GameEntityId Controlled => new GameEntityId(controlledEntityId);
+        private PlayerId _playerId;
 
         [Inject]
-        public void Construct(ICommandQueue commandQueue)
+        public void Construct(ICommandQueue commandQueue, GameState state)
         {
             _commandQueue = commandQueue ?? throw new ArgumentNullException(nameof(commandQueue));
+            _state = state ?? throw new ArgumentNullException(nameof(state));
+        }
+
+        private void Awake()
+        {
+            _playerId = new PlayerId(playerId);
         }
 
         public void SetMove(float x, float y)
@@ -62,10 +75,21 @@ namespace Riftborne.Unity.Input
             _snapshot.EvadePressed = true;
         }
 
-        public void FlushForTick(int tick)
+        public void ProduceCommandsForTick(int tick)
         {
-            if (_commandQueue == null)
-                throw new InvalidOperationException("PlayerInputController is not constructed (DI failed?).");
+            FlushForTick(tick);
+        }
+
+        private void FlushForTick(int tick)
+        {
+            if (_commandQueue == null || _state == null)
+                return;
+
+            if (!TryResolveControlledEntity(out var controlled))
+            {
+                _snapshot.ClearEdges();
+                return;
+            }
 
             InputButtons buttons = InputButtons.None;
 
@@ -81,13 +105,28 @@ namespace Riftborne.Unity.Input
 
             _commandQueue.Enqueue(new InputCommand(
                 tick: tick,
-                entityId: Controlled,
+                entityId: controlled,
                 dx: _snapshot.MoveX,
                 dy: _snapshot.MoveY,
                 buttons: buttons
             ));
 
             _snapshot.ClearEdges();
+        }
+
+        private bool TryResolveControlledEntity(out GameEntityId id)
+        {
+            if (overrideEntityId >= 0)
+            {
+                id = new GameEntityId(overrideEntityId);
+                return true;
+            }
+
+            if (_state.PlayerAvatars.TryGet(_playerId, out id))
+                return true;
+
+            id = default;
+            return false;
         }
     }
 }

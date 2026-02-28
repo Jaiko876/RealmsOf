@@ -1,3 +1,5 @@
+using System;
+using Riftborne.Core.Entities;
 using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
 using UnityEngine;
@@ -6,24 +8,23 @@ using VContainer;
 namespace Riftborne.Physics.Unity2D
 {
     [RequireComponent(typeof(Rigidbody2D))]
-    public sealed class PhysicsBodyAuthoring : MonoBehaviour
+    public sealed class PhysicsBodyAuthoring : MonoBehaviour, IGameEntityIdReceiver
     {
-        [SerializeField] private int entityId = 0;
+        [Header("Scene fallback (debug only)")]
+        [SerializeField] private int sceneEntityId = 0;
 
         private GameEntityId _id;
+        private bool _hasId;
+
         private bool _registered;
 
         private IBodyProvider<GameEntityId> _registry;
         private Rigidbody2DPhysicsBody _body;
 
-        public GameEntityId EntityId
-        {
-            get { return _id; }
-        }
+        public GameEntityId EntityId { get { return _id; } }
 
         private void Awake()
         {
-            _id = new GameEntityId(entityId);
             _body = new Rigidbody2DPhysicsBody(GetComponent<Rigidbody2D>());
         }
 
@@ -34,8 +35,27 @@ namespace Riftborne.Physics.Unity2D
             TryRegister();
         }
 
+        public void SetEntityId(GameEntityId id)
+        {
+            if (_registered)
+                throw new InvalidOperationException("Cannot change EntityId after registration.");
+
+            _id = id;
+            _hasId = true;
+            sceneEntityId = id.Value;
+
+            TryRegister();
+        }
+
         private void OnEnable()
         {
+            // Scene fallback (hand-placed debug objects)
+            if (!_hasId)
+            {
+                _id = new GameEntityId(sceneEntityId);
+                _hasId = true;
+            }
+
             TryRegister();
         }
 
@@ -51,25 +71,11 @@ namespace Riftborne.Physics.Unity2D
         private void TryRegister()
         {
             if (_registered) return;
+            if (!_hasId) return;
             if (_registry == null || _body == null) return;
 
             _registry.Register(_id, _body);
             _registered = true;
-        }
-
-        /// <summary>
-        /// На будущее для спавна: назначить id до регистрации.
-        /// </summary>
-        public void SetEntityId(GameEntityId id)
-        {
-            if (_registered)
-            {
-                // На старте лучше явно падать, чем молча ломать регистрацию.
-                throw new System.InvalidOperationException("Cannot change EntityId after registration.");
-            }
-
-            _id = id;
-            entityId = id.Value;
         }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using Riftborne.App.Commands.Queue;
-using Riftborne.App.Spawning.Abstractions;
 using Riftborne.App.Time;
 using Riftborne.Configs;
 using Riftborne.Core.Config;
@@ -8,7 +7,6 @@ using Riftborne.Core.Model;
 using Riftborne.Core.TIme;
 using Riftborne.Unity.Bootstrap.Runtime;
 using Riftborne.Unity.Input;
-using Riftborne.Unity.Spawning;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -66,9 +64,11 @@ namespace Riftborne.Unity.Bootstrap
             
             builder.RegisterComponentInHierarchy<PlayerInputController>();
             builder.RegisterComponentInHierarchy<PlayerInputAdapter>();
-            
-            builder.RegisterComponentInHierarchy<UnitySpawnBackend>().As<ISpawnBackend>();
+            builder.RegisterComponentInHierarchy<LocalPlayerSpawnBootstrap>();
 
+            // PlayerInputController как источник тиковых команд
+            builder.Register<ITickCommandSource>(c => c.Resolve<PlayerInputController>(), Lifetime.Singleton);
+            
             // --- Entry point: соберёт runtime scope и запустит матч ---
             builder.Register<CombatRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<AnimationsRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();

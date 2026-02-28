@@ -1,33 +1,34 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Riftborne.App.Commands.Queue;
 using Riftborne.App.Simulation;
 using Riftborne.App.Time;
-using Riftborne.Unity.Input;
 using VContainer;
 using VContainer.Unity;
 
 namespace Riftborne.Unity.Bootstrap
 {
-    public class GameLoop : IStartable
+    public sealed class GameLoop : IStartable
     {
         private readonly ITickClock _clock;
         private readonly ICommandQueue _queue;
         private readonly ISimulation _simulation;
-        private readonly PlayerInputController _input;
-        
+
+        private readonly ITickCommandSource[] _sources;
+
         [Inject]
         public GameLoop(
             ITickClock clock,
             ICommandQueue queue,
             ISimulation simulation,
-            PlayerInputController input)
+            IEnumerable<ITickCommandSource> sources)
         {
             _clock = clock;
             _queue = queue;
             _simulation = simulation;
-            _input = input;
-        }
 
+            _sources = sources != null ? ToArray(sources) : new ITickCommandSource[0];
+        }
 
         public void Start()
         {
@@ -42,13 +43,24 @@ namespace Riftborne.Unity.Bootstrap
 
                 var tick = _clock.CurrentTick;
 
-                _input.FlushForTick(tick);
+                for (int i = 0; i < _sources.Length; i++)
+                    _sources[i].ProduceCommandsForTick(tick);
 
                 var batch = _queue.DequeueAllForTick(tick);
                 _simulation.Step(tick, batch);
 
                 _clock.Advance();
             }
+        }
+
+        private static ITickCommandSource[] ToArray(IEnumerable<ITickCommandSource> src)
+        {
+            var list = new List<ITickCommandSource>();
+            foreach (var s in src)
+            {
+                if (s != null) list.Add(s);
+            }
+            return list.ToArray();
         }
     }
 }

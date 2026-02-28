@@ -1,4 +1,5 @@
 using Riftborne.Configs;
+using Riftborne.Core.Entities;
 using Riftborne.Core.Gameplay.Weapons.Model;
 using Riftborne.Core.Model;
 using Riftborne.Core.Stores.Abstractions;
@@ -7,12 +8,15 @@ using VContainer;
 
 namespace Riftborne.Unity.View.Weapons
 {
-    public sealed class WeaponViewBinder : MonoBehaviour
+    public sealed class WeaponViewBinder : MonoBehaviour, IGameEntityIdReceiver
     {
-        [SerializeField] private int controlledEntityId;
+        [Header("Scene fallback (debug only)")]
+        [SerializeField] private int sceneEntityId = 0;
+
         [SerializeField] private Transform weaponSlot;
 
         private GameEntityId _id;
+        private bool _hasId;
 
         private IEquippedWeaponStore _weapons;
         private WeaponViewCatalogAsset _views;
@@ -27,14 +31,25 @@ namespace Riftborne.Unity.View.Weapons
             _views = views;
         }
 
-        private void Awake()
+        public void SetEntityId(GameEntityId id)
         {
-            _id = new GameEntityId(controlledEntityId);
+            _id = id;
+            _hasId = true;
+            sceneEntityId = id.Value;
+        }
+
+        private void OnEnable()
+        {
+            if (!_hasId)
+            {
+                _id = new GameEntityId(sceneEntityId);
+                _hasId = true;
+            }
         }
 
         private void LateUpdate()
         {
-            if (_weapons == null || _views == null || weaponSlot == null)
+            if (!_hasId || _weapons == null || _views == null || weaponSlot == null)
                 return;
 
             var desired = _weapons.GetOrDefault(_id, WeaponId.Fists);

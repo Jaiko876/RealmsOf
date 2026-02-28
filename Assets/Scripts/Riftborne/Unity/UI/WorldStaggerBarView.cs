@@ -1,3 +1,4 @@
+using Riftborne.Core.Entities;
 using Riftborne.Core.Model;
 using Riftborne.Core.Stores.Abstractions;
 using UnityEngine;
@@ -6,7 +7,7 @@ using VContainer;
 
 namespace Riftborne.Unity.UI
 {
-    public sealed class WorldStaggerBarView : MonoBehaviour
+    public sealed class WorldStaggerBarView : MonoBehaviour, IGameEntityIdReceiver
     {
         [Header("UI")]
         [SerializeField] private Image fillImage;          // Filled / Horizontal / Left
@@ -26,7 +27,7 @@ namespace Riftborne.Unity.UI
         [Inject]
         public void Construct(IStatsStore stats) => _stats = stats;
 
-        public void Bind(GameEntityId id)
+        public void SetEntityId(GameEntityId id)
         {
             _id = id;
             _hasId = true;
@@ -40,7 +41,6 @@ namespace Riftborne.Unity.UI
             _shownFill01 = 0f;
             if (fillImage != null) fillImage.fillAmount = 0f;
 
-            // форс выключение на старте
             _visible = true;
             SetVisible(false);
         }

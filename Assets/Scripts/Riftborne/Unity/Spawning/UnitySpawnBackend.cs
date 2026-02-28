@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Riftborne.App.Spawning.Abstractions;
+using Riftborne.Core.Entities;
 using Riftborne.Core.Model;
-using Riftborne.Physics.Unity2D;
+using Riftborne.Unity.Entities;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -28,6 +29,8 @@ namespace Riftborne.Unity.Spawning
         private readonly Dictionary<int, GameObject> _alive =
             new Dictionary<int, GameObject>();
 
+        private Transform _stagingRoot;
+
         [Inject]
         public void Construct(IObjectResolver resolver)
         {
@@ -35,6 +38,12 @@ namespace Riftborne.Unity.Spawning
         }
 
         private void Awake()
+        {
+            BuildCatalog();
+            EnsureStagingRoot();
+        }
+
+        private void BuildCatalog()
         {
             _catalog.Clear();
 
@@ -51,6 +60,17 @@ namespace Riftborne.Unity.Spawning
             }
         }
 
+        private void EnsureStagingRoot()
+        {
+            if (_stagingRoot != null)
+                return;
+
+            var go = new GameObject("__SpawnStaging");
+            go.hideFlags = HideFlags.HideInHierarchy;
+            go.SetActive(false);
+            _stagingRoot = go.transform;
+        }
+
         public void Spawn(GameEntityId id, string prefabKey, float x, float y)
         {
             if (_alive.ContainsKey(id.Value))
@@ -59,18 +79,31 @@ namespace Riftborne.Unity.Spawning
             if (!_catalog.TryGetValue(prefabKey, out var prefab) || prefab == null)
                 throw new InvalidOperationException("Unknown prefabKey: " + prefabKey);
 
-            var go = Instantiate(prefab, new Vector3(x, y, 0f), Quaternion.identity);
+            EnsureStagingRoot();
 
-            // ВАЖНО: Inject только если resolver реально есть
+            // 1) Instantiate under inactive staging root => NO OnEnable/Start yet
+            var instance = Instantiate(prefab, _stagingRoot, false);
+            instance.name = prefab.name + "_" + id.Value;
+
+            // Make sure activeSelf is false while we wire identity + DI
+            instance.SetActive(false);
+
+            // 2) Position
+            instance.transform.position = new Vector3(x, y, 0f);
+            instance.transform.rotation = Quaternion.identity;
+
+            // 3) Identity-first: assign entityId (and optionally owner)
+            ApplyEntityId(instance, id);
+
+            // 4) DI injection while inactive
             if (_resolver != null)
-                _resolver.InjectGameObject(go);
+                _resolver.InjectGameObject(instance);
 
-            // важно: проставить id до регистрации body
-            var body = go.GetComponentInChildren<PhysicsBodyAuthoring>(true);
-            if (body != null)
-                body.SetEntityId(id);
+            // 5) Move to world + enable (OnEnable/Start will run now)
+            instance.transform.SetParent(null, true);
+            instance.SetActive(true);
 
-            _alive[id.Value] = go;
+            _alive[id.Value] = instance;
         }
 
         public void Despawn(GameEntityId id)
@@ -79,6 +112,26 @@ namespace Riftborne.Unity.Spawning
             {
                 _alive.Remove(id.Value);
                 Destroy(go);
+            }
+        }
+
+        private static void ApplyEntityId(GameObject root, GameEntityId id)
+        {
+            var identity = root.GetComponent<EntityIdentityAuthoring>();
+            if (identity != null)
+            {
+                identity.AssignEntityId(id);
+                return;
+            }
+
+            // Fallback: broadcast to receivers (if prefab doesn't have identity component yet)
+            var behaviours = root.GetComponentsInChildren<MonoBehaviour>(true);
+            for (int i = 0; i < behaviours.Length; i++)
+            {
+                var b = behaviours[i];
+                var rx = b as IGameEntityIdReceiver;
+                if (rx != null)
+                    rx.SetEntityId(id);
             }
         }
     }

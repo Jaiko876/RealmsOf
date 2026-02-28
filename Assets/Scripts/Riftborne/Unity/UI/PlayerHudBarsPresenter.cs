@@ -38,33 +38,23 @@ namespace Riftborne.Unity.UI
             if (_state == null || _stats == null)
                 return;
 
-            // 1) Находим аватар игрока (entityId)
-            if (!_hasEntity)
+            if (!_state.PlayerAvatars.TryGet(_playerId, out var current))
             {
-                if (!_state.PlayerAvatars.TryGet(_playerId, out _entityId))
-                    return;
+                _hasEntity = false;
+                return;
+            }
 
+            if (!_hasEntity || !_entityId.Equals(current))
+            {
+                _entityId = current;
                 _hasEntity = true;
             }
 
-            // 2) Читаем статы и обновляем бары
             if (!_stats.TryGet(_entityId, out var s) || !s.IsInitialized)
                 return;
 
-            if (hpBar != null)
-                hpBar.Set(s.HpCur, s.HpMax);
-
-            if (staminaBar != null)
-                staminaBar.Set(s.StaminaCur, s.StaminaMax);
-        }
-
-        private static float SafeDiv01(int cur, int max)
-        {
-            if (max <= 0) return 0f;
-            float v = cur / (float)max;
-            if (v < 0f) return 0f;
-            if (v > 1f) return 1f;
-            return v;
+            if (hpBar != null) hpBar.Set(s.HpCur, s.HpMax);
+            if (staminaBar != null) staminaBar.Set(s.StaminaCur, s.StaminaMax);
         }
     }
 }
