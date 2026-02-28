@@ -24,6 +24,8 @@ namespace Riftborne.Unity.Bootstrap
         [SerializeField] private AttackAnimationConfigAsset _attackAnimConfig;
         
         [SerializeField] private WeaponCatalogAsset _weaponCatalog;
+        [SerializeField] private SpawnPresetAsset _spawnPresets;
+        [SerializeField] private WeaponViewCatalogAsset _weaponViewCatalog;
         
 
         protected override void Configure(IContainerBuilder builder)
@@ -43,6 +45,8 @@ namespace Riftborne.Unity.Bootstrap
             if (_attackAnimConfig == null) throw new InvalidOperationException("AttackAnimationConfigAsset is not assigned in GameLifetimeScope.");
             
             if (_weaponCatalog == null) throw new InvalidOperationException("WeaponCatalogAsset is not assigned in GameLifetimeScope.");
+            if (_spawnPresets == null) throw new InvalidOperationException("SpawnPresetAsset is not assigned in GameLifetimeScope.");
+            if (_weaponViewCatalog == null) throw new InvalidOperationException("WeaponViewCatalogAsset is not assigned in GameLifetimeScope.");
            
             builder.RegisterInstance(_statsConfig);
             builder.RegisterInstance(_motorConfig);
@@ -50,6 +54,8 @@ namespace Riftborne.Unity.Bootstrap
             builder.RegisterInstance(_tuningConfig).As<IGameplayTuning>(); 
             builder.RegisterInstance(_attackAnimConfig);
             builder.RegisterInstance(_weaponCatalog);
+            builder.RegisterInstance(_spawnPresets);
+            builder.RegisterInstance(_weaponViewCatalog);
 
             var dt = 1f / Mathf.Max(1, _gameConfig.TickRate);
             builder.RegisterInstance(new SimulationParameters(

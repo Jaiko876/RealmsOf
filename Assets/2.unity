@@ -1053,6 +1053,8 @@ MonoBehaviour:
   _tuningConfig: {fileID: 11400000, guid: b05d3e49f000fae419123a5154c50d89, type: 2}
   _attackAnimConfig: {fileID: 11400000, guid: da806cbc4eef36c48b7747922a409513, type: 2}
   _weaponCatalog: {fileID: 11400000, guid: 3ba6442883fd8df4381e4cc2ad5b3134, type: 2}
+  _spawnPresets: {fileID: 11400000, guid: e145878b5dc16bb4da9201e96eb63d4d, type: 2}
+  _weaponViewCatalog: {fileID: 11400000, guid: 01dd4fe2415aeee408d8ea8a1f73b5f2, type: 2}
 --- !u!4 &654924459
 Transform:
   m_ObjectHideFlags: 0

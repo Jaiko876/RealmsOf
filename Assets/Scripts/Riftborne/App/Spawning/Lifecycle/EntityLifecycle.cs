@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Generic;
 using Riftborne.App.Spawning.Abstractions;
-using Riftborne.App.Spawning.Hooks;
+using Riftborne.App.Spawning.Hooks.Lifecycle;
 using Riftborne.App.Spawning.Lifecycle.Abstractions;
 using Riftborne.Core.Model;
 
@@ -11,7 +12,7 @@ namespace Riftborne.App.Spawning.Lifecycle
         private readonly GameState _state;
         private readonly IEntityIdAllocator _ids;
         private readonly ISpawnBackend _backend;
-        private readonly IReadOnlyList<IEntityLifecycleHook> _hooks;
+        private readonly IEntityLifecycleHook[] _hooksOrdered;
 
         public EntityLifecycle(
             GameState state,
@@ -19,48 +20,74 @@ namespace Riftborne.App.Spawning.Lifecycle
             ISpawnBackend backend,
             IReadOnlyList<IEntityLifecycleHook> hooks)
         {
-            _state = state;
-            _ids = ids;
-            _backend = backend;
-            _hooks = hooks;
+            _state = state ?? throw new ArgumentNullException(nameof(state));
+            _ids = ids ?? throw new ArgumentNullException(nameof(ids));
+            _backend = backend ?? throw new ArgumentNullException(nameof(backend));
+            if (hooks == null) throw new ArgumentNullException(nameof(hooks));
+
+            _hooksOrdered = OrderHooks(hooks);
         }
 
         public GameEntityId Spawn(string prefabKey, float x, float y, GameEntityId? fixedId)
         {
+            if (string.IsNullOrWhiteSpace(prefabKey))
+                throw new ArgumentException("prefabKey is required", nameof(prefabKey));
+
             var id = fixedId ?? _ids.Next();
 
-            // 1) Core entity exists
             _state.GetOrCreateEntity(id);
 
-            // 2) hooks (before)
-            for (int i = 0; i < _hooks.Count; i++)
-                _hooks[i].OnBeforeSpawn(id, prefabKey, x, y);
+            for (int i = 0; i < _hooksOrdered.Length; i++)
+                _hooksOrdered[i].OnBeforeSpawn(id, prefabKey, x, y);
 
-            // 3) Unity GO
             _backend.Spawn(id, prefabKey, x, y);
 
-            // 4) hooks (after)
-            for (int i = 0; i < _hooks.Count; i++)
-                _hooks[i].OnAfterSpawn(id, prefabKey, x, y);
+            for (int i = 0; i < _hooksOrdered.Length; i++)
+                _hooksOrdered[i].OnAfterSpawn(id, prefabKey, x, y);
 
             return id;
         }
 
         public void Despawn(GameEntityId id)
         {
-            // 0) hooks (before)
-            for (int i = 0; i < _hooks.Count; i++)
-                _hooks[i].OnBeforeDespawn(id);
+            for (int i = 0; i < _hooksOrdered.Length; i++)
+                _hooksOrdered[i].OnBeforeDespawn(id);
 
-            // 1) kill GO
             _backend.Despawn(id);
 
-            // 2) hooks (after)
-            for (int i = 0; i < _hooks.Count; i++)
-                _hooks[i].OnAfterDespawn(id);
+            for (int i = 0; i < _hooksOrdered.Length; i++)
+                _hooksOrdered[i].OnAfterDespawn(id);
 
-            // 3) remove entity last
             _state.RemoveEntity(id);
+        }
+
+        private static IEntityLifecycleHook[] OrderHooks(IReadOnlyList<IEntityLifecycleHook> hooks)
+        {
+            var list = new List<(int order, IEntityLifecycleHook hook)>(hooks.Count);
+
+            for (int i = 0; i < hooks.Count; i++)
+            {
+                var h = hooks[i];
+                if (h == null) continue;
+
+                var order = 0;
+                var ordered = h as IOrderedEntityLifecycleHook;
+                if (ordered != null) order = ordered.Order;
+
+                list.Add((order, h));
+            }
+
+            list.Sort((a, b) =>
+            {
+                var c = a.order.CompareTo(b.order);
+                return c != 0 ? c : string.CompareOrdinal(a.hook.GetType().FullName, b.hook.GetType().FullName);
+            });
+
+            var arr = new IEntityLifecycleHook[list.Count];
+            for (int i = 0; i < list.Count; i++)
+                arr[i] = list[i].hook;
+
+            return arr;
         }
     }
 }

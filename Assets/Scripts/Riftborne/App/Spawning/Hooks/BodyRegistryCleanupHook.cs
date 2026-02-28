@@ -1,5 +1,6 @@
 // Assets/Scripts/Riftborne/Core/Spawning/Hooks/BodyRegistryCleanupHook.cs
 
+using Riftborne.App.Spawning.Hooks.Lifecycle;
 using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
 

@@ -1,6 +1,6 @@
 using Riftborne.Core.Model;
 
-namespace Riftborne.App.Spawning.Hooks
+namespace Riftborne.App.Spawning.Hooks.Lifecycle
 {
     public interface IEntityLifecycleHook
     {

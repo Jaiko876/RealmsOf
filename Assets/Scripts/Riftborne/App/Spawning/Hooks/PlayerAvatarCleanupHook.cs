@@ -1,3 +1,4 @@
+using Riftborne.App.Spawning.Hooks.Lifecycle;
 using Riftborne.Core.Model;
 
 namespace Riftborne.App.Spawning.Hooks

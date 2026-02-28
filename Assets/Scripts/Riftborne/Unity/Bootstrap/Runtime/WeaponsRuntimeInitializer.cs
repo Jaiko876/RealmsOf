@@ -1,6 +1,10 @@
-﻿using Riftborne.App.Weapons.Catalog;
+﻿using Riftborne.App.Spawning.Hooks.lifecycle;
+using Riftborne.App.Spawning.Hooks.Lifecycle;
+using Riftborne.App.Weapons.Catalog;
 using Riftborne.Configs;
 using Riftborne.Core.Gameplay.Weapons.Abstractions;
+using Riftborne.Core.Stores;
+using Riftborne.Core.Stores.Abstractions;
 using VContainer;
 
 namespace Riftborne.Unity.Bootstrap.Runtime
@@ -11,11 +15,14 @@ namespace Riftborne.Unity.Bootstrap.Runtime
 
         public void Initialize(IContainerBuilder builder)
         {
-            builder.Register(c =>
-            {
-                var asset = c.Resolve<WeaponCatalogAsset>();
-                return asset.Build();
-            }, Lifetime.Singleton);
+            builder.Register<IEquippedWeaponStore, EquippedWeaponStore>(Lifetime.Singleton);
+
+            // упорядоченный hook, который применяет пресеты
+            builder.Register<IEntityLifecycleHook>(c =>
+                    new ApplySpawnPresetHook(
+                        c.Resolve<SpawnPresetAsset>(),
+                        c.Resolve<IEquippedWeaponStore>()),
+                Lifetime.Singleton);
 
             builder.Register<IWeaponCatalog, WeaponCatalog>(Lifetime.Singleton);        }
     }
