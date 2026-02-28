@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4d8fb95374848839ad6c9331ca193bb, type: 3}
+  m_Name: WeaponCatalog
+  m_EditorClassIdentifier: Riftborne.Configs::Riftborne.Configs.WeaponCatalogAsset
+  weapons:
+  - Id: 1
+    LightOffsetX: 0
+    LightOffsetY: 0
+    LightWidth: 0.01
+    LightHeight: 0.01
+    HeavyOffsetX: 0
+    HeavyOffsetY: 0
+    HeavyWidth: 0.01
+    HeavyHeight: 0.01
