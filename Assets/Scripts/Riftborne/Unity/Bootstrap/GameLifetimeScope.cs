@@ -81,6 +81,7 @@ namespace Riftborne.Unity.Bootstrap
             builder.Register<RandomRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<StoresRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             builder.Register<UnityRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
+            builder.Register<WeaponsRuntimeInitializer>(Lifetime.Singleton).As<IRuntimeInitializer>();
             
             builder.RegisterEntryPoint<GameRuntimeComposer>();
         }

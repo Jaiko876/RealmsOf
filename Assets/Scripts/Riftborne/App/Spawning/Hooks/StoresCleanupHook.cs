@@ -13,6 +13,7 @@ namespace Riftborne.App.Spawning.Hooks
         private readonly IActionEventStore _actionEventStore;
         private readonly IAttackHoldStore _holdStore;
         private readonly IEquippedWeaponStore _equippedWeaponStore;
+        private readonly ICombatActionStore _combatActions;
 
         public StoresCleanupHook(
             IMotorStateStore motorState,
@@ -21,7 +22,8 @@ namespace Riftborne.App.Spawning.Hooks
             IStatsEffectStore effects, 
             IActionEventStore actionEventStore,
             IAttackHoldStore holdStore, 
-            IEquippedWeaponStore equippedWeaponStore)
+            IEquippedWeaponStore equippedWeaponStore, 
+            ICombatActionStore combatActions)
         {
             _motorState = motorState;
             _charge = charge;
@@ -30,6 +32,7 @@ namespace Riftborne.App.Spawning.Hooks
             _actionEventStore = actionEventStore;
             _holdStore = holdStore;
             _equippedWeaponStore = equippedWeaponStore;
+            _combatActions = combatActions;
         }
 
         public override void OnAfterDespawn(GameEntityId id)
@@ -41,6 +44,7 @@ namespace Riftborne.App.Spawning.Hooks
             _actionEventStore.Remove(id);
             _holdStore.Remove(id);
             _equippedWeaponStore.Remove(id);
+            _combatActions.Remove(id);
         }
     }
 }

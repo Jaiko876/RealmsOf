@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 630a02c9a5a54a6390ae3ca67c2073bd, type: 3}
   m_Name: WeaponViewCatalog
   m_EditorClassIdentifier: Riftborne.Configs::Riftborne.Configs.WeaponViewCatalogAsset
-  entries: []
+  entries:
+  - Id: 1
+    Prefab: {fileID: 0}

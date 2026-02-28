@@ -1,4 +1,5 @@
 using System;
+using Riftborne.App.Combat.Abstractions;
 using Riftborne.App.Combat.Providers.Abstractions;
 using Riftborne.Core.Config;
 using Riftborne.Core.Gameplay.Combat.Model;
@@ -13,6 +14,8 @@ namespace Riftborne.App.Input.Handlers
 {
     public sealed class ActionInputCommandHandler : ICommandHandler<InputCommand>
     {
+        private readonly GameState _state;
+        
         private readonly IActionEventStore _events;
         private readonly IAttackChargeStore _charge;
         private readonly IAttackHoldStore _hold;
@@ -22,6 +25,8 @@ namespace Riftborne.App.Input.Handlers
 
         private readonly CombatInputTuning _inputTuning;
         private readonly CombatAnimationTuning _animTuning;
+        
+        private readonly ICombatActionStarter _starter;
 
         public ActionInputCommandHandler(
             IActionEventStore events,
@@ -30,7 +35,9 @@ namespace Riftborne.App.Input.Handlers
             IAttackCooldownStore cooldowns,
             IAttackInputRules rules,
             ICombatSpeedProvider speeds,
-            IGameplayTuning gameplayTuning)
+            IGameplayTuning gameplayTuning, 
+            ICombatActionStarter starter, 
+            GameState state)
         {
             _events = events ?? throw new ArgumentNullException(nameof(events));
             _charge = charge ?? throw new ArgumentNullException(nameof(charge));
@@ -38,6 +45,8 @@ namespace Riftborne.App.Input.Handlers
             _cooldowns = cooldowns ?? throw new ArgumentNullException(nameof(cooldowns));
             _rules = rules ?? throw new ArgumentNullException(nameof(rules));
             _speeds = speeds ?? throw new ArgumentNullException(nameof(speeds));
+            _starter = starter ?? throw new ArgumentNullException(nameof(starter));
+            _state = state ?? throw new ArgumentNullException(nameof(state));
             if (gameplayTuning == null) throw new ArgumentNullException(nameof(gameplayTuning));
 
             _inputTuning = gameplayTuning.CombatInput;
@@ -75,12 +84,11 @@ namespace Riftborne.App.Input.Handlers
             if (!step.Release.HasRelease)
                 return;
 
-            if (!_cooldowns.CanAttack(id, tick))
-                return;
-
-            _cooldowns.ConsumeAttack(id, tick, step.Release.CooldownTicks);
-            _events.SetTiming(id, step.Release.Action, step.Release.DurationTicks, tick);
-            _events.SetIntent(id, step.Release.Action, tick);
+            // вместо прямого cooldown+events:
+            if (_state.Entities.TryGetValue(id, out var e) && e != null)
+            {
+                _starter.TryStartAttack(id, tick, step.Release.Action, step.Release.DurationTicks, step.Release.CooldownTicks, e.Facing);
+            }
         }
     }
 }

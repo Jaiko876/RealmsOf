@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 516bbe005a331a64dbec3796df507c70, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: Game.Configs::Game.Configs.GameConfigAsset
-  TickRate: 60
+  TickRate: 50
   Seed: 12345
   UnitsPerTick: 0.1

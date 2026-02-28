@@ -5,7 +5,7 @@ using Riftborne.Core.Physics.Abstractions;
 using UnityEngine;
 using VContainer;
 
-namespace Riftborne.Physics.Unity2D
+namespace Riftborne.Unity.Physics.Unity2D
 {
     [RequireComponent(typeof(Rigidbody2D))]
     public sealed class PhysicsBodyAuthoring : MonoBehaviour, IGameEntityIdReceiver

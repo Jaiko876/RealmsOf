@@ -22,6 +22,10 @@ namespace Riftborne.Configs
         [Header("Animator Speed Clamp")]
         [SerializeField] private float minAnimatorSpeed = 0.25f;
         [SerializeField] private float maxAnimatorSpeed = 3.5f;
+        
+        [Header("Parry/Dodge Clips")]
+        [SerializeField] private float parryClipSeconds = 0.35f;
+        [SerializeField] private float dodgeClipSeconds = 0.45f;
 
         public string AttackLayerName => attackLayerName;
         public string AttackStateTag => attackStateTag;
@@ -34,6 +38,8 @@ namespace Riftborne.Configs
         {
             if (action == ActionState.LightAttack) return lightAttackClipSeconds;
             if (action == ActionState.HeavyAttack) return heavyAttackClipSeconds;
+            if (action == ActionState.Parry) return parryClipSeconds;
+            if (action == ActionState.Dodge) return dodgeClipSeconds;
             return 0f;
         }
 

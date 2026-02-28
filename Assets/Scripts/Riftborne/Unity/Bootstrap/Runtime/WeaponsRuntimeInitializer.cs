@@ -2,6 +2,7 @@
 using Riftborne.App.Weapons.Catalog;
 using Riftborne.Configs;
 using Riftborne.Core.Gameplay.Weapons.Abstractions;
+using Riftborne.Core.Gameplay.Weapons.Model;
 using Riftborne.Core.Stores.Abstractions;
 using VContainer;
 
@@ -17,6 +18,10 @@ namespace Riftborne.Unity.Bootstrap.Runtime
                     new ApplySpawnPresetHook(
                         c.Resolve<SpawnPresetAsset>(),
                         c.Resolve<IEquippedWeaponStore>()),
+                Lifetime.Singleton);
+
+            builder.Register<WeaponDefinition[]>(c =>
+                    c.Resolve<WeaponCatalogAsset>().Build(),
                 Lifetime.Singleton);
 
             builder.Register<IWeaponCatalog, WeaponCatalog>(Lifetime.Singleton);

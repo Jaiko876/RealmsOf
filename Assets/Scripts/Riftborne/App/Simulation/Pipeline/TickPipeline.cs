@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Riftborne.App.Animation.Systems;
+using Riftborne.App.Combat.Systems;
 using Riftborne.Core.Systems.PostPhysicsTickSystems;
 using Riftborne.Core.Systems.PrePhysicsTickSystems;
 
@@ -18,6 +19,7 @@ namespace Riftborne.App.Simulation.Pipeline
             StatsApplyDeltasPostPhysicsSystem statsDeltas,
             StatsEffectsTickPostPhysicsSystem statsEffects,
             StatsRebuildModifiersPostPhysicsSystem statsRebuildModifiers,
+            CombatActionsPostPhysicsSystem combat,
             AnimationStatePostPhysicsSystem animation)
         {
             PrePhysics = new IPrePhysicsTickSystem[] { motor };
@@ -28,6 +30,7 @@ namespace Riftborne.App.Simulation.Pipeline
                 statsInit,
                 statsEffects,
                 statsRebuildModifiers,
+                combat,
                 statsRegen,
                 statsDeltas,
                 animation

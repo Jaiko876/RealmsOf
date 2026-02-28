@@ -6,7 +6,7 @@ using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
 using Riftborne.Core.Physics.Motors;
 using Riftborne.Core.TIme;
-using Riftborne.Physics.Unity2D;
+using Riftborne.Unity.Physics.Unity2D;
 using VContainer;
 
 namespace Riftborne.Unity.Bootstrap.Runtime

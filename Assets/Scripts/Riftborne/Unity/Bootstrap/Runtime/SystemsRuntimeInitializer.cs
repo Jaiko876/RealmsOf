@@ -1,4 +1,5 @@
 ﻿using Riftborne.App.Animation.Systems;
+using Riftborne.App.Combat.Systems;
 using Riftborne.App.Simulation.Pipeline;
 using Riftborne.Core.Systems.PostPhysicsTickSystems;
 using Riftborne.Core.Systems.PrePhysicsTickSystems;
@@ -20,6 +21,7 @@ namespace Riftborne.Unity.Bootstrap.Runtime
             builder.Register<StatsApplyDeltasPostPhysicsSystem>(Lifetime.Singleton);
             builder.Register<StatsEffectsTickPostPhysicsSystem>(Lifetime.Singleton);
             builder.Register<StatsRebuildModifiersPostPhysicsSystem>(Lifetime.Singleton);
+            builder.Register<CombatActionsPostPhysicsSystem>(Lifetime.Singleton);
 
             builder.Register<ITickPipeline, TickPipeline>(Lifetime.Singleton);
         }

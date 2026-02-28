@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Riftborne.Physics.Unity2D
+namespace Riftborne.Unity.Physics.Unity2D
 {
 
     /// <summary>

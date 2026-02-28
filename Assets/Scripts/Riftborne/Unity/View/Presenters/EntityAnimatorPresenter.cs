@@ -82,6 +82,8 @@ namespace Riftborne.Unity.View.Presenters
 
                 if (a.Action == ActionState.LightAttack) _animator.SetTrigger(_h.AtkLight);
                 else if (a.Action == ActionState.HeavyAttack) _animator.SetTrigger(_h.AtkHeavy);
+                else if (a.Action == ActionState.Parry) _animator.SetTrigger(_h.AtkParry);
+                else if (a.Action == ActionState.Dodge) _animator.SetTrigger(_h.AtkDodge);
             }
             else
             {
@@ -187,6 +189,8 @@ namespace Riftborne.Unity.View.Presenters
 
             public int AtkLight;
             public int AtkHeavy;
+            public int AtkParry;
+            public int AtkDodge;
 
             public int HeavyCharge;
             public int Charge01;
@@ -213,6 +217,9 @@ namespace Riftborne.Unity.View.Presenters
 
                 h.AttackAnimSpeed = Animator.StringToHash("AttackAnimSpeed");
                 h.ChargeAnimSpeed = Animator.StringToHash("ChargeAnimSpeed");
+                
+                h.AtkParry = Animator.StringToHash("AtkParry");
+                h.AtkDodge = Animator.StringToHash("AtkDodge");
 
                 return h;
             }

@@ -8,24 +8,174 @@ namespace Riftborne.Configs
     [CreateAssetMenu(menuName = "Riftborne/Config/GameplayTuning", fileName = "GameplayTuning")]
     public sealed class GameplayTuningAsset : ScriptableObject, IGameplayTuning
     {
-        [Header("Combat Input")]
-        [SerializeField] private CombatInputSection _combatInput = CombatInputSection.Default;
+        [Header("Combat Input")] [SerializeField]
+        private CombatInputSection _combatInput = CombatInputSection.Default;
 
-        [Header("Stats -> Physics")]
-        [SerializeField] private StatsToPhysicsSection _statsToPhysics = StatsToPhysicsSection.Default;
+        [Header("Stats -> Physics")] [SerializeField]
+        private StatsToPhysicsSection _statsToPhysics = StatsToPhysicsSection.Default;
 
-        [Header("Input")]
-        [SerializeField] private InputSection _input = InputSection.Default;
+        [Header("Input")] [SerializeField] private InputSection _input = InputSection.Default;
 
-        [Header("Physics Probes")]
-        [SerializeField] private PhysicsProbesSection _physicsProbes = PhysicsProbesSection.Default;
+        [Header("Physics Probes")] [SerializeField]
+        private PhysicsProbesSection _physicsProbes = PhysicsProbesSection.Default;
 
-        [Header("Physics World")]
-        [SerializeField] private PhysicsWorldSection _physicsWorld = PhysicsWorldSection.Default;
-        
-        [Header("Combat Animation (Authoritative durations)")]
-        [SerializeField] private CombatAnimationSection _combatAnimation = CombatAnimationSection.Default;
-        
+        [Header("Physics World")] [SerializeField]
+        private PhysicsWorldSection _physicsWorld = PhysicsWorldSection.Default;
+
+        [Header("Combat Animation (Authoritative durations)")] [SerializeField]
+        private CombatAnimationSection _combatAnimation = CombatAnimationSection.Default;
+
+        [Header("Combat Actions (Phases & Parry/Dodge)")] [SerializeField]
+        private CombatActionsSection _combatActions = CombatActionsSection.Default;
+
+        [Header("Combat Hit (Layers)")] [SerializeField]
+        private CombatHitSection _combatHit = CombatHitSection.Default;
+
+        [Header("Combat Damage (Rules numbers)")] [SerializeField]
+        private CombatDamageSection _combatDamage = CombatDamageSection.Default;
+
+        public CombatActionsTuning CombatActions
+            => new CombatActionsTuning(
+                new CombatActionsTuning.PhaseWeights(
+                    _combatActions.LightWindupWeight,
+                    _combatActions.LightActiveWeight,
+                    _combatActions.LightRecoveryWeight),
+                new CombatActionsTuning.PhaseWeights(
+                    _combatActions.HeavyWindupWeight,
+                    _combatActions.HeavyActiveWeight,
+                    _combatActions.HeavyRecoveryWeight),
+                new CombatActionsTuning.FixedAction(
+                    _combatActions.ParryDurationBaseTicks,
+                    _combatActions.ParryCooldownBaseTicks,
+                    new CombatActionsTuning.PhaseWeights(
+                        _combatActions.ParryWindupWeight,
+                        _combatActions.ParryActiveWeight,
+                        _combatActions.ParryRecoveryWeight)),
+                new CombatActionsTuning.FixedAction(
+                    _combatActions.DodgeDurationBaseTicks,
+                    _combatActions.DodgeCooldownBaseTicks,
+                    new CombatActionsTuning.PhaseWeights(
+                        _combatActions.DodgeWindupWeight,
+                        _combatActions.DodgeActiveWeight,
+                        _combatActions.DodgeRecoveryWeight))
+            );
+
+        public CombatHitTuning CombatHit
+            => new CombatHitTuning(_combatHit.TargetLayers.value);
+
+        public CombatDamageTuning CombatDamage
+            => new CombatDamageTuning(
+                _combatDamage.LightHpMul,
+                _combatDamage.LightStaminaDamage,
+                _combatDamage.LightStagger,
+                _combatDamage.HeavyHpMul,
+                _combatDamage.HeavyStaminaDamage,
+                _combatDamage.HeavyStagger,
+                _combatDamage.ParrySuccessAttackerStagger,
+                _combatDamage.DodgeSuccessAttackerStaminaDamage,
+                _combatDamage.DodgeSuccessAttackerStagger,
+                _combatDamage.ParryFailDefenderStaminaDamage,
+                _combatDamage.DodgeFailExtraDefenderStagger
+            );
+
+        [Serializable]
+        private struct CombatHitSection
+        {
+            public LayerMask TargetLayers;
+
+            public static CombatHitSection Default => new CombatHitSection
+            {
+                TargetLayers = -1 // Everything, потом выставишь аккуратно (Players+Enemies)
+            };
+        }
+
+        [Serializable]
+        private struct CombatActionsSection
+        {
+            // phase weights for splitting total attack duration
+            public int LightWindupWeight;
+            public int LightActiveWeight;
+            public int LightRecoveryWeight;
+
+            public int HeavyWindupWeight;
+            public int HeavyActiveWeight;
+            public int HeavyRecoveryWeight;
+
+            // Parry fixed action
+            public int ParryDurationBaseTicks;
+            public int ParryCooldownBaseTicks;
+            public int ParryWindupWeight;
+            public int ParryActiveWeight;
+            public int ParryRecoveryWeight;
+
+            // Dodge fixed action
+            public int DodgeDurationBaseTicks;
+            public int DodgeCooldownBaseTicks;
+            public int DodgeWindupWeight;
+            public int DodgeActiveWeight;
+            public int DodgeRecoveryWeight;
+
+            public static CombatActionsSection Default => new CombatActionsSection
+            {
+                LightWindupWeight = 4,
+                LightActiveWeight = 6,
+                LightRecoveryWeight = 6,
+
+                HeavyWindupWeight = 6,
+                HeavyActiveWeight = 8,
+                HeavyRecoveryWeight = 8,
+
+                ParryDurationBaseTicks = 14,
+                ParryCooldownBaseTicks = 18,
+                ParryWindupWeight = 2,
+                ParryActiveWeight = 6,
+                ParryRecoveryWeight = 6,
+
+                DodgeDurationBaseTicks = 16,
+                DodgeCooldownBaseTicks = 20,
+                DodgeWindupWeight = 0,
+                DodgeActiveWeight = 8,
+                DodgeRecoveryWeight = 8
+            };
+        }
+
+        [Serializable]
+        private struct CombatDamageSection
+        {
+            public float LightHpMul;
+            public int LightStaminaDamage;
+            public int LightStagger;
+
+            public float HeavyHpMul;
+            public int HeavyStaminaDamage;
+            public int HeavyStagger;
+
+            public int ParrySuccessAttackerStagger;
+            public int DodgeSuccessAttackerStaminaDamage;
+            public int DodgeSuccessAttackerStagger;
+
+            public int ParryFailDefenderStaminaDamage;
+            public int DodgeFailExtraDefenderStagger;
+
+            public static CombatDamageSection Default => new CombatDamageSection
+            {
+                LightHpMul = 1.0f,
+                LightStaminaDamage = 6,
+                LightStagger = 10,
+
+                HeavyHpMul = 1.6f,
+                HeavyStaminaDamage = 12,
+                HeavyStagger = 20,
+
+                ParrySuccessAttackerStagger = 18,
+                DodgeSuccessAttackerStaminaDamage = 25,
+                DodgeSuccessAttackerStagger = 8,
+
+                ParryFailDefenderStaminaDamage = 12,
+                DodgeFailExtraDefenderStagger = 12
+            };
+        }
+
         public CombatAnimationTuning CombatAnimation
             => new CombatAnimationTuning(
                 _combatAnimation.LightAttackDurationBaseTicks,
@@ -62,6 +212,7 @@ namespace Riftborne.Configs
                     _physicsProbes.WallHeightShrink,
                     _physicsProbes.WallMinWallNormalAbsX,
                     _physicsProbes.WallLayers.value));
+
         public PhysicsWorldTuning PhysicsWorld
             => new PhysicsWorldTuning(_physicsWorld.MaxSubSteps);
 
@@ -71,7 +222,8 @@ namespace Riftborne.Configs
             public int HeavyThresholdBaseTicks;
             public int FullChargeExtraBaseTicks;
 
-            [FormerlySerializedAs("LightCooldownBaseTicks")] public int AttackCooldownBaseTicks;
+            [FormerlySerializedAs("LightCooldownBaseTicks")]
+            public int AttackCooldownBaseTicks;
 
             public float MinAttackSpeed;
             public float MaxAttackSpeed;
@@ -90,7 +242,7 @@ namespace Riftborne.Configs
                 MaxChargeSpeed = 3.00f
             };
         }
-        
+
         [Serializable]
         private struct CombatAnimationSection
         {
@@ -133,9 +285,8 @@ namespace Riftborne.Configs
         [Serializable]
         private struct PhysicsProbesSection
         {
-            [Header("Layer Masks (multi-select)")]
-            public LayerMask GroundLayers; // несколько слоёв для grounded-check
-            public LayerMask WallLayers;   // несколько слоёв для wall-check
+            [Header("Layer Masks (multi-select)")] public LayerMask GroundLayers; // несколько слоёв для grounded-check
+            public LayerMask WallLayers; // несколько слоёв для wall-check
 
             public float GroundSkin;
             public float GroundCheckDepth;
