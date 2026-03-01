@@ -1,5 +1,5 @@
-﻿using System;
-using Riftborne.Core.Gameplay.Locomotion.Abstractions;
+﻿using Riftborne.Core.Gameplay.Locomotion.Abstractions;
+using Riftborne.Core.Gameplay.Locomotion.Model;
 using Riftborne.Core.Gameplay.Physics.Modifiers;
 using Riftborne.Core.Gameplay.Physics.Providers;
 using Riftborne.Core.Model;
@@ -21,7 +21,6 @@ namespace Riftborne.Core.Systems.PrePhysicsTickSystems
         private readonly SimulationParameters _parameters;
         private readonly IMotorInputStore _motorInputs;
         private readonly IWallSensor _walls;
-
         private readonly IPhysicsModifiersProvider _modifiers;
         private readonly ILocomotionConstraintsProvider _locomotion;
 
@@ -61,17 +60,20 @@ namespace Riftborne.Core.Systems.PrePhysicsTickSystems
                 if (!_motorInputs.TryGet(entityId, out var input))
                     input = MotorInput.None(entityId);
 
-                // ВАЖНО: Facing от намерения, а не от физики
                 var e = _state.GetOrCreateEntity(entityId);
-                
+
                 var constraints = _locomotion != null
                     ? _locomotion.Get(entityId, tick)
                     : LocomotionConstraints.None;
-                
+
+                // Facing intent (lock has priority)
                 if (constraints.HasFacingLock)
                     e.ApplyFacingIntent(constraints.FacingLock);
                 else
                     e.ApplyFacingIntent(input.FacingIntent);
+
+                // NEW: prevent moonwalk when requested by constraints
+                input = ApplyMoveRestrictions(input, constraints);
 
                 var blockedLeft = _walls.IsBlockedLeft(entityId);
                 var blockedRight = _walls.IsBlockedRight(entityId);
@@ -94,10 +96,36 @@ namespace Riftborne.Core.Systems.PrePhysicsTickSystems
 
             _motorInputs.Clear();
         }
-        
+
+        private static MotorInput ApplyMoveRestrictions(MotorInput input, LocomotionConstraints c)
+        {
+            if (!c.HasFacingLock || !c.ForbidMoveAgainstFacing)
+                return input;
+
+            float mx = input.MoveX;
+
+            if (c.FacingLock > 0)
+            {
+                if (mx < 0f) mx = 0f;
+            }
+            else
+            {
+                if (mx > 0f) mx = 0f;
+            }
+
+            if (mx.Equals(input.MoveX))
+                return input;
+
+            return new MotorInput(
+                input.EntityId,
+                mx,
+                input.JumpPressed,
+                input.JumpHeld,
+                input.FacingIntent);
+        }
+
         private static PhysicsModifiers ApplyLocomotionMultipliers(PhysicsModifiers m, LocomotionConstraints c)
         {
-            // Multiply ONLY movement fields
             return new PhysicsModifiers(
                 gravityScaleMultiplier: m.GravityScaleMultiplier,
                 impulseX: m.ImpulseX,

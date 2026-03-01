@@ -60,7 +60,7 @@ namespace Riftborne.App.Combat.Systems
             _deltas = deltas ?? throw new ArgumentNullException(nameof(deltas));
             _rules = rules ?? throw new ArgumentNullException(nameof(rules));
             _block = block ?? throw new ArgumentNullException(nameof(block));
-            _events = events ?? throw new ArgumentNullException(nameof(block));
+            _events = events ?? throw new ArgumentNullException(nameof(events));
         }
 
         public void Tick(int tick)

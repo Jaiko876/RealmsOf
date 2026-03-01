@@ -1,7 +1,6 @@
 ﻿using Riftborne.App.Physics.Providers;
 using Riftborne.App.Physics.Registry;
 using Riftborne.Configs;
-using Riftborne.Core.Gameplay.Locomotion.Abstractions;
 using Riftborne.Core.Gameplay.Physics.Providers;
 using Riftborne.Core.Model;
 using Riftborne.Core.Physics.Abstractions;
@@ -42,7 +41,6 @@ namespace Riftborne.Unity.Bootstrap.Runtime
             builder.Register<IGroundSensor, Unity2DGroundSensor>(Lifetime.Singleton);
             builder.Register<Unity2DWallSensor>(Lifetime.Singleton).As<IWallSensor>();
             builder.Register<ICharacterMotor, PlatformerCharacterMotor>(Lifetime.Singleton);
-            builder.Register<ILocomotionConstraintsProvider, NullLocomotionConstraintsProvider>(Lifetime.Singleton);
         }
     }
 }
