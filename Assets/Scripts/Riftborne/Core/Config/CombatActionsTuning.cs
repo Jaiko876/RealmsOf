@@ -7,20 +7,24 @@
 
         public readonly FixedAction Parry;
         public readonly FixedAction Dodge;
+        public readonly FixedAction DodgeDash;
 
         public readonly AttackMovementTuning AttackMovement;
         public readonly CancelTuning Cancel;
         
-        public readonly DodgeMovementTuning DodgeMovement;
+        public readonly DodgeMovementTuning DodgeMovement; 
+        public readonly PerfectDodgeTuning PerfectDodge; 
 
         public CombatActionsTuning(
             PhaseWeights light,
             PhaseWeights heavy,
             FixedAction parry,
-            FixedAction dodge,
+            FixedAction dodge, 
+            FixedAction dodgeDash,
             AttackMovementTuning attackMovement,
             CancelTuning cancel, 
-            DodgeMovementTuning dodgeMovement)
+            DodgeMovementTuning dodgeMovement, 
+            PerfectDodgeTuning perfectDodge)
         {
             Light = light;
             Heavy = heavy;
@@ -29,6 +33,8 @@
             AttackMovement = attackMovement;
             Cancel = cancel;
             DodgeMovement = dodgeMovement;
+            PerfectDodge = perfectDodge;
+            DodgeDash = dodgeDash;
         }
 
         public readonly struct PhaseWeights
@@ -95,15 +101,30 @@
         
         public readonly struct DodgeMovementTuning
         {
-            // Vx = Motor.MaxSpeedX * RollSpeedMul during Dodge.Active
             public readonly float RollSpeedMul;
+            public readonly float DashSpeedMul; // NEW
 
-            public DodgeMovementTuning(float rollSpeedMul)
+            public DodgeMovementTuning(float rollSpeedMul, float dashSpeedMul)
             {
-                // allow >1 (roll faster than run), guard nonsense
-                if (rollSpeedMul < 0.1f) rollSpeedMul = 0.1f;
-                if (rollSpeedMul > 3.0f) rollSpeedMul = 3.0f;
-                RollSpeedMul = rollSpeedMul;
+                RollSpeedMul = Clamp(rollSpeedMul, 0.1f, 3.0f);
+                DashSpeedMul = Clamp(dashSpeedMul, 0.1f, 3.0f);
+            }
+
+            private static float Clamp(float v, float min, float max)
+            {
+                if (v < min) return min;
+                if (v > max) return max;
+                return v;
+            }
+        }
+        
+        public readonly struct PerfectDodgeTuning
+        {
+            public readonly int WindowTicks; // NEW
+
+            public PerfectDodgeTuning(int windowTicks)
+            {
+                WindowTicks = windowTicks < 0 ? 0 : windowTicks;
             }
         }
     }

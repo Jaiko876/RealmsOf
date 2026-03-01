@@ -6,6 +6,7 @@
         LightAttack = 1,
         HeavyAttack = 2,
         Parry = 3,
-        Dodge = 4
+        Dodge = 4,
+        DodgeDash = 5
     }
 }

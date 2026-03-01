@@ -40,7 +40,7 @@ namespace Riftborne.App.Combat.Systems
                 if (!_actions.TryGet(id, out var a))
                     continue;
 
-                if (a.Type != CombatActionType.Dodge)
+                if (a.Type != CombatActionType.Dodge && a.Type != CombatActionType.DodgeDash)
                     continue;
 
                 if (!a.IsRunningAt(tick))
@@ -54,7 +54,11 @@ namespace Riftborne.App.Combat.Systems
 
                 sbyte dir = a.LockedFacing != 0 ? a.LockedFacing : (sbyte)1;
 
-                float speed = _motor.MaxSpeedX * _tuning.DodgeMovement.RollSpeedMul;
+                float mul = a.Type == CombatActionType.Dodge
+                    ? _tuning.DodgeMovement.RollSpeedMul
+                    : _tuning.DodgeMovement.DashSpeedMul;
+
+                float speed = _motor.MaxSpeedX * mul;
                 body.Vx = dir * speed;
             }
         }

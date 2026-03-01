@@ -69,13 +69,23 @@ namespace Riftborne.Configs
                         _combatActions.DodgeWindupWeight,
                         _combatActions.DodgeActiveWeight,
                         _combatActions.DodgeRecoveryWeight)),
+                new CombatActionsTuning.FixedAction( // NEW DodgeDash
+                    _combatActions.DodgeDashDurationBaseTicks,
+                    _combatActions.DodgeDashCooldownBaseTicks,
+                    new CombatActionsTuning.PhaseWeights(
+                        _combatActions.DodgeDashWindupWeight,
+                        _combatActions.DodgeDashActiveWeight,
+                        _combatActions.DodgeDashRecoveryWeight)),
                 new CombatActionsTuning.AttackMovementTuning(
                     _combatActions.LightAttackMoveMul,
                     _combatActions.HeavyAttackMoveMul),
                 new CombatActionsTuning.CancelTuning(
                     _combatActions.HeavyDodgeCancelRecoveryStart01),
                 new CombatActionsTuning.DodgeMovementTuning(
-                    _combatActions.DodgeRollSpeedMul)
+                    _combatActions.DodgeRollSpeedMul,
+                    _combatActions.DodgeDashSpeedMul),
+                new CombatActionsTuning.PerfectDodgeTuning(
+                    _combatActions.PerfectDodgeWindowTicks)
             );
 
         public CombatHitTuning CombatHit
@@ -142,7 +152,17 @@ namespace Riftborne.Configs
             public float HeavyAttackMoveMul;
 
             public float HeavyDodgeCancelRecoveryStart01;
+            
+            public int PerfectDodgeWindowTicks;
+
+            public int DodgeDashDurationBaseTicks;
+            public int DodgeDashCooldownBaseTicks;
+            public int DodgeDashWindupWeight;
+            public int DodgeDashActiveWeight;
+            public int DodgeDashRecoveryWeight;
+
             public float DodgeRollSpeedMul;
+            public float DodgeDashSpeedMul;
 
             public static CombatActionsSection Default => new CombatActionsSection
             {
@@ -169,7 +189,16 @@ namespace Riftborne.Configs
                 LightAttackMoveMul = 0.65f,
                 HeavyAttackMoveMul = 0.55f,
                 HeavyDodgeCancelRecoveryStart01 = 0.75f,
-                DodgeRollSpeedMul = 1.25f
+                PerfectDodgeWindowTicks = 3,
+
+                DodgeDashDurationBaseTicks = 10,
+                DodgeDashCooldownBaseTicks = 0,
+                DodgeDashWindupWeight = 0,
+                DodgeDashActiveWeight = 4,
+                DodgeDashRecoveryWeight = 6,
+
+                DodgeRollSpeedMul = 1.25f,
+                DodgeDashSpeedMul = 1.90f
             };
         }
 

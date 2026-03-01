@@ -7,7 +7,8 @@
         HeavyAttack = 2,
         Parry = 3,
         Dodge = 4,
-        Hurt = 5,
-        Dead = 6
+        DodgePerfect = 5,
+        Hurt = 6,
+        Dead = 7
     }
 }

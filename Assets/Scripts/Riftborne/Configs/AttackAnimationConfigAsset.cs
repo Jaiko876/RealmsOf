@@ -26,6 +26,7 @@ namespace Riftborne.Configs
         [Header("Parry/Dodge Clips")]
         [SerializeField] private float parryClipSeconds = 0.35f;
         [SerializeField] private float dodgeClipSeconds = 0.45f;
+        [SerializeField] private float dodgePerfectClipSeconds = 0.25f;
 
         public string AttackLayerName => attackLayerName;
         public string AttackStateTag => attackStateTag;
@@ -40,6 +41,7 @@ namespace Riftborne.Configs
             if (action == ActionState.HeavyAttack) return heavyAttackClipSeconds;
             if (action == ActionState.Parry) return parryClipSeconds;
             if (action == ActionState.Dodge) return dodgeClipSeconds;
+            if (action == ActionState.DodgePerfect) return dodgePerfectClipSeconds;
             return 0f;
         }
 

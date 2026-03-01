@@ -86,6 +86,7 @@ namespace Riftborne.Unity.View.Presenters
                 else if (a.Action == ActionState.HeavyAttack) _animator.SetTrigger(_h.AtkHeavy);
                 else if (a.Action == ActionState.Parry) _animator.SetTrigger(_h.AtkParry);
                 else if (a.Action == ActionState.Dodge) _animator.SetTrigger(_h.AtkDodge);
+                else if (a.Action == ActionState.DodgePerfect) _animator.SetTrigger(_h.AtkDodgePerfect);
             }
         }
 
@@ -200,6 +201,7 @@ namespace Riftborne.Unity.View.Presenters
             public int AtkHeavy;
             public int AtkParry;
             public int AtkDodge;
+            public int AtkDodgePerfect;
 
             public int HeavyCharge;
             public int Charge01;
@@ -224,6 +226,7 @@ namespace Riftborne.Unity.View.Presenters
                 h.AtkHeavy = Animator.StringToHash("AtkHeavy");
                 h.AtkParry = Animator.StringToHash("AtkParry");
                 h.AtkDodge = Animator.StringToHash("AtkDodge");
+                h.AtkDodgePerfect = Animator.StringToHash("AtkDodgePerfect");
 
                 h.HeavyCharge = Animator.StringToHash("HeavyCharge");
                 h.Charge01 = Animator.StringToHash("Charge01");

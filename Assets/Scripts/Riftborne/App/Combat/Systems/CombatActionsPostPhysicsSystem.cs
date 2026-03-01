@@ -28,6 +28,7 @@ namespace Riftborne.App.Combat.Systems
 
         private readonly IStatsStore _stats;
         private readonly IStatsDeltaStore _deltas;
+        private readonly IActionEventStore _events;
 
         private readonly ICombatRulesResolver _rules;
 
@@ -46,7 +47,8 @@ namespace Riftborne.App.Combat.Systems
             IStatsStore stats,
             IStatsDeltaStore deltas,
             ICombatRulesResolver rules, 
-            IBlockStateStore block)
+            IBlockStateStore block, 
+            IActionEventStore events)
         {
             _state = state ?? throw new ArgumentNullException(nameof(state));
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
@@ -58,6 +60,7 @@ namespace Riftborne.App.Combat.Systems
             _deltas = deltas ?? throw new ArgumentNullException(nameof(deltas));
             _rules = rules ?? throw new ArgumentNullException(nameof(rules));
             _block = block ?? throw new ArgumentNullException(nameof(block));
+            _events = events ?? throw new ArgumentNullException(nameof(block));
         }
 
         public void Tick(int tick)
@@ -146,14 +149,24 @@ namespace Riftborne.App.Combat.Systems
 
             bool parryActive = false;
             bool dodgeActive = false;
+            
+            CombatActionInstance defAction = default;
 
-            if (_actions.TryGet(defenderId, out var defAction) && defAction.IsRunningAt(tick))
+            if (_actions.TryGet(defenderId, out defAction) && defAction.IsRunningAt(tick))
             {
                 parryActive = defAction.Type == CombatActionType.Parry && defAction.IsActiveAt(tick);
-                dodgeActive = defAction.Type == CombatActionType.Dodge && defAction.IsActiveAt(tick);
+
+                // dodge считается активным и для DodgeDash тоже
+                bool isDodgeType = defAction.Type == CombatActionType.Dodge || defAction.Type == CombatActionType.DodgeDash;
+                dodgeActive = isDodgeType && defAction.IsActiveAt(tick);
             }
 
             bool blockActive = !dodgeActive && _block != null && _block.IsBlocking(defenderId);
+            
+            if (attackType == CombatActionType.HeavyAttack)
+            {
+                TryTriggerPerfectDodge(tick, defenderId, defAction, dodgeActive);
+            }
 
             var req = new CombatResolveRequest(
                 attackerId: attackerId,
@@ -175,6 +188,80 @@ namespace Riftborne.App.Combat.Systems
             // Attacker punish
             if (r.AttackerStaminaDamage > 0) _deltas.SpendStamina(attackerId, r.AttackerStaminaDamage, StatsDeltaKind.Cost);
             if (r.AttackerStaggerBuild > 0) _deltas.AddStagger(attackerId, r.AttackerStaggerBuild, StatsDeltaKind.Damage);
+        }
+        
+        private void TryTriggerPerfectDodge(int tick, GameEntityId defenderId, CombatActionInstance cur, bool dodgeActive)
+        {
+            // нужен активный обычный dodge (не dash)
+            if (!dodgeActive) return;
+            if (cur.Type != CombatActionType.Dodge) return;
+
+            // окно perfect из tuning (например 3 тика)
+            int window = _tuning.CombatActions.PerfectDodge.WindowTicks;
+            if (window <= 0) return;
+
+            // elapsed в active: tick - (start + windup)
+            int activeStart = cur.StartTick + cur.WindupTicks;
+            int elapsedInActive = tick - activeStart;
+
+            if (elapsedInActive < 0) return;
+            if (elapsedInActive >= window) return; // не perfect
+
+            // Стартуем dash прямо на этом же тике
+            var dashCfg = _tuning.CombatActions.DodgeDash; // FixedAction
+            int total = dashCfg.DurationBaseTicks;
+
+            SplitPhases(total, dashCfg.Phases, out var w, out var a, out var r);
+
+            // направление: если в action уже был залочен facing - берем его, иначе просто 1
+            sbyte facing = cur.LockedFacing != 0 ? cur.LockedFacing : (sbyte)1;
+
+            var dash = new CombatActionInstance(
+                type: CombatActionType.DodgeDash,
+                startTick: tick,
+                windupTicks: w,
+                activeTicks: a,
+                recoveryTicks: r,
+                cooldownTicks: 0,
+                lockedFacing: facing,
+                hitApplied: false);
+
+            _actions.Set(defenderId, dash);
+
+            // Пушим отдельное анимационное событие
+            _events.SetTiming(defenderId, ActionState.DodgePerfect, total, tick);
+            _events.SetIntent(defenderId, ActionState.DodgePerfect, tick);
+        }
+        
+        private static void SplitPhases(int totalTicks, CombatActionsTuning.PhaseWeights w, out int windup, out int active, out int recovery)
+        {
+            if (totalTicks < 0) totalTicks = 0;
+
+            int sum = w.WindupWeight + w.ActiveWeight + w.RecoveryWeight;
+            if (sum <= 0 || totalTicks == 0)
+            {
+                windup = 0;
+                active = 0;
+                recovery = totalTicks;
+                return;
+            }
+
+            windup = (int)MathF.Round(totalTicks * (w.WindupWeight / (float)sum));
+            active = (int)MathF.Round(totalTicks * (w.ActiveWeight / (float)sum));
+
+            if (windup < 0) windup = 0;
+            if (active < 0) active = 0;
+
+            int used = windup + active;
+            if (used > totalTicks)
+            {
+                int overflow = used - totalTicks;
+                if (active >= overflow) active -= overflow;
+                else windup = Math.Max(0, windup - (overflow - active));
+            }
+
+            recovery = totalTicks - (windup + active);
+            if (recovery < 0) recovery = 0;
         }
     }
 }
