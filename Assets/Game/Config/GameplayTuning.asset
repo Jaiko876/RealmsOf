@@ -15,8 +15,7 @@ MonoBehaviour:
   _combatInput:
     HeavyThresholdBaseTicks: 18
     FullChargeExtraBaseTicks: 42
-    LightCooldownBaseTicks: 18
-    HeavyCooldownBaseTicks: 26
+    AttackCooldownBaseTicks: 8
     MinAttackSpeed: 0.2
     MaxAttackSpeed: 3
     MinChargeSpeed: 0.2
@@ -26,6 +25,7 @@ MonoBehaviour:
     MaxMoveSpeedMultiplier: 3
   _input:
     FacingDeadzone: 0.1
+    MoveSpeedDeadzone01: 0.01
   _physicsProbes:
     GroundLayers:
       serializedVersion: 2
@@ -44,3 +44,58 @@ MonoBehaviour:
     WallMinWallNormalAbsX: 0.6
   _physicsWorld:
     MaxSubSteps: 8
+  _combatAnimation:
+    LightAttackDurationBaseTicks: 16
+    HeavyAttackDurationBaseTicks: 22
+  _combatActions:
+    LightWindupWeight: 4
+    LightActiveWeight: 6
+    LightRecoveryWeight: 6
+    HeavyWindupWeight: 6
+    HeavyActiveWeight: 8
+    HeavyRecoveryWeight: 8
+    ParryDurationBaseTicks: 12
+    ParryCooldownBaseTicks: 8
+    ParryWindupWeight: 0
+    ParryActiveWeight: 6
+    ParryRecoveryWeight: 6
+    DodgeDurationBaseTicks: 16
+    DodgeCooldownBaseTicks: 8
+    DodgeWindupWeight: 0
+    DodgeActiveWeight: 8
+    DodgeRecoveryWeight: 8
+    LightAttackMoveMul: 0.4
+    HeavyAttackMoveMul: 0.25
+    HeavyDodgeCancelRecoveryStart01: 0.75
+    PerfectDodgeWindowTicks: 3
+    DodgeDashDurationBaseTicks: 10
+    DodgeDashCooldownBaseTicks: 8
+    DodgeDashWindupWeight: 0
+    DodgeDashActiveWeight: 4
+    DodgeDashRecoveryWeight: 6
+    DodgeRollSpeedMul: 2
+    DodgeDashSpeedMul: 2.5
+  _combatHit:
+    TargetLayers:
+      serializedVersion: 2
+      m_Bits: 4294967295
+  _combatDamage:
+    LightHpMul: 1
+    LightStaminaDamage: 6
+    LightStagger: 10
+    HeavyHpMul: 1.6
+    HeavyStaminaDamage: 12
+    HeavyStagger: 20
+    ParrySuccessAttackerStagger: 18
+    DodgeSuccessAttackerStaminaDamage: 25
+    DodgeSuccessAttackerStagger: 8
+    ParryFailDefenderStaminaDamage: 12
+    DodgeFailExtraDefenderStagger: 12
+    BlockLightStaminaDamage: 8
+    BlockLightStaggerBuild: 6
+    BlockHeavyStaminaDamage: 22
+    BlockHeavyStaggerBuild: 28
+    BlockHeavyHpMul: 0.25
+  _defenceInput:
+    ParryMaxTapTicks: 8
+    BlockStartTicks: 10

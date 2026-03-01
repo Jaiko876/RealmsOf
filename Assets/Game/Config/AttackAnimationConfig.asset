@@ -13,12 +13,21 @@ MonoBehaviour:
   m_Name: AttackAnimationConfig
   m_EditorClassIdentifier: Riftborne.Configs::Riftborne.Configs.AttackAnimationConfigAsset
   attackLayerName: Attack Layer
+  defenseLayerName: Defense Layer
+  evadeLayerName: Evade Layer
   attackStateTag: Attack
+  defenseStateTag: Defense
+  evadeStateTag: Evade
   attackLayerBlendInSeconds: 0.05
-  attackLayerBlendOutSeconds: 0.1
+  attackLayerBlendOutSeconds: 0.2
+  defenseLayerBlendInSeconds: 0.05
+  defenseLayerBlendOutSeconds: 0.2
+  evadeLayerBlendInSeconds: 0.02
+  evadeLayerBlendOutSeconds: 0.2
   lightAttackClipSeconds: 0.45
-  heavyAttackClipSeconds: 0.6
+  heavyAttackClipSeconds: 0.4
+  parryClipSeconds: 0.25
+  dodgeClipSeconds: 0.45
+  dodgePerfectClipSeconds: 0.25
   minAnimatorSpeed: 0.25
   maxAnimatorSpeed: 3.5
-  parryClipSeconds: 0.35
-  dodgeClipSeconds: 0.45

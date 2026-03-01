@@ -18,3 +18,4 @@ MonoBehaviour:
   JumpVelocity: 12
   CoyoteTimeSeconds: 0.08
   JumpBufferSeconds: 0.1
+  MaxFallSpeed: 20

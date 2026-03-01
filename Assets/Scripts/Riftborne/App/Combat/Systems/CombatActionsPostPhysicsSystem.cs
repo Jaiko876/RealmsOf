@@ -229,8 +229,8 @@ namespace Riftborne.App.Combat.Systems
             _actions.Set(defenderId, dash);
 
             // Пушим отдельное анимационное событие
-            _events.SetTiming(defenderId, ActionState.DodgePerfect, total, tick);
-            _events.SetIntent(defenderId, ActionState.DodgePerfect, tick);
+            _events.SetTiming(defenderId, ActionState.Dodge, total, tick);
+            _events.SetIntent(defenderId, ActionState.Dodge, tick);
         }
         
         private static void SplitPhases(int totalTicks, CombatActionsTuning.PhaseWeights w, out int windup, out int active, out int recovery)

@@ -174,11 +174,11 @@ namespace Riftborne.Configs
                 HeavyActiveWeight = 8,
                 HeavyRecoveryWeight = 8,
 
-                ParryDurationBaseTicks = 14,
-                ParryCooldownBaseTicks = 18,
-                ParryWindupWeight = 2,
-                ParryActiveWeight = 6,
-                ParryRecoveryWeight = 6,
+                ParryDurationBaseTicks = 8,
+                ParryCooldownBaseTicks = 6,
+                ParryWindupWeight = 0,
+                ParryActiveWeight = 4,
+                ParryRecoveryWeight = 4,
 
                 DodgeDurationBaseTicks = 16,
                 DodgeCooldownBaseTicks = 20,
@@ -197,7 +197,7 @@ namespace Riftborne.Configs
                 DodgeDashActiveWeight = 4,
                 DodgeDashRecoveryWeight = 6,
 
-                DodgeRollSpeedMul = 1.25f,
+                DodgeRollSpeedMul = 1.5f,
                 DodgeDashSpeedMul = 1.90f
             };
         }
