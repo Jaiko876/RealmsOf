@@ -14,6 +14,7 @@ namespace Riftborne.Unity.Bootstrap.Runtime
         public void Initialize(IContainerBuilder builder)
         {
             builder.Register<MotorPrePhysicsTickSystem>(Lifetime.Singleton);
+            builder.Register<CombatDodgeMovementPrePhysicsSystem>(Lifetime.Singleton);
             builder.Register<PostPhysicsStateSyncSystem>(Lifetime.Singleton);
             builder.Register<AnimationStatePostPhysicsSystem>(Lifetime.Singleton);
             builder.Register<StatsInitPostPhysicsSystem>(Lifetime.Singleton);

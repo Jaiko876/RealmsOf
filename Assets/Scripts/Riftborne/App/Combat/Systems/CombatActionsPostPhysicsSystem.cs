@@ -153,7 +153,7 @@ namespace Riftborne.App.Combat.Systems
                 dodgeActive = defAction.Type == CombatActionType.Dodge && defAction.IsActiveAt(tick);
             }
 
-            bool blockActive = _block != null && _block.IsBlocking(defenderId);
+            bool blockActive = !dodgeActive && _block != null && _block.IsBlocking(defenderId);
 
             var req = new CombatResolveRequest(
                 attackerId: attackerId,

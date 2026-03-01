@@ -73,7 +73,9 @@ namespace Riftborne.Configs
                     _combatActions.LightAttackMoveMul,
                     _combatActions.HeavyAttackMoveMul),
                 new CombatActionsTuning.CancelTuning(
-                    _combatActions.HeavyDodgeCancelRecoveryStart01)
+                    _combatActions.HeavyDodgeCancelRecoveryStart01),
+                new CombatActionsTuning.DodgeMovementTuning(
+                    _combatActions.DodgeRollSpeedMul)
             );
 
         public CombatHitTuning CombatHit
@@ -140,6 +142,7 @@ namespace Riftborne.Configs
             public float HeavyAttackMoveMul;
 
             public float HeavyDodgeCancelRecoveryStart01;
+            public float DodgeRollSpeedMul;
 
             public static CombatActionsSection Default => new CombatActionsSection
             {
@@ -165,7 +168,8 @@ namespace Riftborne.Configs
 
                 LightAttackMoveMul = 0.65f,
                 HeavyAttackMoveMul = 0.55f,
-                HeavyDodgeCancelRecoveryStart01 = 0.75f
+                HeavyDodgeCancelRecoveryStart01 = 0.75f,
+                DodgeRollSpeedMul = 1.25f
             };
         }
 

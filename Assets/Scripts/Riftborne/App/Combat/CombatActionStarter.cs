@@ -84,9 +84,8 @@ namespace Riftborne.App.Combat
             StartFixed(id, tick, CombatActionType.Parry, ActionState.Parry, cfg, facing);
         }
 
-        public void TryStartDodge(GameEntityId id, int tick, int facing)
+        public void TryStartDodge(GameEntityId id, int tick, int direction)
         {
-            // Dodge can cancel attacks (by rules), but cannot cancel dodge/parry (v1).
             bool hasCur = _actions.TryGet(id, out var cur) && cur.IsRunningAt(tick);
 
             if (hasCur)
@@ -94,7 +93,6 @@ namespace Riftborne.App.Combat
                 if (cur.Type == CombatActionType.Dodge || cur.Type == CombatActionType.Parry)
                     return;
 
-                // allow only if cancel window says so
                 if (!_cancelRules.CanCancel(in cur, CombatActionType.Dodge, tick))
                     return;
             }
@@ -106,8 +104,8 @@ namespace Riftborne.App.Combat
 
             _combatCooldowns.Consume(id, CombatActionType.Dodge, tick, cfg.CooldownBaseTicks);
 
-            // overwrite current action if any (this is the "cancel")
-            StartFixed(id, tick, CombatActionType.Dodge, ActionState.Dodge, cfg, facing);
+            // IMPORTANT: lock facing to dodge direction
+            StartFixed(id, tick, CombatActionType.Dodge, ActionState.Dodge, cfg, direction);
         }
 
         private bool IsBusy(GameEntityId id, int tick)

@@ -1,4 +1,5 @@
 ﻿// Assets/Scripts/Riftborne/Core/Gameplay/Combat/Rules/DefaultCombatRulesEngine.cs
+
 using System;
 using Riftborne.Core.Config;
 using Riftborne.Core.Gameplay.Combat.Model;
@@ -74,14 +75,16 @@ namespace Riftborne.Core.Gameplay.Combat.Rules
 
                 if (dodge && lightDodgeAllowed)
                 {
-                    return new CombatHitResult(0, 0, 0, _t.DodgeSuccessAttackerStaminaDamage, _t.DodgeSuccessAttackerStagger);
+                    return new CombatHitResult(0, 0, 0, _t.DodgeSuccessAttackerStaminaDamage,
+                        _t.DodgeSuccessAttackerStagger);
                 }
             }
             else // heavy
             {
                 if (dodge)
                 {
-                    return new CombatHitResult(0, 0, 0, _t.DodgeSuccessAttackerStaminaDamage, _t.DodgeSuccessAttackerStagger);
+                    return new CombatHitResult(0, 0, 0, _t.DodgeSuccessAttackerStaminaDamage,
+                        _t.DodgeSuccessAttackerStagger);
                 }
 
                 if (parry && heavyParryAllowed)
@@ -97,10 +100,23 @@ namespace Riftborne.Core.Gameplay.Combat.Rules
                 return new CombatHitResult(hp, _t.ParryFailDefenderStaminaDamage, _t.HeavyStagger, 0, 0);
             }
 
-            if (isLight && dodge && !lightDodgeAllowed)
+            // --- DODGE: universal i-frames (Active) ---
+            // Light dodge: just avoid damage, no attacker punishment.
+            // Heavy dodge: avoid damage + punish attacker (stamina + micro-stagger).
+            if (dodge)
             {
-                int hp = (int)MathF.Round(baseHp * _t.LightHpMul);
-                return new CombatHitResult(hp, _t.LightStaminaDamage, _t.LightStagger + _t.DodgeFailExtraDefenderStagger, 0, 0);
+                if (isHeavy)
+                {
+                    return new CombatHitResult(
+                        defenderHpDamage: 0,
+                        defenderStaminaDamage: 0,
+                        defenderStaggerBuild: 0,
+                        attackerStaminaDamage: _t.DodgeSuccessAttackerStaminaDamage,
+                        attackerStaggerBuild: _t.DodgeSuccessAttackerStagger);
+                }
+
+                // light
+                return CombatHitResult.None;
             }
 
             // --- Normal hit ---

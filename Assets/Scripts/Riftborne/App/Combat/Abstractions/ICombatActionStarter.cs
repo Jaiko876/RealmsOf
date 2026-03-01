@@ -7,6 +7,6 @@ namespace Riftborne.App.Combat.Abstractions
     {
         void TryStartAttack(GameEntityId id, int tick, ActionState action, int totalDurationTicks, int cooldownTicks, int facing);
         void TryStartParry(GameEntityId id, int tick, int facing);
-        void TryStartDodge(GameEntityId id, int tick, int facing);
+        void TryStartDodge(GameEntityId id, int tick, int direction);
     }
 }

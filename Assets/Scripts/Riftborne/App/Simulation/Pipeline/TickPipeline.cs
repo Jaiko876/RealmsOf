@@ -13,6 +13,7 @@ namespace Riftborne.App.Simulation.Pipeline
 
         public TickPipeline(
             MotorPrePhysicsTickSystem motor,
+            CombatDodgeMovementPrePhysicsSystem dodgeMove,
             PostPhysicsStateSyncSystem sync,
             StatsInitPostPhysicsSystem statsInit,
             StatsRegenPostPhysicsSystem statsRegen,
@@ -22,7 +23,11 @@ namespace Riftborne.App.Simulation.Pipeline
             CombatActionsPostPhysicsSystem combat,
             AnimationStatePostPhysicsSystem animation)
         {
-            PrePhysics = new IPrePhysicsTickSystem[] { motor };
+            PrePhysics = new IPrePhysicsTickSystem[]
+            {
+                motor,
+                dodgeMove
+            };
 
             PostPhysics = new IPostPhysicsTickSystem[]
             {
