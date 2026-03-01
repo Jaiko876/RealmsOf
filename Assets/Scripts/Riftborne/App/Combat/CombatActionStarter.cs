@@ -5,6 +5,7 @@ using Riftborne.Core.Gameplay.Combat.Model;
 using Riftborne.Core.Gameplay.Combat.Rules.Abstractions;
 using Riftborne.Core.Model;
 using Riftborne.Core.Model.Animation;
+using Riftborne.Core.Stats;
 using Riftborne.Core.Stores.Abstractions;
 
 namespace Riftborne.App.Combat
@@ -13,12 +14,14 @@ namespace Riftborne.App.Combat
     {
         private readonly ICombatActionStore _actions;
         private readonly IActionEventStore _events;
-
         private readonly IAttackCooldownStore _attackCooldowns;
         private readonly ICombatActionCooldownStore _combatCooldowns;
-
         private readonly IGameplayTuning _tuning;
         private readonly ICombatCancelRules _cancelRules;
+
+        private readonly IStatsStore _stats;
+        private readonly IStatsDeltaStore _deltas;
+        private readonly CombatResourceTuning _resources;
 
         public CombatActionStarter(
             ICombatActionStore actions,
@@ -26,7 +29,9 @@ namespace Riftborne.App.Combat
             IAttackCooldownStore attackCooldowns,
             ICombatActionCooldownStore combatCooldowns,
             IGameplayTuning tuning,
-            ICombatCancelRules cancelRules)
+            ICombatCancelRules cancelRules,
+            IStatsStore stats,
+            IStatsDeltaStore deltas)
         {
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _events = events ?? throw new ArgumentNullException(nameof(events));
@@ -34,6 +39,10 @@ namespace Riftborne.App.Combat
             _combatCooldowns = combatCooldowns ?? throw new ArgumentNullException(nameof(combatCooldowns));
             _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
             _cancelRules = cancelRules ?? throw new ArgumentNullException(nameof(cancelRules));
+
+            _stats = stats ?? throw new ArgumentNullException(nameof(stats));
+            _deltas = deltas ?? throw new ArgumentNullException(nameof(deltas));
+            _resources = _tuning.CombatResources;
         }
 
         public void TryStartAttack(GameEntityId id, int tick, ActionState action, int totalDurationTicks, int cooldownTicks, int facing)
@@ -42,11 +51,17 @@ namespace Riftborne.App.Combat
             if (type != CombatActionType.LightAttack && type != CombatActionType.HeavyAttack)
                 return;
 
-            // v1: attack does not cancel anything
             if (IsBusy(id, tick))
                 return;
 
             if (!_attackCooldowns.CanAttack(id, tick))
+                return;
+
+            int staminaCost = (type == CombatActionType.LightAttack)
+                ? _resources.LightAttackStaminaCost
+                : 0; // heavy оплатим на старте charge
+
+            if (!HasStaminaOrAssumeFullOnSpawnTick(id, staminaCost))
                 return;
 
             _attackCooldowns.ConsumeAttack(id, tick, cooldownTicks);
@@ -66,28 +81,32 @@ namespace Riftborne.App.Combat
 
             _actions.Set(id, inst);
             PublishEvent(id, tick, action, totalDurationTicks);
+
+            SpendIfNeeded(id, staminaCost);
         }
 
         public void TryStartParry(GameEntityId id, int tick, int facing)
         {
-            // v1: parry doesn't cancel attacks
             if (IsBusy(id, tick))
                 return;
 
             var cfg = _tuning.CombatActions.Parry;
-
             if (!_combatCooldowns.CanUse(id, CombatActionType.Parry, tick))
                 return;
 
-            _combatCooldowns.Consume(id, CombatActionType.Parry, tick, cfg.CooldownBaseTicks);
+            int staminaCost = _resources.ParryStaminaCost;
+            if (!HasStaminaOrAssumeFullOnSpawnTick(id, staminaCost))
+                return;
 
+            _combatCooldowns.Consume(id, CombatActionType.Parry, tick, cfg.CooldownBaseTicks);
             StartFixed(id, tick, CombatActionType.Parry, ActionState.Parry, cfg, facing);
+
+            SpendIfNeeded(id, staminaCost);
         }
 
         public void TryStartDodge(GameEntityId id, int tick, int direction)
         {
             bool hasCur = _actions.TryGet(id, out var cur) && cur.IsRunningAt(tick);
-
             if (hasCur)
             {
                 if (cur.Type == CombatActionType.Dodge || cur.Type == CombatActionType.Parry)
@@ -98,14 +117,35 @@ namespace Riftborne.App.Combat
             }
 
             var cfg = _tuning.CombatActions.Dodge;
-
             if (!_combatCooldowns.CanUse(id, CombatActionType.Dodge, tick))
                 return;
 
-            _combatCooldowns.Consume(id, CombatActionType.Dodge, tick, cfg.CooldownBaseTicks);
+            int staminaCost = _resources.DodgeStaminaCost;
+            if (!HasStaminaOrAssumeFullOnSpawnTick(id, staminaCost))
+                return;
 
-            // IMPORTANT: lock facing to dodge direction
+            _combatCooldowns.Consume(id, CombatActionType.Dodge, tick, cfg.CooldownBaseTicks);
             StartFixed(id, tick, CombatActionType.Dodge, ActionState.Dodge, cfg, direction);
+
+            SpendIfNeeded(id, staminaCost);
+        }
+
+        private bool HasStaminaOrAssumeFullOnSpawnTick(GameEntityId id, int cost)
+        {
+            if (cost <= 0) return true;
+
+            // На spawn-тик статы могут быть ещё не инициализированы (StatsInit будет в post-physics).
+            // По факту там будет full stamina, так что разрешаем.
+            if (!_stats.TryGet(id, out var s) || !s.IsInitialized)
+                return true;
+
+            return s.StaminaCur >= cost;
+        }
+
+        private void SpendIfNeeded(GameEntityId id, int cost)
+        {
+            if (cost <= 0) return;
+            _deltas.SpendStamina(id, cost, StatsDeltaKind.Cost);
         }
 
         private bool IsBusy(GameEntityId id, int tick)

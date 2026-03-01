@@ -4,10 +4,10 @@ namespace Riftborne.Core.Config
     {
         CombatInputTuning CombatInput { get; }
         CombatAnimationTuning CombatAnimation { get; }
-
         CombatActionsTuning CombatActions { get; }
         CombatHitTuning CombatHit { get; }
         CombatDamageTuning CombatDamage { get; }
+        CombatResourceTuning CombatResources { get; }
 
         StatsToPhysicsTuning StatsToPhysics { get; }
         InputTuning Input { get; }

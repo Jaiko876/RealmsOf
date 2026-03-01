@@ -36,7 +36,17 @@ namespace Riftborne.Configs
         
         [Header("Defence Input")] [SerializeField]
         private DefenceInputSection _defenceInput = DefenceInputSection.Default;
+        
+        [Header("Combat Resources (Stamina Costs)")] [SerializeField]
+        private CombatResourcesSection _combatResources = CombatResourcesSection.Default;
 
+        public CombatResourceTuning CombatResources
+            => new CombatResourceTuning(
+                _combatResources.LightAttackStaminaCost,
+                _combatResources.HeavyChargeStartStaminaCost,
+                _combatResources.ParryStaminaCost,
+                _combatResources.DodgeStaminaCost,
+                _combatResources.BlockStaminaPerTick);
 
         public DefenseInputTuning DefenseInput
             => new DefenseInputTuning(
@@ -119,6 +129,25 @@ namespace Riftborne.Configs
             public static CombatHitSection Default => new CombatHitSection
             {
                 TargetLayers = -1 // Everything, потом выставишь аккуратно (Players+Enemies)
+            };
+        }
+        
+        [Serializable]
+        private struct CombatResourcesSection
+        {
+            public int LightAttackStaminaCost;
+            public int HeavyChargeStartStaminaCost;
+            public int ParryStaminaCost;
+            public int DodgeStaminaCost;
+            public int BlockStaminaPerTick;
+
+            public static CombatResourcesSection Default => new CombatResourcesSection
+            {
+                LightAttackStaminaCost = 8,
+                HeavyChargeStartStaminaCost = 14,
+                ParryStaminaCost = 6,
+                DodgeStaminaCost = 18,
+                BlockStaminaPerTick = 1
             };
         }
 

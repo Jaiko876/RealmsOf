@@ -26,7 +26,7 @@ MonoBehaviour:
   evadeLayerBlendOutSeconds: 0.2
   lightAttackClipSeconds: 0.45
   heavyAttackClipSeconds: 0.4
-  parryClipSeconds: 0.25
+  parryClipSeconds: 0.4
   dodgeClipSeconds: 0.45
   dodgePerfectClipSeconds: 0.25
   minAnimatorSpeed: 0.25

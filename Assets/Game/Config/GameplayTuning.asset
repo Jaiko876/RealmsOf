@@ -99,3 +99,9 @@ MonoBehaviour:
   _defenceInput:
     ParryMaxTapTicks: 8
     BlockStartTicks: 10
+  _combatResources:
+    LightAttackStaminaCost: 8
+    HeavyChargeStartStaminaCost: 24
+    ParryStaminaCost: 8
+    DodgeStaminaCost: 24
+    BlockStaminaPerTick: 1

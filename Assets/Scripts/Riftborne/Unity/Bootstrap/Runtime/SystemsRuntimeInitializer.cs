@@ -1,6 +1,8 @@
 ﻿using Riftborne.App.Animation.Systems;
+using Riftborne.App.Combat.Policy;
 using Riftborne.App.Combat.Systems;
 using Riftborne.App.Simulation.Pipeline;
+using Riftborne.Core.Gameplay.Resources;
 using Riftborne.Core.Systems.PostPhysicsTickSystems;
 using Riftborne.Core.Systems.PrePhysicsTickSystems;
 using VContainer;
@@ -23,6 +25,8 @@ namespace Riftborne.Unity.Bootstrap.Runtime
             builder.Register<StatsEffectsTickPostPhysicsSystem>(Lifetime.Singleton);
             builder.Register<StatsRebuildModifiersPostPhysicsSystem>(Lifetime.Singleton);
             builder.Register<CombatActionsPostPhysicsSystem>(Lifetime.Singleton);
+
+            builder.Register<IResourceRegenPolicy, CombatStaminaRegenPolicy>(Lifetime.Singleton);
 
             builder.Register<ITickPipeline, TickPipeline>(Lifetime.Singleton);
         }
