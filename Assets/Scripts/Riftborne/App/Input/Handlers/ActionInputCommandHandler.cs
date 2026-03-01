@@ -16,10 +16,8 @@ namespace Riftborne.App.Input.Handlers
     {
         private readonly GameState _state;
         
-        private readonly IActionEventStore _events;
         private readonly IAttackChargeStore _charge;
         private readonly IAttackHoldStore _hold;
-        private readonly IAttackCooldownStore _cooldowns;
         private readonly IAttackInputRules _rules;
         private readonly ICombatSpeedProvider _speeds;
 
@@ -29,20 +27,16 @@ namespace Riftborne.App.Input.Handlers
         private readonly ICombatActionStarter _starter;
 
         public ActionInputCommandHandler(
-            IActionEventStore events,
             IAttackChargeStore charge,
             IAttackHoldStore hold,
-            IAttackCooldownStore cooldowns,
             IAttackInputRules rules,
             ICombatSpeedProvider speeds,
             IGameplayTuning gameplayTuning, 
             ICombatActionStarter starter, 
             GameState state)
         {
-            _events = events ?? throw new ArgumentNullException(nameof(events));
             _charge = charge ?? throw new ArgumentNullException(nameof(charge));
             _hold = hold ?? throw new ArgumentNullException(nameof(hold));
-            _cooldowns = cooldowns ?? throw new ArgumentNullException(nameof(cooldowns));
             _rules = rules ?? throw new ArgumentNullException(nameof(rules));
             _speeds = speeds ?? throw new ArgumentNullException(nameof(speeds));
             _starter = starter ?? throw new ArgumentNullException(nameof(starter));

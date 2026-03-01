@@ -23,7 +23,6 @@ namespace Riftborne.Unity.Bootstrap.Runtime
             builder.Register<IAttackInputRules, AttackInputRules>(Lifetime.Singleton);
             builder.Register<ICombatSpeedProvider, StatsCombatSpeedProvider>(Lifetime.Singleton);
             
-            builder.Register<ICombatHitRules, BasicCombatHitRules>(Lifetime.Singleton);
             builder.Register<ICombatHitQuery, Unity2DCombatHitQuery>(Lifetime.Singleton);
             builder.Register<ICombatCancelRules, DefaultCombatCancelRules>(Lifetime.Singleton);
             builder.Register<ICombatActionStarter, CombatActionStarter>(Lifetime.Singleton);

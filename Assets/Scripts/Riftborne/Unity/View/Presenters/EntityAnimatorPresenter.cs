@@ -8,7 +8,6 @@ using AnimationState = Riftborne.Core.Model.Animation.AnimationState;
 
 namespace Riftborne.Unity.View.Presenters
 {
-
     public sealed class EntityAnimatorPresenter : IEntityAnimatorPresenter
     {
         private Animator _animator;
@@ -22,7 +21,7 @@ namespace Riftborne.Unity.View.Presenters
         private float _attackLayerWeight;
 
         private bool _prevChargeFull;
-        private int _lastActionTick = int.MinValue;
+        private int _lastTriggerActionTick = int.MinValue;
 
         public void Initialize(Animator animator, ChargeFullFlashView flash, AttackAnimationConfigAsset config)
         {
@@ -60,7 +59,7 @@ namespace Riftborne.Unity.View.Presenters
             _animator.SetFloat(_h.Speed01, a.Speed01);
             _animator.SetFloat(_h.AirSpeed01, a.AirSpeed01);
             _animator.SetFloat(_h.AirT, a.AirT);
-            
+
             _animator.SetBool(_h.Blocking, a.Blocking);
 
             // Charge
@@ -70,28 +69,54 @@ namespace Riftborne.Unity.View.Presenters
 
             SyncChargeFx(a.Charge01, facing);
 
-            // Attack layer blend
+            // Attack layer blend (keep while charging OR playing action OR animator is actually in attack states)
             ApplyAttackLayerWeight(a, dt);
 
-            // Attack event speed + triggers
-            bool isNewActionEvent = a.Action != ActionState.None && a.ActionTick != _lastActionTick;
-            if (isNewActionEvent)
-            {
-                _lastActionTick = a.ActionTick;
+            // Attack speed must be stable while PlayingAction is active
+            float effectiveAttackSpeed = ResolveAttackAnimSpeed(a, fixedDt);
+            _animator.SetFloat(_h.AttackAnimSpeed, effectiveAttackSpeed);
 
-                float speedForThisAction = ComputeActionAnimatorSpeed(a, fixedDt);
-                _animator.SetFloat(_h.AttackAnimSpeed, speedForThisAction);
+            // One-shot triggers (ONLY when Action != None)
+            bool isNewTrigger = a.Action != ActionState.None && a.ActionTick != _lastTriggerActionTick;
+            if (isNewTrigger)
+            {
+                _lastTriggerActionTick = a.ActionTick;
 
                 if (a.Action == ActionState.LightAttack) _animator.SetTrigger(_h.AtkLight);
                 else if (a.Action == ActionState.HeavyAttack) _animator.SetTrigger(_h.AtkHeavy);
                 else if (a.Action == ActionState.Parry) _animator.SetTrigger(_h.AtkParry);
                 else if (a.Action == ActionState.Dodge) _animator.SetTrigger(_h.AtkDodge);
             }
-            else
-            {
-                // Continuous stat-driven value when there is no new event.
-                _animator.SetFloat(_h.AttackAnimSpeed, ClampAnimatorSpeed(a.AttackAnimSpeed));
-            }
+        }
+
+        private float ResolveAttackAnimSpeed(AnimationState a, float fixedDt)
+        {
+            // If we have a latched playing window with known duration -> compute forced speed
+            if (a.PlayingAction != ActionState.None && a.PlayingDurationTicks > 0)
+                return ComputeForcedAnimatorSpeed(a.PlayingAction, a.PlayingDurationTicks, fixedDt, a.AttackAnimSpeed);
+
+            // Otherwise use stat-driven speed
+            return ClampAnimatorSpeed(a.AttackAnimSpeed);
+        }
+
+        private float ComputeForcedAnimatorSpeed(ActionState action, int durationTicks, float fixedDt, float fallbackSpeed)
+        {
+            if (durationTicks <= 0)
+                return ClampAnimatorSpeed(fallbackSpeed);
+
+            float clipSeconds = _config != null ? _config.GetClipSeconds(action) : 0f;
+            if (clipSeconds <= 0f)
+                return ClampAnimatorSpeed(fallbackSpeed);
+
+            if (fixedDt <= 0f)
+                return ClampAnimatorSpeed(fallbackSpeed);
+
+            float desiredSeconds = durationTicks * fixedDt;
+            if (desiredSeconds <= 0f)
+                return ClampAnimatorSpeed(fallbackSpeed);
+
+            float speed = clipSeconds / desiredSeconds;
+            return ClampAnimatorSpeed(speed);
         }
 
         private void SyncChargeFx(float charge01, int facing)
@@ -113,14 +138,13 @@ namespace Riftborne.Unity.View.Presenters
             if (_attackLayerIndex >= _animator.layerCount) return;
 
             bool inAttack = IsAttackPlayingOnLayer();
-            bool wantsByState =
-                a.HeavyCharging
-                || a.Action == ActionState.LightAttack
-                || a.Action == ActionState.HeavyAttack
-                || a.Action == ActionState.Parry
-                || a.Action == ActionState.Dodge;
 
-            float target = (wantsByState || inAttack) ? 1f : 0f;
+            bool wants =
+                a.HeavyCharging ||
+                (a.PlayingAction != ActionState.None) ||
+                inAttack;
+
+            float target = wants ? 1f : 0f;
 
             float tau = target > _attackLayerWeight
                 ? _config.AttackLayerBlendInSeconds
@@ -132,6 +156,8 @@ namespace Riftborne.Unity.View.Presenters
 
         private bool IsAttackPlayingOnLayer()
         {
+            if (_attackLayerIndex < 0) return false;
+
             var cur = _animator.GetCurrentAnimatorStateInfo(_attackLayerIndex);
             if (cur.tagHash == _attackTagHash)
                 return true;
@@ -141,27 +167,6 @@ namespace Riftborne.Unity.View.Presenters
 
             var next = _animator.GetNextAnimatorStateInfo(_attackLayerIndex);
             return next.tagHash == _attackTagHash;
-        }
-
-        private float ComputeActionAnimatorSpeed(AnimationState s, float fixedDt)
-        {
-            // Contract: durationTicks has higher priority for the one-shot event tick if provided by Core.
-            if (s.ActionDurationTicks <= 0)
-                return ClampAnimatorSpeed(s.AttackAnimSpeed);
-
-            float clipSeconds = _config.GetClipSeconds(s.Action);
-            if (clipSeconds <= 0f)
-                return ClampAnimatorSpeed(s.AttackAnimSpeed);
-
-            if (fixedDt <= 0f)
-                return ClampAnimatorSpeed(s.AttackAnimSpeed);
-
-            float desiredSeconds = s.ActionDurationTicks * fixedDt;
-            if (desiredSeconds <= 0f)
-                return ClampAnimatorSpeed(s.AttackAnimSpeed);
-
-            float speed = clipSeconds / desiredSeconds;
-            return ClampAnimatorSpeed(speed);
         }
 
         private float ClampAnimatorSpeed(float v)
@@ -201,7 +206,7 @@ namespace Riftborne.Unity.View.Presenters
 
             public int AttackAnimSpeed;
             public int ChargeAnimSpeed;
-            
+
             public int Blocking;
 
             public static AnimatorHashes Create()
@@ -217,16 +222,15 @@ namespace Riftborne.Unity.View.Presenters
 
                 h.AtkLight = Animator.StringToHash("AtkLight");
                 h.AtkHeavy = Animator.StringToHash("AtkHeavy");
+                h.AtkParry = Animator.StringToHash("AtkParry");
+                h.AtkDodge = Animator.StringToHash("AtkDodge");
 
                 h.HeavyCharge = Animator.StringToHash("HeavyCharge");
                 h.Charge01 = Animator.StringToHash("Charge01");
 
                 h.AttackAnimSpeed = Animator.StringToHash("AttackAnimSpeed");
                 h.ChargeAnimSpeed = Animator.StringToHash("ChargeAnimSpeed");
-                
-                h.AtkParry = Animator.StringToHash("AtkParry");
-                h.AtkDodge = Animator.StringToHash("AtkDodge");
-                
+
                 h.Blocking = Animator.StringToHash("Blocking");
 
                 return h;

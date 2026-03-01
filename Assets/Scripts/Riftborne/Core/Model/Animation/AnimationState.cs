@@ -2,14 +2,15 @@
 {
     public struct AnimationState
     {
+        // One-shot trigger (event tick)
         public ActionState Action;
-
-        // tick when Action was set (one-shot)
         public int ActionTick;
+        public int ActionDurationTicks; // 0 means "unknown / not provided"
 
-        // NEW: authoritative duration of the triggered Action in simulation ticks.
-        // 0 means "unknown / not provided".
-        public int ActionDurationTicks;
+        // NEW: latched playback window (deterministic)
+        public ActionState PlayingAction;       // None if nothing is considered "playing"
+        public int PlayingStartTick;            // tick when playing started
+        public int PlayingDurationTicks;        // duration in sim ticks (>0), 0 = not latched
 
         public sbyte Facing;
 
@@ -20,7 +21,7 @@
         public float Speed01;
         public float AirSpeed01;
         public float AirT;
-        
+
         public bool Blocking;
 
         public bool HeavyCharging;

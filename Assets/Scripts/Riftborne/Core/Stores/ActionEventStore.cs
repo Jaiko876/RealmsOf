@@ -131,7 +131,7 @@ namespace Riftborne.Core.Stores
             public int DurationTicks;
             public int LastUpdatedTick;
 
-            public bool IsEmpty => Action == ActionState.None && !HasIntent && !HasTiming && DurationTicks == 0 && LastUpdatedTick == 0;
+            public bool IsEmpty => Action == ActionState.None && !HasIntent && !HasTiming && DurationTicks == 0 && LastUpdatedTick < 0;
 
             public static Entry Empty => new Entry
             {
@@ -139,7 +139,7 @@ namespace Riftborne.Core.Stores
                 HasIntent = false,
                 HasTiming = false,
                 DurationTicks = 0,
-                LastUpdatedTick = 0
+                LastUpdatedTick = -1
             };
 
             public static Entry ForIntent(ActionState action, int tick)

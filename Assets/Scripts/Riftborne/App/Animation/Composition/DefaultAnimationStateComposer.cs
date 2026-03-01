@@ -39,21 +39,50 @@ namespace Riftborne.App.Animation.Composition
             a.AttackAnimSpeed = ctx.Mods.AttackAnimSpeed;
             a.ChargeAnimSpeed = ctx.Mods.ChargeAnimSpeed;
 
+            // --- One-shot trigger + latched playback window ---
+            ApplyAction(in ctx, ref a);
+
+            a.Blocking = ctx.Blocking;
+
+            return a;
+        }
+
+        private static void ApplyAction(in AnimationStateComposeContext ctx, ref AnimationState a)
+        {
+            // 1) One-shot trigger for this tick (used for Animator.SetTrigger)
             if (ctx.Action.Action != ActionState.None)
             {
                 a.Action = ctx.Action.Action;
                 a.ActionTick = ctx.Action.ActionTick;
                 a.ActionDurationTicks = ctx.Action.DurationTicks;
+
+                // 2) Latch playing window if duration is known
+                if (ctx.Action.DurationTicks > 0)
+                {
+                    a.PlayingAction = ctx.Action.Action;
+                    a.PlayingStartTick = ctx.Action.ActionTick;
+                    a.PlayingDurationTicks = ctx.Action.DurationTicks;
+                }
             }
             else
             {
                 a.Action = ActionState.None;
                 a.ActionDurationTicks = 0;
+                // ActionTick intentionally left as-is (useful for edge debugging, and triggers are gated by Action != None anyway)
             }
 
-            a.Blocking = ctx.Blocking;
-
-            return a;
+            // 3) Expire playing window deterministically
+            if (a.PlayingAction != ActionState.None && a.PlayingDurationTicks > 0)
+            {
+                // playing interval: [start, end)
+                int endTick = a.PlayingStartTick + a.PlayingDurationTicks;
+                if (ctx.Tick >= endTick)
+                {
+                    a.PlayingAction = ActionState.None;
+                    a.PlayingStartTick = 0;
+                    a.PlayingDurationTicks = 0;
+                }
+            }
         }
     }
 }
