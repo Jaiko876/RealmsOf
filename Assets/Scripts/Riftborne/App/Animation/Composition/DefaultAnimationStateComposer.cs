@@ -51,6 +51,8 @@ namespace Riftborne.App.Animation.Composition
                 a.ActionDurationTicks = 0;
             }
 
+            a.Blocking = ctx.Blocking;
+
             return a;
         }
     }

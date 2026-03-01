@@ -21,10 +21,10 @@ namespace Riftborne.Unity.Bootstrap.Runtime
             builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<InputCommand, ActionInputCommandHandler>>(Lifetime.Singleton);
             
             // Assets/Scripts/Riftborne/Unity/Bootstrap/Runtime/CommandsRuntimeInitializer.cs
-            builder.Register<DefenseInputCommandHandler>(Lifetime.Singleton);
+            builder.Register<DefenseHoldInputCommandHandler>(Lifetime.Singleton);
             builder.Register<EvadeInputCommandHandler>(Lifetime.Singleton);
 
-            builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<InputCommand, DefenseInputCommandHandler>>(Lifetime.Singleton);
+            builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<InputCommand, DefenseHoldInputCommandHandler>>(Lifetime.Singleton);
             builder.Register<ICommandHandlerRegistration, CommandHandlerRegistration<InputCommand, EvadeInputCommandHandler>>(Lifetime.Singleton);
 
             builder.Register<ICommandDispatcher, CommandDispatcher>(Lifetime.Singleton);

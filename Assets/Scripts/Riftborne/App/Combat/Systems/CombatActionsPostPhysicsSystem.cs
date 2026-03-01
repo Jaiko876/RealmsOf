@@ -1,6 +1,4 @@
-﻿// Assets/Scripts/Riftborne/App/Combat/Systems/CombatActionsPostPhysicsSystem.cs
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Riftborne.Core.Config;
 using Riftborne.Core.Gameplay.Combat.Abstractions;
@@ -20,6 +18,7 @@ namespace Riftborne.App.Combat.Systems
     {
         private readonly GameState _state;
         private readonly ICombatActionStore _actions;
+        private readonly IBlockStateStore _block;
 
         private readonly ICombatHitQuery _hitQuery;
         private readonly IGameplayTuning _tuning;
@@ -30,7 +29,7 @@ namespace Riftborne.App.Combat.Systems
         private readonly IStatsStore _stats;
         private readonly IStatsDeltaStore _deltas;
 
-        private readonly ICombatHitRules _rules;
+        private readonly ICombatRulesResolver _rules;
 
         private readonly GameEntityId[] _hitIds = new GameEntityId[32];
         private readonly HashSet<int> _dedupe = new HashSet<int>();
@@ -46,7 +45,8 @@ namespace Riftborne.App.Combat.Systems
             IEquippedWeaponStore equipped,
             IStatsStore stats,
             IStatsDeltaStore deltas,
-            ICombatHitRules rules)
+            ICombatRulesResolver rules, 
+            IBlockStateStore block)
         {
             _state = state ?? throw new ArgumentNullException(nameof(state));
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
@@ -57,6 +57,7 @@ namespace Riftborne.App.Combat.Systems
             _stats = stats ?? throw new ArgumentNullException(nameof(stats));
             _deltas = deltas ?? throw new ArgumentNullException(nameof(deltas));
             _rules = rules ?? throw new ArgumentNullException(nameof(rules));
+            _block = block ?? throw new ArgumentNullException(nameof(block));
         }
 
         public void Tick(int tick)
@@ -152,14 +153,19 @@ namespace Riftborne.App.Combat.Systems
                 dodgeActive = defAction.Type == CombatActionType.Dodge && defAction.IsActiveAt(tick);
             }
 
-            var ctx = new CombatHitContext(
+            bool blockActive = _block != null && _block.IsBlocking(defenderId);
+
+            var req = new CombatResolveRequest(
+                attackerId: attackerId,
+                defenderId: defenderId,
                 attack: attackType,
                 defenderParryActive: parryActive,
                 defenderDodgeActive: dodgeActive,
+                defenderBlockActive: blockActive,
                 attackerAttack: aStats.GetEffective(StatId.Attack),
                 defenderDefense: dStats.GetEffective(StatId.Defense));
 
-            var r = _rules.Resolve(in ctx);
+            var r = _rules.Resolve(in req);
 
             // Defender deltas
             if (r.DefenderHpDamage > 0) _deltas.DamageHp(defenderId, r.DefenderHpDamage, StatsDeltaKind.Damage);

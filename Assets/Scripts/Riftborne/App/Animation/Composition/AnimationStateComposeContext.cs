@@ -16,6 +16,7 @@ namespace Riftborne.App.Animation.Composition
         public readonly AnimationModifiers Mods;
         public readonly AttackChargeSnapshot Charge;
         public readonly ActionPayload Action;
+        public readonly bool Blocking;
 
         public AnimationStateComposeContext(
             int tick,
@@ -25,7 +26,8 @@ namespace Riftborne.App.Animation.Composition
             InputTuning input,
             AnimationModifiers mods,
             AttackChargeSnapshot charge,
-            ActionPayload action)
+            ActionPayload action, 
+            bool blocking)
         {
             Tick = tick;
             Entity = entity;
@@ -35,6 +37,7 @@ namespace Riftborne.App.Animation.Composition
             Mods = mods;
             Charge = charge;
             Action = action;
+            Blocking = blocking;
         }
     }
 

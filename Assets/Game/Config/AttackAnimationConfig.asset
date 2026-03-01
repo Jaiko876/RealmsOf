@@ -15,8 +15,10 @@ MonoBehaviour:
   attackLayerName: Attack Layer
   attackStateTag: Attack
   attackLayerBlendInSeconds: 0.05
-  attackLayerBlendOutSeconds: 0.25
+  attackLayerBlendOutSeconds: 0.1
   lightAttackClipSeconds: 0.45
   heavyAttackClipSeconds: 0.6
   minAnimatorSpeed: 0.25
   maxAnimatorSpeed: 3.5
+  parryClipSeconds: 0.35
+  dodgeClipSeconds: 0.45

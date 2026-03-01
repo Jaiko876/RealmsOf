@@ -20,6 +20,8 @@
         public float Speed01;
         public float AirSpeed01;
         public float AirT;
+        
+        public bool Blocking;
 
         public bool HeavyCharging;
         public float Charge01;

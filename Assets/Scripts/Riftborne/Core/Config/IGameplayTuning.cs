@@ -13,5 +13,6 @@ namespace Riftborne.Core.Config
         InputTuning Input { get; }
         PhysicsProbesTuning PhysicsProbes { get; }
         PhysicsWorldTuning PhysicsWorld { get; }
+        DefenseInputTuning DefenseInput { get; }
     }
 }

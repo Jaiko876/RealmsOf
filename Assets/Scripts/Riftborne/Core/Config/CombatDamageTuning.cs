@@ -10,6 +10,12 @@
         public readonly int HeavyStaminaDamage;
         public readonly int HeavyStagger;
 
+        public readonly int BlockLightStaminaDamage;
+        public readonly int BlockLightStaggerBuild;
+        public readonly int BlockHeavyStaminaDamage;
+        public readonly int BlockHeavyStaggerBuild;
+        public readonly float BlockHeavyHpMul;
+
         // Defender reactions
         public readonly int ParrySuccessAttackerStagger;     // parry light => attacker stagger
         public readonly int DodgeSuccessAttackerStaminaDamage; // dodge heavy => attacker stamina loss
@@ -29,7 +35,12 @@
             int dodgeSuccessAttackerStaminaDamage,
             int dodgeSuccessAttackerStagger,
             int parryFailDefenderStaminaDamage,
-            int dodgeFailExtraDefenderStagger)
+            int dodgeFailExtraDefenderStagger, 
+            int blockLightStaminaDamage, 
+            int blockLightStaggerBuild, 
+            int blockHeavyStaminaDamage, 
+            int blockHeavyStaggerBuild, 
+            float blockHeavyHpMul)
         {
             LightHpMul = lightHpMul;
             LightStaminaDamage = lightStaminaDamage;
@@ -45,6 +56,11 @@
 
             ParryFailDefenderStaminaDamage = parryFailDefenderStaminaDamage;
             DodgeFailExtraDefenderStagger = dodgeFailExtraDefenderStagger;
+            BlockLightStaminaDamage = blockLightStaminaDamage;
+            BlockLightStaggerBuild = blockLightStaggerBuild;
+            BlockHeavyStaminaDamage = blockHeavyStaminaDamage;
+            BlockHeavyStaggerBuild = blockHeavyStaggerBuild;
+            BlockHeavyHpMul = blockHeavyHpMul;
         }
     }
 }

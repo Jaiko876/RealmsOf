@@ -33,6 +33,17 @@ namespace Riftborne.Configs
 
         [Header("Combat Damage (Rules numbers)")] [SerializeField]
         private CombatDamageSection _combatDamage = CombatDamageSection.Default;
+        
+        [Header("Defence Input")] [SerializeField]
+        private DefenceInputSection _defenceInput = DefenceInputSection.Default;
+
+
+        public DefenseInputTuning DefenseInput
+            => new DefenseInputTuning(
+                _defenceInput.ParryMaxTapTicks,
+                _defenceInput.BlockStartTicks
+                );
+        
 
         public CombatActionsTuning CombatActions
             => new CombatActionsTuning(
@@ -57,7 +68,12 @@ namespace Riftborne.Configs
                     new CombatActionsTuning.PhaseWeights(
                         _combatActions.DodgeWindupWeight,
                         _combatActions.DodgeActiveWeight,
-                        _combatActions.DodgeRecoveryWeight))
+                        _combatActions.DodgeRecoveryWeight)),
+                new CombatActionsTuning.AttackMovementTuning(
+                    _combatActions.LightAttackMoveMul,
+                    _combatActions.HeavyAttackMoveMul),
+                new CombatActionsTuning.CancelTuning(
+                    _combatActions.HeavyDodgeCancelRecoveryStart01)
             );
 
         public CombatHitTuning CombatHit
@@ -75,7 +91,12 @@ namespace Riftborne.Configs
                 _combatDamage.DodgeSuccessAttackerStaminaDamage,
                 _combatDamage.DodgeSuccessAttackerStagger,
                 _combatDamage.ParryFailDefenderStaminaDamage,
-                _combatDamage.DodgeFailExtraDefenderStagger
+                _combatDamage.DodgeFailExtraDefenderStagger,
+                _combatDamage.BlockLightStaminaDamage,
+                _combatDamage.BlockLightStaggerBuild,
+                _combatDamage.BlockHeavyStaminaDamage,
+                _combatDamage.BlockHeavyStaggerBuild,
+                _combatDamage.BlockHeavyHpMul
             );
 
         [Serializable]
@@ -115,6 +136,11 @@ namespace Riftborne.Configs
             public int DodgeActiveWeight;
             public int DodgeRecoveryWeight;
 
+            public float LightAttackMoveMul;
+            public float HeavyAttackMoveMul;
+
+            public float HeavyDodgeCancelRecoveryStart01;
+
             public static CombatActionsSection Default => new CombatActionsSection
             {
                 LightWindupWeight = 4,
@@ -135,7 +161,11 @@ namespace Riftborne.Configs
                 DodgeCooldownBaseTicks = 20,
                 DodgeWindupWeight = 0,
                 DodgeActiveWeight = 8,
-                DodgeRecoveryWeight = 8
+                DodgeRecoveryWeight = 8,
+
+                LightAttackMoveMul = 0.65f,
+                HeavyAttackMoveMul = 0.55f,
+                HeavyDodgeCancelRecoveryStart01 = 0.75f
             };
         }
 
@@ -156,6 +186,12 @@ namespace Riftborne.Configs
 
             public int ParryFailDefenderStaminaDamage;
             public int DodgeFailExtraDefenderStagger;
+            
+            public int BlockLightStaminaDamage;
+            public int BlockLightStaggerBuild;
+            public int BlockHeavyStaminaDamage;
+            public int BlockHeavyStaggerBuild;
+            public float BlockHeavyHpMul;
 
             public static CombatDamageSection Default => new CombatDamageSection
             {
@@ -172,7 +208,14 @@ namespace Riftborne.Configs
                 DodgeSuccessAttackerStagger = 8,
 
                 ParryFailDefenderStaminaDamage = 12,
-                DodgeFailExtraDefenderStagger = 12
+                DodgeFailExtraDefenderStagger = 12,
+                
+                BlockLightStaminaDamage = 8,
+                BlockLightStaggerBuild = 6,
+
+                BlockHeavyStaminaDamage = 22,
+                BlockHeavyStaggerBuild = 28,
+                BlockHeavyHpMul = 0.25f
             };
         }
 
@@ -215,7 +258,7 @@ namespace Riftborne.Configs
 
         public PhysicsWorldTuning PhysicsWorld
             => new PhysicsWorldTuning(_physicsWorld.MaxSubSteps);
-
+        
         [Serializable]
         private struct CombatInputSection
         {
@@ -325,6 +368,19 @@ namespace Riftborne.Configs
             public static PhysicsWorldSection Default => new PhysicsWorldSection
             {
                 MaxSubSteps = 8
+            };
+        }
+        
+        [Serializable]
+        private struct DefenceInputSection
+        {
+            public int ParryMaxTapTicks;
+            public int BlockStartTicks;
+
+            public static DefenceInputSection Default => new DefenceInputSection
+            {
+                ParryMaxTapTicks = 8,
+                BlockStartTicks = 10
             };
         }
     }

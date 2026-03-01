@@ -60,6 +60,8 @@ namespace Riftborne.Unity.View.Presenters
             _animator.SetFloat(_h.Speed01, a.Speed01);
             _animator.SetFloat(_h.AirSpeed01, a.AirSpeed01);
             _animator.SetFloat(_h.AirT, a.AirT);
+            
+            _animator.SetBool(_h.Blocking, a.Blocking);
 
             // Charge
             _animator.SetBool(_h.HeavyCharge, a.HeavyCharging);
@@ -114,7 +116,9 @@ namespace Riftborne.Unity.View.Presenters
             bool wantsByState =
                 a.HeavyCharging
                 || a.Action == ActionState.LightAttack
-                || a.Action == ActionState.HeavyAttack;
+                || a.Action == ActionState.HeavyAttack
+                || a.Action == ActionState.Parry
+                || a.Action == ActionState.Dodge;
 
             float target = (wantsByState || inAttack) ? 1f : 0f;
 
@@ -197,6 +201,8 @@ namespace Riftborne.Unity.View.Presenters
 
             public int AttackAnimSpeed;
             public int ChargeAnimSpeed;
+            
+            public int Blocking;
 
             public static AnimatorHashes Create()
             {
@@ -220,6 +226,8 @@ namespace Riftborne.Unity.View.Presenters
                 
                 h.AtkParry = Animator.StringToHash("AtkParry");
                 h.AtkDodge = Animator.StringToHash("AtkDodge");
+                
+                h.Blocking = Animator.StringToHash("Blocking");
 
                 return h;
             }

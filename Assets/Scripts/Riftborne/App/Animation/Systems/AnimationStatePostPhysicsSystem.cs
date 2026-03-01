@@ -23,6 +23,8 @@ namespace Riftborne.App.Animation.Systems
 
         private readonly IActionEventStore _events;
         private readonly IAnimationStateComposer _composer;
+        
+        private readonly IBlockStateStore _block;
 
         public AnimationStatePostPhysicsSystem(
             GameState state,
@@ -31,7 +33,8 @@ namespace Riftborne.App.Animation.Systems
             IAnimationModifiersProvider animMods,
             IGameplayTuning tuning,
             IActionEventStore events,
-            IAnimationStateComposer composer)
+            IAnimationStateComposer composer, 
+            IBlockStateStore block)
         {
             _state = state ?? throw new ArgumentNullException(nameof(state));
             _motor = motor ?? throw new ArgumentNullException(nameof(motor));
@@ -40,6 +43,7 @@ namespace Riftborne.App.Animation.Systems
             _input = (tuning ?? throw new ArgumentNullException(nameof(tuning))).Input;
             _events = events ?? throw new ArgumentNullException(nameof(events));
             _composer = composer ?? throw new ArgumentNullException(nameof(composer));
+            _block = block ?? throw new ArgumentNullException(nameof(block));
         }
 
         public void Tick(int tick)
@@ -66,6 +70,8 @@ namespace Riftborne.App.Animation.Systems
                     action = ActionPayload.None(tick);
                 }
 
+                var blocking = _block.IsBlocking(e.Id);
+
                 var ctx = new AnimationStateComposeContext(
                     tick,
                     e,
@@ -74,7 +80,8 @@ namespace Riftborne.App.Animation.Systems
                     _input,
                     mods,
                     charge,
-                    action);
+                    action,
+                    blocking);
 
                 var next = _composer.Compose(in ctx);
                 e.SetAnimationState(next);

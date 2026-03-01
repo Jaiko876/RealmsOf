@@ -21,6 +21,9 @@ namespace Riftborne.Unity.Bootstrap.Runtime
             builder.Register<IAttackHoldStore, AttackHoldStore>(Lifetime.Singleton);
             builder.Register<IEquippedWeaponStore, EquippedWeaponStore>(Lifetime.Singleton);
             builder.Register<ICombatActionStore, CombatActionStore>(Lifetime.Singleton);
+            builder.Register<ICombatActionCooldownStore, CombatActionCooldownStore>(Lifetime.Singleton);
+            builder.Register<IDefenseHoldStore, DefenseHoldStore>(Lifetime.Singleton);
+            builder.Register<IBlockStateStore, BlockStateStore>(Lifetime.Singleton);
         }
     }
 }
